@@ -4262,7 +4262,7 @@ pub fn create_dxgi_factory2<T: IFactory>(flags: Option<CreateFactoryFlag>) -> Re
 
 extern "system" {
     #[cfg(feature = "dxgi1_6")]
-    pub fn DXGIDeclareAdapterRemovalSupport() -> HRESULT;
+    fn DXGIDeclareAdapterRemovalSupport() -> HRESULT;
 }
 #[cfg(feature = "dxgi1_6")]
 pub fn declare_adapter_removal_support() -> Result<(), HResult> {
@@ -4290,8 +4290,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn create_factory1() {
+    fn create_factory1_test() {
         let res = create_dxgi_factory1::<Factory1>();
         assert!(res.is_ok());
+    }
+    #[test]
+    #[cfg(feature = "dxgi1_6")]
+    fn declare_adapter_removal_support_test() {
+        let _ = declare_adapter_removal_support();
     }
 }
