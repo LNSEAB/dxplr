@@ -1525,10 +1525,10 @@ pub struct SwapChainDesc {
     pub sample_desc: SampleDesc,
     pub buffer_usage: Usage,
     pub buffer_count: u32,
-    pub output_window: HWND,
+    pub output_window: Option<HWND>,
     pub windowed: bool,
     pub swap_effect: SwapEffect,
-    pub flags: SwapChainFlag,
+    pub flags: Option<SwapChainFlag>,
 }
 impl From<DXGI_SWAP_CHAIN_DESC> for SwapChainDesc {
     fn from(src: DXGI_SWAP_CHAIN_DESC) -> SwapChainDesc {
@@ -1537,10 +1537,10 @@ impl From<DXGI_SWAP_CHAIN_DESC> for SwapChainDesc {
             sample_desc: src.SampleDesc.into(),
             buffer_usage: unsafe { std::mem::transmute(src.BufferUsage) },
             buffer_count: src.BufferCount,
-            output_window: src.OutputWindow,
+            output_window: if src.OutputWindow == std::ptr::null_mut() { None } else { Some(src.OutputWindow) },
             windowed: src.Windowed == TRUE,
             swap_effect: unsafe { std::mem::transmute(src.SwapEffect) },
-            flags: SwapChainFlag(src.Flags),
+            flags: if src.Flags == 0 { None } else { Some(SwapChainFlag(src.Flags)) },
         }
     }
 }
@@ -1551,10 +1551,10 @@ impl From<SwapChainDesc> for DXGI_SWAP_CHAIN_DESC {
             SampleDesc: src.sample_desc.into(),
             BufferUsage: src.buffer_usage.0,
             BufferCount: src.buffer_count,
-            OutputWindow: src.output_window,
+            OutputWindow: src.output_window.unwrap_or(std::ptr::null_mut()),
             Windowed: to_BOOL(src.windowed),
             SwapEffect: src.swap_effect as u32,
-            Flags: src.flags.0,
+            Flags: src.flags.map_or(0, |f| f.0),
         }
     }
 }
@@ -1572,7 +1572,7 @@ pub struct SwapChainDesc1 {
     pub scaling: Scaling,
     pub swap_effect: SwapEffect,
     pub alpha_mode: AlphaMode,
-    pub flags: SwapChainFlag,
+    pub flags: Option<SwapChainFlag>,
 }
 #[cfg(feature = "dxgi1_2")]
 impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1 {
@@ -1588,7 +1588,7 @@ impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1 {
             scaling: unsafe { std::mem::transmute(src.Scaling) },
             swap_effect: unsafe { std::mem::transmute(src.SwapEffect) },
             alpha_mode: unsafe { std::mem::transmute(src.AlphaMode) },
-            flags: SwapChainFlag(src.Flags),
+            flags: if src.Flags == 0 { None } else { Some(SwapChainFlag(src.Flags)) },
         }
     }
 }
@@ -1606,7 +1606,7 @@ impl From<SwapChainDesc1> for DXGI_SWAP_CHAIN_DESC1 {
             Scaling: src.scaling as u32,
             SwapEffect: src.swap_effect as u32,
             AlphaMode: src.alpha_mode as u32,
-            Flags: src.flags.0,
+            Flags: src.flags.map_or(0, |f| f.0),
         }
     }
 }
