@@ -217,13 +217,13 @@ pub enum ColorSpaceType {
     YCbCrStudioG22TopleftP2020 = DXGI_COLOR_SPACE_YCBCR_STUDIO_G22_TOPLEFT_P2020,
     YCbCrStudioG2084TopleftP2020 = DXGI_COLOR_SPACE_YCBCR_STUDIO_G2084_TOPLEFT_P2020,
     RGBFullG22NoneP2020 = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P2020,
-    // YCbCrStudioGhlgTopleftP2020 = DXGI_COLOR_SPACE_YCBCR_STUDIO_GHLG_TOPLEFT_P2020,
-    // YCbCrFullGhlgTopleftP2020 = DXGI_COLOR_SPACE_YCBCR_FULL_GHLG_TOPLEFT_P2020,
-    // RGBStudioG24NoneP709 = DXGI_COLOR_SPACE_RGB_STUDIO_G24_NONE_P709,
-    // RGBStudioG24NoneP2020 = DXGI_COLOR_SPACE_RGB_STUDIO_G24_NONE_P2020,
-    // YCbCrStudioG24LeftP709 = DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_LEFT_P709,
-    // YCbCrStudioG24LeftP2020 = DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_LEFT_P2020,
-    // YCbCrStuioG24TopleftP2020 = DXGI_COLOR_SPACE_YCBCR_STUDIO_G24_TOPLEFT_P2020,
+    YCbCrStudioGhlgTopleftP2020 = 18,
+    YCbCrFullGhlgTopleftP2020 = 19,
+    RGBStudioG24NoneP709 = 20,
+    RGBStudioG24NoneP2020 = 21,
+    YCbCrStudioG24LeftP709 = 22,
+    YCbCrStudioG24LeftP2020 = 23,
+    YCbCrStuioG24TopleftP2020 = 24,
     Custom = DXGI_COLOR_SPACE_CUSTOM,
 }
 
@@ -426,7 +426,7 @@ impl_bitflag_operators!(HardwareCompositionSupportFlags);
 pub enum HDRMetadataType {
     None = DXGI_HDR_METADATA_TYPE_NONE,
     HDR10 = DXGI_HDR_METADATA_TYPE_HDR10,
-    // HDR10Plus = DXGI_HDR_METADATA_TYPE_HDR10PLUS,
+    HDR10Plus = 2,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -605,7 +605,7 @@ impl SwapChainFlag {
     pub const YUVVideo: Self = Self(DXGI_SWAP_CHAIN_FLAG_YUV_VIDEO);
     pub const HWProtected: Self = Self(DXGI_SWAP_CHAIN_FLAG_HW_PROTECTED);
     pub const AllowTearing: Self = Self(DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
-    // pub const RestrictedToAllHolographicsDisplays: Self = Self(DXGI_SWAP_CHAIN_FLAG_RESTRICTED_TO_ALL_HOLOGRAPHIC_DISPLAYS);
+    pub const RestrictedToAllHolographicsDisplays: Self = Self(4096);
 }
 impl_bitflag_operators!(SwapChainFlag);
 
