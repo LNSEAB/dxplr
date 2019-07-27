@@ -127,3 +127,7 @@ impl PartialEq<HResultKind> for HResult {
         self.kind() == other
     }
 }
+
+pub fn hresult<T>(obj: T, res: HRESULT) -> Result<T, HResult> {
+    com_ptr::hresult(obj, res).map_err(|res| res.into())
+}

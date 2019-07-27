@@ -1,3 +1,4 @@
+use winapi::ctypes::c_void;
 use winapi::shared::minwindef::{BOOL, FALSE, TRUE, UINT};
 
 #[allow(non_snake_case)]
@@ -37,14 +38,20 @@ macro_rules! impl_interface {
 
         impl Interface for $s {
             type APIType = $api_type;
+            fn new(p: ComPtr<Self::APIType>) -> Self {
+                $s(p)
+            }
             fn uuidof() -> $crate::api::Guid {
                 Self::APIType::uuidof().into()
+            }
+            fn as_ptr(&self) -> *mut Self::APIType {
+                self.0.as_ptr()
             }
             fn as_com_ptr(&self) -> &ComPtr<Self::APIType> {
                 &self.0
             }
             fn as_unknown(&self) -> *mut IUnknown {
-                self.as_com_ptr().as_ptr() as *mut IUnknown
+                self.as_ptr() as *mut IUnknown
             }
             fn from_com_ptr(p: ComPtr<Self::APIType>) -> Self {
                 $s(p)
@@ -87,4 +94,11 @@ macro_rules! impl_bitflag_operators {
             }
         }
     };
+}
+
+pub(crate) fn as_c_void<T>(obj: &T) -> *const c_void {
+    obj as *const T as *const c_void
+}
+pub(crate) fn as_c_void_mut<T>(obj: &mut T) -> *mut c_void {
+    obj as *mut T as *mut c_void
 }

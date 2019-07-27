@@ -1,5 +1,5 @@
 use crate::api::*;
-use crate::result::HResult;
+use crate::result::{hresult, HResult};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
@@ -31,10 +31,6 @@ use winapi::um::unknwnbase::IUnknown;
 use winapi::um::winnt::HANDLE;
 use winapi::um::winnt::HRESULT;
 use winapi::Interface as _;
-
-fn hresult<T>(obj: T, res: HRESULT) -> Result<T, HResult> {
-    com_ptr::hresult(obj, res).map_err(|res| res.into())
-}
 
 #[derive(Clone, Copy, Debug)]
 pub struct DebugID(Guid);
@@ -375,6 +371,11 @@ pub enum Format {
     P208 = DXGI_FORMAT_P208,
     V208 = DXGI_FORMAT_V208,
     V408 = DXGI_FORMAT_V408,
+}
+impl Default for Format {
+    fn default() -> Self {
+        Format::Unknown
+    }
 }
 
 #[cfg(feature = "dxgi1_3")]
@@ -794,9 +795,9 @@ pub struct DecodeSwapChainDesc {
     pub flags: u32,
 }
 #[cfg(feature = "dxgi1_3")]
-impl From<DecodeSwapChainDesc> for DXGI_DECODE_SWAP_CHAIN_DESC {
-    fn from(src: DecodeSwapChainDesc) -> DXGI_DECODE_SWAP_CHAIN_DESC {
-        DXGI_DECODE_SWAP_CHAIN_DESC { Flags: src.flags }
+impl DecodeSwapChainDesc {
+    fn to_c_struct(&self) -> DXGI_DECODE_SWAP_CHAIN_DESC {
+        DXGI_DECODE_SWAP_CHAIN_DESC { Flags: self.flags }
     }
 }
 
@@ -1399,6 +1400,16 @@ pub struct RGB {
     pub g: f32,
     pub b: f32,
 }
+impl RGB {
+    pub fn to_rgba(&self, a: f32) -> RGBA {
+        RGBA {
+            r: self.r,
+            g: self.g,
+            b: self.b,
+            a,
+        }
+    }
+}
 impl From<DXGI_RGB> for RGB {
     fn from(src: DXGI_RGB) -> RGB {
         RGB {
@@ -1414,6 +1425,15 @@ impl From<RGB> for DXGI_RGB {
             Red: src.r,
             Green: src.g,
             Blue: src.b,
+        }
+    }
+}
+impl From<(f32, f32, f32)> for RGB {
+    fn from(src: (f32, f32, f32)) -> RGB {
+        RGB {
+            r: src.0,
+            g: src.1,
+            b: src.2,
         }
     }
 }
@@ -1445,11 +1465,29 @@ impl From<RGBA> for DXGI_RGBA {
         }
     }
 }
+impl From<(f32, f32, f32, f32)> for RGBA {
+    fn from(src: (f32, f32, f32, f32)) -> RGBA {
+        RGBA {
+            r: src.0,
+            g: src.1,
+            b: src.2,
+            a: src.3,
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct SampleDesc {
     count: u32,
     quality: u32,
+}
+impl SampleDesc {
+    pub(crate) fn to_c_struct(&self) -> DXGI_SAMPLE_DESC {
+        DXGI_SAMPLE_DESC {
+            Count: self.count,
+            Quality: self.quality,
+        }
+    }
 }
 impl Default for SampleDesc {
     fn default() -> Self {
@@ -1459,19 +1497,19 @@ impl Default for SampleDesc {
         }
     }
 }
-impl From<DXGI_SAMPLE_DESC> for SampleDesc {
-    fn from(src: DXGI_SAMPLE_DESC) -> SampleDesc {
-        SampleDesc {
-            count: src.Count,
-            quality: src.Quality,
-        }
-    }
-}
 impl From<SampleDesc> for DXGI_SAMPLE_DESC {
     fn from(src: SampleDesc) -> DXGI_SAMPLE_DESC {
         DXGI_SAMPLE_DESC {
             Count: src.count,
             Quality: src.quality,
+        }
+    }
+}
+impl From<DXGI_SAMPLE_DESC> for SampleDesc {
+    fn from(src: DXGI_SAMPLE_DESC) -> SampleDesc {
+        SampleDesc {
+            count: src.Count,
+            quality: src.Quality,
         }
     }
 }
@@ -1537,10 +1575,18 @@ impl From<DXGI_SWAP_CHAIN_DESC> for SwapChainDesc {
             sample_desc: src.SampleDesc.into(),
             buffer_usage: unsafe { std::mem::transmute(src.BufferUsage) },
             buffer_count: src.BufferCount,
-            output_window: if src.OutputWindow == std::ptr::null_mut() { None } else { Some(src.OutputWindow) },
+            output_window: if src.OutputWindow == std::ptr::null_mut() {
+                None
+            } else {
+                Some(src.OutputWindow)
+            },
             windowed: src.Windowed == TRUE,
             swap_effect: unsafe { std::mem::transmute(src.SwapEffect) },
-            flags: if src.Flags == 0 { None } else { Some(SwapChainFlag(src.Flags)) },
+            flags: if src.Flags == 0 {
+                None
+            } else {
+                Some(SwapChainFlag(src.Flags))
+            },
         }
     }
 }
@@ -1588,7 +1634,11 @@ impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1 {
             scaling: unsafe { std::mem::transmute(src.Scaling) },
             swap_effect: unsafe { std::mem::transmute(src.SwapEffect) },
             alpha_mode: unsafe { std::mem::transmute(src.AlphaMode) },
-            flags: if src.Flags == 0 { None } else { Some(SwapChainFlag(src.Flags)) },
+            flags: if src.Flags == 0 {
+                None
+            } else {
+                Some(SwapChainFlag(src.Flags))
+            },
         }
     }
 }
@@ -2688,7 +2738,7 @@ impl IFactoryMedia for FactoryMedia {
     ) -> Result<DecodeSwapChain, HResult> {
         Ok(DecodeSwapChain(ComPtr::new(|| {
             let mut obj = std::ptr::null_mut();
-            let mut desc = desc.clone().into();
+            let mut desc = desc.to_c_struct();
             let res = unsafe {
                 self.0.CreateDecodeSwapChainForCompositionSurfaceHandle(
                     device.as_unknown(),
@@ -4222,7 +4272,10 @@ pub struct SwapChainMedia(ComPtr<IDXGISwapChainMedia>);
 impl ISwapChainMedia for SwapChainMedia {
     fn check_present_duration_support(&self, desired: u32) -> Result<PresentDuration, HResult> {
         let mut duration = PresentDuration::default();
-        let res = unsafe { self.0.CheckPresentDurationSupport(desired, &mut duration.small, &mut duration.large) };
+        let res = unsafe {
+            self.0
+                .CheckPresentDurationSupport(desired, &mut duration.small, &mut duration.large)
+        };
         hresult(duration, res)
     }
     fn get_frame_statistics_media(&self) -> Result<FrameStatisticsMedia, HResult> {

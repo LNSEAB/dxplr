@@ -19,6 +19,8 @@ winapi = { version = "0.3.7", features = [
 	"winbase",
 	"winuser",
 	"libloaderapi",
+	"d3dcommon",
+	"dxgi",
 	"dxgi",
 	"dxgidebug",
 	"d3d11",
