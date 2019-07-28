@@ -1,4 +1,3 @@
-use crate::api::*;
 use crate::impl_interface;
 use crate::Interface;
 use com_ptr::ComPtr;

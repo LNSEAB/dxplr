@@ -96,9 +96,6 @@ macro_rules! impl_bitflag_operators {
     };
 }
 
-pub(crate) fn as_c_void<T>(obj: &T) -> *const c_void {
-    obj as *const T as *const c_void
-}
 pub(crate) fn as_c_void_mut<T>(obj: &mut T) -> *mut c_void {
     obj as *mut T as *mut c_void
 }
