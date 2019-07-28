@@ -1475,58 +1475,6 @@ pub struct Box {
     pub back: u32,
 }
 
-#[derive(Clone, Default, Debug)]
-pub struct BufferRTV {
-    pub first_element: u64,
-    pub num_elements: u32,
-}
-impl BufferRTV {
-    fn to_c_struct(&self) -> D3D12_BUFFER_RTV {
-        D3D12_BUFFER_RTV {
-            FirstElement: self.first_element,
-            NumElements: self.num_elements,
-        }
-    }
-}
-
-#[derive(Clone, Default, Debug)]
-pub struct BufferSRV {
-    pub first_element: u64,
-    pub num_elements: u32,
-    pub structure_byte_stride: u32,
-    pub flags: Option<BufferSRVFlags>,
-}
-impl BufferSRV {
-    fn to_c_struct(&self) -> D3D12_BUFFER_SRV {
-        D3D12_BUFFER_SRV {
-            FirstElement: self.first_element,
-            NumElements: self.num_elements,
-            StructureByteStride: self.structure_byte_stride,
-            Flags: self.flags.unwrap_or(BufferSRVFlags::None).0,
-        }
-    }
-}
-
-#[derive(Clone, Default, Debug)]
-pub struct BufferUAV {
-    pub first_element: u64,
-    pub num_elements: u32,
-    pub structure_byte_stride: u32,
-    pub counter_offset_in_bytes: u64,
-    pub flags: Option<BufferUAVFlags>,
-}
-impl BufferUAV {
-    fn to_c_struct(&self) -> D3D12_BUFFER_UAV {
-        D3D12_BUFFER_UAV {
-            FirstElement: self.first_element,
-            NumElements: self.num_elements,
-            StructureByteStride: self.structure_byte_stride,
-            CounterOffsetInBytes: self.counter_offset_in_bytes,
-            Flags: self.flags.unwrap_or(BufferUAVFlags::None).0,
-        }
-    }
-}
-
 // pub struct BuildRaytracingAccelerationStructureDesc;
 // pub struct BuildRaytracingAccelerationStructureInputs;
 // pub struct BuildRaytracingAccelerationStructureToolsVisualizationHeader;
@@ -1712,6 +1660,7 @@ impl DepthStencilDesc {
     }
 }
 
+/*
 #[derive(Clone, Debug)]
 pub struct DepthStencilDesc1 {
     depth_enable: bool,
@@ -1754,6 +1703,7 @@ impl DepthStencilDesc1 {
         }
     }
 }
+*/
 
 #[derive(Clone, Copy, Debug)]
 pub struct DepthStencilValue {
@@ -1942,23 +1892,13 @@ impl From<D3D12_DESCRIPTOR_HEAP_DESC> for DescriptorHeapDesc {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct DescriptorRange {
     pub range_type: DescriptorRangeType,
     pub num_descriptors: u32,
     pub base_shader_register: u32,
     pub register_space: u32,
     pub offset_in_descriptors_from_table_start: u32,
-}
-impl DescriptorRange {
-    fn to_c_struct(&self) -> D3D12_DESCRIPTOR_RANGE {
-        D3D12_DESCRIPTOR_RANGE {
-            RangeType: self.range_type as u32,
-            NumDescriptors: self.num_descriptors,
-            BaseShaderRegister: self.base_shader_register,
-            RegisterSpace: self.register_space,
-            OffsetInDescriptorsFromTableStart: self.offset_in_descriptors_from_table_start,
-        }
-    }
 }
 impl From<D3D12_DESCRIPTOR_RANGE> for DescriptorRange {
     fn from(src: D3D12_DESCRIPTOR_RANGE) -> DescriptorRange {
@@ -1973,6 +1913,7 @@ impl From<D3D12_DESCRIPTOR_RANGE> for DescriptorRange {
 }
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct DescriptorRange1 {
     pub range_type: DescriptorRangeType,
     pub num_descriptors: u32,
@@ -1980,18 +1921,6 @@ pub struct DescriptorRange1 {
     pub register_space: u32,
     pub flags: Option<DescriptorRangeFlags>,
     pub offset_in_descriptors_from_table_start: u32,
-}
-impl DescriptorRange1 {
-    fn to_c_struct(&self) -> D3D12_DESCRIPTOR_RANGE1 {
-        D3D12_DESCRIPTOR_RANGE1 {
-            RangeType: self.range_type as u32,
-            NumDescriptors: self.num_descriptors,
-            BaseShaderRegister: self.base_shader_register,
-            RegisterSpace: self.register_space,
-            Flags: self.flags.unwrap_or(DescriptorRangeFlags::None).0,
-            OffsetInDescriptorsFromTableStart: self.offset_in_descriptors_from_table_start,
-        }
-    }
 }
 
 // pub struct DeviceRemovedExtendedData;
@@ -2020,15 +1949,6 @@ pub struct DispatchArguments {
     pub thread_group_count_y: u32,
     pub thread_group_count_z: u32,
 }
-impl DispatchArguments {
-    fn to_c_struct(&self) -> D3D12_DISPATCH_ARGUMENTS {
-        D3D12_DISPATCH_ARGUMENTS {
-            ThreadGroupCountX: self.thread_group_count_x,
-            ThreadGroupCountY: self.thread_group_count_y,
-            ThreadGroupCountZ: self.thread_group_count_z,
-        }
-    }
-}
 
 // pub struct DispatchRaysDesc;
 
@@ -2039,16 +1959,6 @@ pub struct DrawArguments {
     pub start_vertex_location: u32,
     pub start_instance_location: u32,
 }
-impl DrawArguments {
-    fn to_c_struct(&self) -> D3D12_DRAW_ARGUMENTS {
-        D3D12_DRAW_ARGUMENTS {
-            VertexCountPerInstance: self.vertex_count_per_instance,
-            InstanceCount: self.instance_count,
-            StartVertexLocation: self.start_vertex_location,
-            StartInstanceLocation: self.start_instance_location,
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct DrawIndexedArguments {
@@ -2057,17 +1967,6 @@ pub struct DrawIndexedArguments {
     pub start_index_location: u32,
     pub base_vertex_location: i32,
     pub start_instance_location: u32,
-}
-impl DrawIndexedArguments {
-    fn to_c_struct(&self) -> D3D12_DRAW_INDEXED_ARGUMENTS {
-        D3D12_DRAW_INDEXED_ARGUMENTS {
-            IndexCountPerInstance: self.index_count_per_instance,
-            InstanceCount: self.instance_count,
-            StartIndexLocation: self.start_index_location,
-            BaseVertexLocation: self.base_vertex_location,
-            StartInstanceLocation: self.start_instance_location,
-        }
-    }
 }
 
 // pub struct DREDAllocationNode;
@@ -3416,10 +3315,51 @@ pub enum RootParameter {
         shader_visibility: ShaderVisibility,
     },
     Descriptor {
+        ty: RootParameterType,
         shader_register: u32,
         register_space: u32,
         shader_visibility: ShaderVisibility,
     },
+}
+impl RootParameter {
+    fn to_c_struct(&self) -> D3D12_ROOT_PARAMETER {
+        let mut obj = D3D12_ROOT_PARAMETER::default();
+        match self {
+            RootParameter::DescriptorTable {
+                descriptor_ranges,
+                shader_visibility,
+            } => unsafe {
+                obj.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                obj.u.DescriptorTable_mut().NumDescriptorRanges = descriptor_ranges.len() as u32;
+                obj.u.DescriptorTable_mut().pDescriptorRanges = descriptor_ranges.as_ptr() as *const D3D12_DESCRIPTOR_RANGE;
+                obj.ShaderVisibility = *shader_visibility as u32;
+            },
+            RootParameter::Constants {
+                shader_register,
+                register_space,
+                num_32bit_values,
+                shader_visibility,
+            } => unsafe {
+                obj.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+                obj.u.Constants_mut().ShaderRegister = *shader_register;
+                obj.u.Constants_mut().RegisterSpace = *register_space;
+                obj.u.Constants_mut().Num32BitValues = *num_32bit_values;
+                obj.ShaderVisibility = *shader_visibility as u32;
+            },
+            RootParameter::Descriptor {
+                ty,
+                shader_register,
+                register_space,
+                shader_visibility,
+            } => unsafe {
+                obj.ParameterType = *ty as u32;
+                obj.u.Descriptor_mut().ShaderRegister = *shader_register;
+                obj.u.Descriptor_mut().RegisterSpace = *register_space;
+                obj.ShaderVisibility = *shader_visibility as u32;
+            },
+        }
+        obj
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -3447,6 +3387,18 @@ pub struct RootSignatureDesc {
     pub parameters: Vec<RootParameter>,
     pub static_samplers: Vec<StaticSamplerDesc>,
     pub flags: Option<RootSignatureFlags>,
+}
+impl RootSignatureDesc {
+    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC, Vec<D3D12_ROOT_PARAMETER>) {
+        let parameters = self.parameters.iter().map(|param| param.to_c_struct()).collect::<Vec<_>>();
+        (D3D12_ROOT_SIGNATURE_DESC {
+            NumParameters: parameters.len() as u32,
+            pParameters: parameters.as_ptr(),
+            NumStaticSamplers: self.static_samplers.len() as u32,
+            pStaticSamplers: self.static_samplers.as_ptr() as *const D3D12_STATIC_SAMPLER_DESC,
+            Flags: self.flags.map_or(0, |f| f.0),
+        }, parameters)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -3799,6 +3751,7 @@ impl<'a> SODeclarationEntry<'a> {
 // pub struct StateSubobject;
 
 #[derive(Clone, Debug)]
+#[repr(C)]
 pub struct StaticSamplerDesc {
     pub filter: Filter,
     pub address_u: TextureAddressMode,
@@ -5236,34 +5189,34 @@ impl_fence!(Fence, ID3D12Fence, Fence);
 
 pub trait IGraphicsCommandList: ICommandList {
     fn begin_event(&self, metadata: u32, data: *const c_void, size: u32);
-    fn begin_query(&self, query_heap: &impl IQueryHeap, ty: QueryType, index: u32);
+    fn begin_query(&self, query_heap: &QueryHeap, ty: QueryType, index: u32);
     fn clear_depth_stencil_view(&self, dsv: CPUDescriptorHandle, clear_flags: ClearFlags, depth: f32, stencil: u8, rects: &[Rect]);
     fn clear_render_target_view(&self, rtv: CPUDescriptorHandle, clear_rgba: dxgi::RGBA, rects: &[Rect]);
-    fn clear_state(&self, pipeline_state: &impl IPipelineState);
-    fn clear_unordered_access_view_float(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: &impl IResource, values: [f32; 4], rects: &[Rect]);
-    fn clear_unordered_access_view_uint(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: &impl IResource, values: [u32; 4], rects: &[Rect]);
+    fn clear_state(&self, pipeline_state: &PipelineState);
+    fn clear_unordered_access_view_float(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: Resource, values: [f32; 4], rects: &[Rect]);
+    fn clear_unordered_access_view_uint(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: Resource, values: [u32; 4], rects: &[Rect]);
     fn close(&self) -> HResult;
-    fn copy_buffer_region(&self, dst_buffer: &impl IResource, dst_offset: u64, src_buffer: &impl IResource, src_offset: u64, num_bytes: u64);
-    fn copy_resource(&self, dst_resource: &impl IResource, src_resource: &impl IResource);
+    fn copy_buffer_region(&self, dst_buffer: &Resource, dst_offset: u64, src_buffer: &Resource, src_offset: u64, num_bytes: u64);
+    fn copy_resource(&self, dst_resource: &Resource, src_resource: &Resource);
     fn copy_texture_region(&self, dst: &TextureCopyLocation<impl IResource>, dst_x: u32, dst_y: u32, dst_z: u32, src: &TextureCopyLocation<impl IResource>, src_box: Option<Box>);
     // fn copy_tiles();
-    fn discard_resouce(&self, resource: &impl IResource, region: DiscardRegion);
+    fn discard_resouce(&self, resource: &Resource, region: DiscardRegion);
     fn dispatch(&self, thread_group_count_x: u32, thread_group_count_y: u32, thread_group_count_z: u32);
     fn draw_indexed_instanced(&self, index_count_per_instance: u32, instance_count: u32, start_index_location: u32, base_vertex_location: i32, start_instance_location: u32);
     fn draw_instanced(&self, vertex_count_per_instance: u32, instance_count: u32, start_vertex_location: u32, start_instance_location: u32);
     fn end_event(&self);
-    fn end_query(&self, query_heap: &impl IQueryHeap, ty: QueryType, index: u32);
-    fn execute_bundle(&self, command_list: &impl IGraphicsCommandList);
-    fn execute_indirect(&self, command_signature: &impl ICommandSignature, max_command_count: u32, argument_buffer: &impl IResource, argument_buffer_offset: u64, count_buffer: Option<&impl IResource>, count_buffer_offset: u64);
+    fn end_query(&self, query_heap: &QueryHeap, ty: QueryType, index: u32);
+    fn execute_bundle(&self, command_list: &GraphicsCommandList);
+    fn execute_indirect(&self, command_signature: &CommandSignature, max_command_count: u32, argument_buffer: &Resource, argument_buffer_offset: u64, count_buffer: Option<&Resource>, count_buffer_offset: u64);
     fn ia_set_index_buffer(&self, view: &IndexBufferView);
     fn ia_set_primitive_topology(&self, primitive_topology: d3d::PrimitiveTopology);
     fn ia_set_vertex_buffers(&self, start_slot: u32, views: &[VertexBufferView]);
     fn om_set_blend_factor(&self, blend_factor: dxgi::RGBA);
     fn om_set_render_targets(&self, render_target_descriptors: &[CPUDescriptorHandle], rts_single_handle_to_descriptor_range: bool, depth_stencil_descriptor: Option<CPUDescriptorHandle>);
     fn om_set_stencil_ref(&self, stencil_ref: u32);
-    fn reset(&self, command_allocator: &impl ICommandAllocator, pipeline_state: Option<&impl IPipelineState>) -> Result<(), HResult>;
-    fn resolve_query_data(&self, query_heap: &impl IQueryHeap, ty: QueryType, start_index: u32, num_queries: u32, dst_buffer: &impl IResource, aligned_dst_bufer_offset: u64);
-    fn resolve_subresource(&self, dst_resource: &impl IResource, dst_subresource: u32, src_resource: &impl IResource, src_subresource: u32, format: dxgi::Format);
+    fn reset(&self, command_allocator: &CommandAllocator, pipeline_state: Option<&PipelineState>) -> Result<(), HResult>;
+    fn resolve_query_data(&self, query_heap: &QueryHeap, ty: QueryType, start_index: u32, num_queries: u32, dst_buffer: &Resource, aligned_dst_bufer_offset: u64);
+    fn resolve_subresource(&self, dst_resource: &Resource, dst_subresource: u32, src_resource: &Resource, src_subresource: u32, format: dxgi::Format);
     fn resource_barrier(&self, barriers: &[ResourceBarrier<impl IResource>]);
     fn rs_set_scissor_rects(&self, rects: &[Rect]);
     fn rs_set_viewports(&self, viewports: &[Viewport]);
@@ -5272,19 +5225,19 @@ pub trait IGraphicsCommandList: ICommandList {
     fn set_compute_root_constant_buffer_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
     fn set_compute_root_descriptor_table(&self, root_parameter_index: u32, base_descriptor: GPUDescriptorHandle);
     fn set_compute_root_shader_resource_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
-    fn set_compute_root_signature(&self, root_signature: &impl IRootSignature);
+    fn set_compute_root_signature(&self, root_signature: &RootSignature);
     fn set_compute_root_unordered_access_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
-    fn set_descriptor_heaps(&self, descriptor_heaps: &[&impl IDescriptorHeap]);
+    fn set_descriptor_heaps(&self, descriptor_heaps: &[&DescriptorHeap]);
     fn set_graphics_root_32bit_constant(&self, root_parameter_index: u32, src_data: u32, dest_offset_in_32bit_values: u32);
     fn set_graphics_root_32bit_constants<T>(&self, root_parameter_index: u32, src_data: &[T], dest_offset_in_32bit_values: u32);
     fn set_graphics_root_constant_buffer_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
     fn set_graphics_root_descriptor_table(&self, root_parameter_index: u32, base_descriptor: GPUDescriptorHandle);
     fn set_graphics_root_shader_resource_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
-    fn set_graphics_root_signature(&self, root_signature: &impl IRootSignature);
+    fn set_graphics_root_signature(&self, root_signature: &RootSignature);
     fn set_graphics_root_unordered_access_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress);
     fn set_marker(&self, metadata: u32, data: *const c_void, size: u32);
-    fn set_pipeline_state(&self, pipeline_state: &impl IPipelineState);
-    fn set_predication(&self, buffer: &impl IResource, aligned_buffer_offset: u64, operation: PredicationOp);
+    fn set_pipeline_state(&self, pipeline_state: &PipelineState);
+    fn set_predication(&self, buffer: &Resource, aligned_buffer_offset: u64, operation: PredicationOp);
     fn so_set_targets(&self, start_slot: u32, views: &[StreamOutputBufferView]);
 }
 macro_rules! impl_graphics_command_list {
@@ -5294,8 +5247,8 @@ macro_rules! impl_graphics_command_list {
             fn begin_event(&self, metadata: u32, data: *const c_void, size: u32) {
                 unsafe { self.0.BeginEvent(metadata, data, size) }
             }
-            fn begin_query(&self, query_heap: &impl IQueryHeap, ty: QueryType, index: u32) {
-                unsafe { self.0.BeginQuery(query_heap.as_ptr() as *mut ID3D12QueryHeap, ty as u32, index) }
+            fn begin_query(&self, query_heap: &QueryHeap, ty: QueryType, index: u32) {
+                unsafe { self.0.BeginQuery(query_heap.as_ptr(), ty as u32, index) }
             }
             fn clear_depth_stencil_view(&self, dsv: CPUDescriptorHandle, clear_flags: ClearFlags, depth: f32, stencil: u8, rects: &[Rect]) {
                 unsafe { self.0.ClearDepthStencilView(dsv.into(), clear_flags.0, depth, stencil, rects.len() as u32, rects.as_ptr() as *const RECT) }
@@ -5303,30 +5256,30 @@ macro_rules! impl_graphics_command_list {
             fn clear_render_target_view(&self, rtv: CPUDescriptorHandle, clear_rgba: dxgi::RGBA, rects: &[Rect]) {
                 unsafe { self.0.ClearRenderTargetView(rtv.into(), &[clear_rgba.r, clear_rgba.g, clear_rgba.b, clear_rgba.a], rects.len() as u32, rects.as_ptr() as *const RECT) }
             }
-            fn clear_state(&self, pipeline_state: &impl IPipelineState) {
-                unsafe { self.0.ClearState(pipeline_state.as_ptr() as *mut ID3D12PipelineState) }
+            fn clear_state(&self, pipeline_state: &PipelineState) {
+                unsafe { self.0.ClearState(pipeline_state.as_ptr()) }
             }
-            fn clear_unordered_access_view_float(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: &impl IResource,  values: [f32; 4], rects: &[Rect]) {
-                unsafe { self.0.ClearUnorderedAccessViewFloat(view_gpu_handle_in_current_heap.into(), view_cpu_handle.into(), resource.as_ptr() as *mut ID3D12Resource, &values, rects.len() as u32, rects.as_ptr() as *const RECT) }
+            fn clear_unordered_access_view_float(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: Resource,  values: [f32; 4], rects: &[Rect]) {
+                unsafe { self.0.ClearUnorderedAccessViewFloat(view_gpu_handle_in_current_heap.into(), view_cpu_handle.into(), resource.as_ptr(), &values, rects.len() as u32, rects.as_ptr() as *const RECT) }
             }
-            fn clear_unordered_access_view_uint(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: &impl IResource,  values: [u32; 4], rects: &[Rect]) {
-                unsafe { self.0.ClearUnorderedAccessViewUint(view_gpu_handle_in_current_heap.into(), view_cpu_handle.into(), resource.as_ptr() as *mut ID3D12Resource, &values, rects.len() as u32, rects.as_ptr() as *const RECT) }
+            fn clear_unordered_access_view_uint(&self, view_gpu_handle_in_current_heap: GPUDescriptorHandle, view_cpu_handle: CPUDescriptorHandle, resource: Resource,  values: [u32; 4], rects: &[Rect]) {
+                unsafe { self.0.ClearUnorderedAccessViewUint(view_gpu_handle_in_current_heap.into(), view_cpu_handle.into(), resource.as_ptr(), &values, rects.len() as u32, rects.as_ptr() as *const RECT) }
             }
             fn close(&self) -> HResult {
                 unsafe { self.0.Close().into() }
             }
-            fn copy_buffer_region(&self, dst_buffer: &impl IResource, dst_offset: u64, src_buffer: &impl IResource, src_offset: u64, num_bytes: u64) {
-                unsafe { self.0.CopyBufferRegion(dst_buffer.as_ptr() as *mut ID3D12Resource, dst_offset, src_buffer.as_ptr() as *mut ID3D12Resource, src_offset, num_bytes) }
+            fn copy_buffer_region(&self, dst_buffer: &Resource, dst_offset: u64, src_buffer: &Resource, src_offset: u64, num_bytes: u64) {
+                unsafe { self.0.CopyBufferRegion(dst_buffer.as_ptr(), dst_offset, src_buffer.as_ptr(), src_offset, num_bytes) }
             }
-            fn copy_resource(&self, dst_resource: &impl IResource, src_resource: &impl IResource) {
-                unsafe { self.0.CopyResource(dst_resource.as_ptr() as *mut ID3D12Resource, src_resource.as_ptr() as *mut ID3D12Resource) }
+            fn copy_resource(&self, dst_resource: &Resource, src_resource: &Resource) {
+                unsafe { self.0.CopyResource(dst_resource.as_ptr(), src_resource.as_ptr()) }
             }
             fn copy_texture_region(&self, dst: &TextureCopyLocation<impl IResource>, dst_x: u32, dst_y: u32, dst_z: u32, src: &TextureCopyLocation<impl IResource>, src_box: Option<Box>) {
                 unsafe { self.0.CopyTextureRegion(&dst.to_c_struct(), dst_x, dst_y, dst_z, &src.to_c_struct(), src_box.as_ref().map_or(std::ptr::null(), |b| b as *const Box as *const D3D12_BOX)) }
             }
             // fn copy_tiles();
-            fn discard_resouce(&self, resource: &impl IResource, region: DiscardRegion) {
-                unsafe { self.0.DiscardResource(resource.as_ptr() as *mut ID3D12Resource, &region.to_c_struct()) }
+            fn discard_resouce(&self, resource: &Resource, region: DiscardRegion) {
+                unsafe { self.0.DiscardResource(resource.as_ptr(), &region.to_c_struct()) }
             }
             fn dispatch(&self, thread_group_count_x: u32, thread_group_count_y: u32, thread_group_count_z: u32) {
                 unsafe { self.0.Dispatch(thread_group_count_x, thread_group_count_y, thread_group_count_z) }
@@ -5340,19 +5293,19 @@ macro_rules! impl_graphics_command_list {
             fn end_event(&self) {
                 unsafe { self.0.EndEvent() }
             }
-            fn end_query(&self, query_heap: &impl IQueryHeap, ty: QueryType, index: u32) {
-                unsafe { self.0.EndQuery(query_heap.as_ptr() as *mut ID3D12QueryHeap, ty as u32, index) }
+            fn end_query(&self, query_heap: &QueryHeap, ty: QueryType, index: u32) {
+                unsafe { self.0.EndQuery(query_heap.as_ptr(), ty as u32, index) }
             }
-            fn execute_bundle(&self, command_list: &impl IGraphicsCommandList) {
-                unsafe { self.0.ExecuteBundle(command_list.as_ptr() as *mut ID3D12GraphicsCommandList) }
+            fn execute_bundle(&self, command_list: &GraphicsCommandList) {
+                unsafe { self.0.ExecuteBundle(command_list.as_ptr()) }
             }
-            fn execute_indirect(&self, command_signature: &impl ICommandSignature, max_command_count: u32, argument_buffer: &impl IResource, argument_buffer_offset: u64, count_buffer: Option<&impl IResource>, count_buffer_offset: u64) {
+            fn execute_indirect(&self, command_signature: &CommandSignature, max_command_count: u32, argument_buffer: &Resource, argument_buffer_offset: u64, count_buffer: Option<&Resource>, count_buffer_offset: u64) {
                 unsafe { self.0.ExecuteIndirect(
-                    command_signature.as_ptr() as *mut ID3D12CommandSignature,
+                    command_signature.as_ptr(),
                     max_command_count,
-                    argument_buffer.as_ptr() as *mut ID3D12Resource,
+                    argument_buffer.as_ptr(),
                     argument_buffer_offset,
-                    count_buffer.as_ref().map_or(std::ptr::null_mut(), |cb| cb.as_ptr() as *mut ID3D12Resource),
+                    count_buffer.as_ref().map_or(std::ptr::null_mut(), |cb| cb.as_ptr()),
                     count_buffer_offset,
                 ) }
             }
@@ -5379,19 +5332,19 @@ macro_rules! impl_graphics_command_list {
             fn om_set_stencil_ref(&self, stencil_ref: u32) {
                 unsafe { self.0.OMSetStencilRef(stencil_ref) }
             }
-            fn reset(&self, command_allocator: &impl ICommandAllocator, pipeline_state: Option<&impl IPipelineState>) -> Result<(), HResult> {
+            fn reset(&self, command_allocator: &CommandAllocator, pipeline_state: Option<&PipelineState>) -> Result<(), HResult> {
                 unsafe {
-                    hresult((), self.0.Reset(command_allocator.as_ptr() as *mut ID3D12CommandAllocator, pipeline_state.map_or(std::ptr::null_mut(), |p| p.as_ptr() as *mut ID3D12PipelineState)))
+                    hresult((), self.0.Reset(command_allocator.as_ptr(), pipeline_state.map_or(std::ptr::null_mut(), |p| p.as_ptr())))
                 }
             }
-            fn resolve_query_data(&self, query_heap: &impl IQueryHeap, ty: QueryType, start_index: u32, num_queries: u32, dst_buffer: &impl IResource, aligned_dst_bufer_offset: u64) {
+            fn resolve_query_data(&self, query_heap: &QueryHeap, ty: QueryType, start_index: u32, num_queries: u32, dst_buffer: &Resource, aligned_dst_bufer_offset: u64) {
                 unsafe {
-                    self.0.ResolveQueryData(query_heap.as_ptr() as *mut ID3D12QueryHeap, ty as u32, start_index, num_queries, dst_buffer.as_ptr() as *mut ID3D12Resource, aligned_dst_bufer_offset)
+                    self.0.ResolveQueryData(query_heap.as_ptr(), ty as u32, start_index, num_queries, dst_buffer.as_ptr(), aligned_dst_bufer_offset)
                 }
             }
-            fn resolve_subresource(&self, dst_resource: &impl IResource, dst_subresource: u32, src_resource: &impl IResource, src_subresource: u32, format: dxgi::Format) {
+            fn resolve_subresource(&self, dst_resource: &Resource, dst_subresource: u32, src_resource: &Resource, src_subresource: u32, format: dxgi::Format) {
                 unsafe {
-                    self.0.ResolveSubresource(dst_resource.as_ptr() as *mut ID3D12Resource, dst_subresource, src_resource.as_ptr() as *mut ID3D12Resource, src_subresource, format as u32)
+                    self.0.ResolveSubresource(dst_resource.as_ptr(), dst_subresource, src_resource.as_ptr(), src_subresource, format as u32)
                 }
             }
             fn resource_barrier(&self, barriers: &[ResourceBarrier<impl IResource>]) {
@@ -5419,14 +5372,14 @@ macro_rules! impl_graphics_command_list {
             fn set_compute_root_shader_resource_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress) {
                 unsafe { self.0.SetComputeRootShaderResourceView(root_parameter_index, buffer_location.into()) }
             }
-            fn set_compute_root_signature(&self, root_signature: &impl IRootSignature) {
-                unsafe { self.0.SetComputeRootSignature(root_signature.as_ptr() as *mut ID3D12RootSignature) }
+            fn set_compute_root_signature(&self, root_signature: &RootSignature) {
+                unsafe { self.0.SetComputeRootSignature(root_signature.as_ptr()) }
             }
             fn set_compute_root_unordered_access_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress) {
                 unsafe { self.0.SetComputeRootUnorderedAccessView(root_parameter_index, buffer_location.into()) }
             }
-            fn set_descriptor_heaps(&self, descriptor_heaps: &[&impl IDescriptorHeap]) {
-                let mut heap_ptrs = descriptor_heaps.iter().map(|h| h.as_ptr() as *mut ID3D12DescriptorHeap).collect::<Vec<_>>();
+            fn set_descriptor_heaps(&self, descriptor_heaps: &[&DescriptorHeap]) {
+                let mut heap_ptrs = descriptor_heaps.iter().map(|h| h.as_ptr()).collect::<Vec<_>>();
                 unsafe { self.0.SetDescriptorHeaps(heap_ptrs.len() as u32, heap_ptrs.as_mut_ptr()) }
             }
             fn set_graphics_root_32bit_constant(&self, root_parameter_index: u32, src_data: u32, dest_offset_in_32bit_value: u32) {
@@ -5444,8 +5397,8 @@ macro_rules! impl_graphics_command_list {
             fn set_graphics_root_shader_resource_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress) {
                 unsafe { self.0.SetGraphicsRootShaderResourceView(root_parameter_index, buffer_location.into()) }
             }
-            fn set_graphics_root_signature(&self, root_signature: &impl IRootSignature) {
-                unsafe { self.0.SetGraphicsRootSignature(root_signature.as_ptr() as *mut ID3D12RootSignature) }
+            fn set_graphics_root_signature(&self, root_signature: &RootSignature) {
+                unsafe { self.0.SetGraphicsRootSignature(root_signature.as_ptr()) }
             }
             fn set_graphics_root_unordered_access_view(&self, root_parameter_index: u32, buffer_location: GPUVirtualAddress) {
                 unsafe { self.0.SetGraphicsRootUnorderedAccessView(root_parameter_index, buffer_location.into()) }
@@ -5453,11 +5406,11 @@ macro_rules! impl_graphics_command_list {
             fn set_marker(&self, metadata: u32, data: *const c_void, size: u32) {
                 unsafe { self.0.SetMarker(metadata, data, size) }
             }
-            fn set_pipeline_state(&self, pipeline_state: &impl IPipelineState) {
-                unsafe { self.0.SetPipelineState(pipeline_state.as_ptr() as *mut ID3D12PipelineState) }
+            fn set_pipeline_state(&self, pipeline_state: &PipelineState) {
+                unsafe { self.0.SetPipelineState(pipeline_state.as_ptr()) }
             }
-            fn set_predication(&self, resource: &impl IResource, aligned_buffer_offset: u64, operation: PredicationOp) {
-                unsafe { self.0.SetPredication(resource.as_ptr() as *mut ID3D12Resource, aligned_buffer_offset, operation as u32) }
+            fn set_predication(&self, resource: &Resource, aligned_buffer_offset: u64, operation: PredicationOp) {
+                unsafe { self.0.SetPredication(resource.as_ptr(), aligned_buffer_offset, operation as u32) }
             }
             fn so_set_targets(&self, start_slot: u32, views: &[StreamOutputBufferView]) {
                 unsafe { self.0.SOSetTargets(start_slot, views.len() as u32, views.as_ptr() as *mut D3D12_STREAM_OUTPUT_BUFFER_VIEW) }
@@ -5488,7 +5441,7 @@ pub trait IPipelineLibrary: IDeviceChild {
     fn load_compute_pipeline<T: IPipelineState>(&self, name: &str, desc: &ComputePipelineStateDesc) -> Result<T, HResult>;
     fn load_graphics_pipeline<T: IPipelineState>(&self, name: &str, desc: &GraphicsPipelineStateDesc) -> Result<T, HResult>;
     fn serialize(&self) -> Result<Vec<u8>, HResult>;
-    fn store_pipeline(&self, name: &str, pipeline: &impl IPipelineLibrary) -> Result<(), HResult>;
+    fn store_pipeline(&self, name: &str, pipeline: &PipelineState) -> Result<(), HResult>;
 }
 macro_rules! impl_pipeline_library {
     ($s: ident, $interface: ident, PipelineLibrary) => {
@@ -5523,9 +5476,9 @@ macro_rules! impl_pipeline_library {
                     hresult(v, res)
                 }
             }
-            fn store_pipeline(&self, name: &str, pipeline: &impl IPipelineLibrary) -> Result<(), HResult> {
+            fn store_pipeline(&self, name: &str, pipeline: &PipelineState) -> Result<(), HResult> {
                 let wname = name.encode_utf16().chain(Some(0)).collect::<Vec<_>>();
-                let res = unsafe { self.0.StorePipeline(wname.as_ptr(), pipeline.as_ptr() as *mut ID3D12PipelineState) };
+                let res = unsafe { self.0.StorePipeline(wname.as_ptr(), pipeline.as_ptr()) };
                 hresult((), res)
             }
         }
@@ -5654,6 +5607,7 @@ impl IRootSignatureDeserializer for RootSignatureDeserializer {
                     },
                     D3D12_ROOT_PARAMETER_TYPE_CBV | D3D12_ROOT_PARAMETER_TYPE_SRV | D3D12_ROOT_PARAMETER_TYPE_UAV => {
                         RootParameter::Descriptor {
+                            ty: std::mem::transmute(param.ParameterType),
                             shader_register: param.u.Constants().ShaderRegister,
                             register_space: param.u.Constants().RegisterSpace,
                             shader_visibility: std::mem::transmute(param.ShaderVisibility),
@@ -5681,3 +5635,37 @@ impl_pageable!(StateObject, ID3D12StateObject);
 impl IStateObject for StateObject {}
 */
 // pub trait IStateObjectProperties;
+
+pub fn create_device<T: IDevice>(adapter: Option<&dxgi::Adapter>, minimum_feature_level: d3d::FeatureLevel) -> Result<T, HResult> {
+    Ok(T::new(ComPtr::new(|| {
+        let mut obj = std::ptr::null_mut();
+        let res = unsafe { D3D12CreateDevice(adapter.map_or(std::ptr::null_mut(), |a| a.as_unknown()), minimum_feature_level.into(), &T::uuidof().into(), &mut obj) };
+        hresult(obj as *mut <T as Interface>::APIType, res)
+    })?))
+}
+
+pub fn serialize_root_signature(desc: RootSignatureDesc, version: d3d::RootSignatureVersion) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
+    let mut obj = std::ptr::null_mut();
+    let mut err = std::ptr::null_mut();
+    let (c_desc, _tmp) = desc.to_c_struct();
+    unsafe {
+        let res = D3D12SerializeRootSignature(&c_desc, version.into(), &mut obj, &mut err);
+            if res < 0 {
+            Err((res.into(), if err != std::ptr::null_mut() { Some(d3d::Blob::new(ComPtr::from_raw(err))) } else { None }))
+        } else {
+            Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use d3d;
+
+    #[test]
+    fn create_device_test() {
+        let device = create_device::<Device>(None, d3d::FeatureLevel(12, 0));
+        assert!(device.is_ok());
+    }
+}
