@@ -25,5 +25,6 @@ winapi = { version = "0.3.7", features = [
 	"dxgidebug",
 	"d3d11",
 	"d3d12",
+	"d3d12sdklayers",
 ] }
 failure = "0.1.5"

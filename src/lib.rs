@@ -1,6 +1,7 @@
 pub mod api;
 pub mod d3d;
 pub mod d3d12;
+mod d3d12sdklayers;
 pub mod dxgi;
 pub mod result;
 mod utility;

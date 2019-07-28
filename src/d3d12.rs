@@ -14,6 +14,7 @@ use winapi::um::minwinbase::SECURITY_ATTRIBUTES;
 use winapi::um::unknwnbase::IUnknown;
 use winapi::um::winnt::HANDLE;
 use winapi::Interface as _;
+pub use crate::d3d12sdklayers::*;
 
 /*
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -5656,6 +5657,14 @@ pub fn serialize_root_signature(desc: RootSignatureDesc, version: d3d::RootSigna
             Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
         }
     }
+}
+
+pub fn get_debug_interface<T: IDebug>() -> Result<T, HResult> {
+    Ok(T::new(ComPtr::new(|| {
+        let mut obj = std::ptr::null_mut();
+        let res = unsafe { D3D12GetDebugInterface(&T::uuidof().into(), &mut obj) };
+        hresult(obj as *mut <T as Interface>::APIType, res)
+    })?))
 }
 
 #[cfg(test)]
