@@ -3868,7 +3868,7 @@ pub trait ISwapChain: Interface {
     fn get_frame_statistics(&self) -> Result<FrameStatistics, HResult>;
     fn get_fullscreen_state(&self) -> Result<(bool, Option<Output>), HResult>;
     fn get_last_present_count(&self) -> Result<u32, HResult>;
-    fn present(&self, interval: u32, flags: Present) -> Result<(), HResult>;
+    fn present(&self, interval: u32, flags: Option<Present>) -> Result<(), HResult>;
     fn resize_buffers(
         &self,
         buffer_count: u32,
@@ -3896,7 +3896,7 @@ pub trait ISwapChain1: ISwapChain {
     fn present1(
         &self,
         interval: u32,
-        flags: Present,
+        flags: Option<Present>,
         parameters: &PresentParameters,
     ) -> Result<(), HResult>;
     fn set_background_color(&self, rgba: RGBA) -> Result<(), HResult>;
@@ -3918,7 +3918,7 @@ pub trait ISwapChain3: ISwapChain2 {
         &self,
         color_space: ColorSpaceType,
     ) -> Result<SwapChainColorSpaceSupportFlag, HResult>;
-    fn get_current_backbuffer_index(&self) -> u32;
+    fn get_current_back_buffer_index(&self) -> u32;
     fn resize_buffers1<T: Interface>(
         &self,
         buffer_count: u32,
@@ -3981,8 +3981,8 @@ macro_rules! impl_swapchain {
                 let res = unsafe { self.0.GetLastPresentCount(&mut count) };
                 hresult(count, res)
             }
-            fn present(&self, interval: u32, flags: Present) -> Result<(), HResult> {
-                let res = unsafe { self.0.Present(interval, flags.0) };
+            fn present(&self, interval: u32, flags: Option<Present>) -> Result<(), HResult> {
+                let res = unsafe { self.0.Present(interval, flags.map_or(0, |f| f.0)) };
                 hresult((), res)
             }
             fn resize_buffers(
@@ -4074,7 +4074,7 @@ macro_rules! impl_swapchain {
             fn present1(
                 &self,
                 interval: u32,
-                flags: Present,
+                flags: Option<Present>,
                 parameters: &PresentParameters,
             ) -> Result<(), HResult> {
                 let parameters = parameters.clone();
@@ -4097,7 +4097,7 @@ macro_rules! impl_swapchain {
                         .as_mut()
                         .map_or(std::ptr::null_mut(), |pt| pt as *mut POINT),
                 };
-                let res = unsafe { self.0.Present1(interval, flags.0, &params) };
+                let res = unsafe { self.0.Present1(interval, flags.map_or(0, |f| f.0), &params) };
                 hresult((), res)
             }
             fn set_background_color(&self, rgba: RGBA) -> Result<(), HResult> {
@@ -4169,7 +4169,7 @@ macro_rules! impl_swapchain {
                 };
                 hresult(SwapChainColorSpaceSupportFlag(support), res)
             }
-            fn get_current_backbuffer_index(&self) -> u32 {
+            fn get_current_back_buffer_index(&self) -> u32 {
                 unsafe { self.0.GetCurrentBackBufferIndex() }
             }
             fn resize_buffers1<T: Interface>(

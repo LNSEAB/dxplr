@@ -1,5 +1,7 @@
 use winapi::shared::guiddef::GUID;
 use winapi::shared::windef::{POINT, RECT};
+use winapi::um::handleapi::*;
+use winapi::um::winnt::HANDLE;
 use winapi::um::winnt::LUID;
 
 #[derive(Clone, Copy)]
@@ -58,8 +60,8 @@ impl From<Luid> for LUID {
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Point {
-    x: i32,
-    y: i32,
+    pub x: i32,
+    pub y: i32,
 }
 impl Point {
     pub fn new(x: i32, y: i32) -> Self {
@@ -80,10 +82,10 @@ impl From<Point> for POINT {
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Rect {
-    left: i32,
-    top: i32,
-    right: i32,
-    bottom: i32,
+    pub left: i32,
+    pub top: i32,
+    pub right: i32,
+    pub bottom: i32,
 }
 impl Rect {
     pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
@@ -115,3 +117,22 @@ impl From<Rect> for RECT {
         }
     }
 }
+
+pub(crate) struct Handle(HANDLE);
+impl Handle {
+    pub(crate) fn new(p: HANDLE) -> Self {
+        Self(p)
+    }
+    pub(crate) fn as_raw_handle(&self) -> HANDLE {
+        self.0
+    }
+}
+impl Drop for Handle {
+    fn drop(&mut self) {
+        unsafe {
+            CloseHandle(self.0);
+        }
+    }
+}
+unsafe impl Send for Handle {}
+unsafe impl Sync for Handle {}

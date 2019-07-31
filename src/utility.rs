@@ -50,11 +50,21 @@ macro_rules! impl_interface {
             fn as_com_ptr(&self) -> &ComPtr<Self::APIType> {
                 &self.0
             }
-            fn as_unknown(&self) -> *mut IUnknown {
-                self.as_ptr() as *mut IUnknown
+            fn as_unknown(&self) -> *mut winapi::um::unknwnbase::IUnknown {
+                self.as_ptr() as *mut winapi::um::unknwnbase::IUnknown
             }
-            fn from_com_ptr(p: ComPtr<Self::APIType>) -> Self {
+            fn from_com_ptr(p: com_ptr::ComPtr<Self::APIType>) -> Self {
                 $s(p)
+            }
+            fn query_interface<T: $crate::Interface>(&self) -> Result<T, $crate::result::HResult> {
+                let p = self
+                    .as_com_ptr()
+                    .query_interface::<<T as $crate::Interface>::APIType>();
+                if let Err(e) = p {
+                    Err(e.into())
+                } else {
+                    Ok(T::new(p.unwrap()))
+                }
             }
         }
     };

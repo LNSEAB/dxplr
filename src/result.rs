@@ -74,7 +74,7 @@ impl std::fmt::Display for HResult {
             let len = FormatMessageW(
                 FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER,
                 std::ptr::null(),
-                0,
+                std::mem::transmute(self.code()),
                 0,
                 std::mem::transmute(&mut p),
                 0,

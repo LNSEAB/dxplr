@@ -5,6 +5,7 @@ mod d3d12sdklayers;
 pub mod dxgi;
 pub mod result;
 mod utility;
+pub mod d3dcompiler;
 
 pub trait Interface {
     type APIType: winapi::Interface;
@@ -14,4 +15,5 @@ pub trait Interface {
     fn as_com_ptr(&self) -> &com_ptr::ComPtr<Self::APIType>;
     fn as_unknown(&self) -> *mut winapi::um::unknwnbase::IUnknown;
     fn from_com_ptr(p: com_ptr::ComPtr<Self::APIType>) -> Self;
+    fn query_interface<T: Interface>(&self) -> Result<T, result::HResult>;
 }

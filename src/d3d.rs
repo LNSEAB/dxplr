@@ -7,8 +7,10 @@ use winapi::um::d3d12::{
     D3D_SHADER_MODEL,
 };
 use winapi::um::d3dcommon::*;
-use winapi::um::unknwnbase::IUnknown;
 use winapi::Interface as _;
+
+#[cfg(feature = "d3dcompiler")]
+pub use crate::d3dcompiler::*;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u32)]
@@ -115,22 +117,43 @@ impl From<D3D_SHADER_MODEL> for ShaderModel {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct ShaderMacro<'a, 'b> {
+    name: &'a str,
+    definition: &'b str,
+}
+impl<'a, 'b> ShaderMacro<'a, 'b> {
+    // This function is used in d3dcompiler.rs.
+    #[allow(dead_code)]
+    pub(crate) fn to_c_struct(&self) -> (D3D_SHADER_MACRO, (std::ffi::CString, std::ffi::CString)) {
+        let name = std::ffi::CString::new(self.name).unwrap();
+        let definition = std::ffi::CString::new(self.name).unwrap();
+        (
+            D3D_SHADER_MACRO {
+                Name: name.as_ptr(),
+                Definition: definition.as_ptr(),
+            },
+            (name, definition),
+        )
+    }
+}
+
 pub trait IBlob: Interface {
     fn get_buffer_pointer(&self) -> *const c_void;
-    fn get_buffer_pointer_mut(&self) -> *mut c_void;
+    fn get_buffer_pointer_mut(&mut self) -> *mut c_void;
     fn get_buffer_size(&self) -> usize;
     fn as_slice(&self) -> &[u8];
     fn as_mut_slice(&mut self) -> &mut [u8];
     fn to_vec(&self) -> Vec<u8>;
 }
 #[derive(Clone, Debug)]
-pub struct Blob(ComPtr<ID3DBlob>);
+pub struct Blob(pub(crate) ComPtr<ID3DBlob>);
 impl_interface!(Blob, ID3DBlob);
 impl IBlob for Blob {
     fn get_buffer_pointer(&self) -> *const c_void {
         unsafe { self.0.GetBufferPointer() }
     }
-    fn get_buffer_pointer_mut(&self) -> *mut c_void {
+    fn get_buffer_pointer_mut(&mut self) -> *mut c_void {
         unsafe { self.0.GetBufferPointer() }
     }
     fn get_buffer_size(&self) -> usize {
