@@ -1563,7 +1563,7 @@ pub struct SwapChainDesc {
     pub sample_desc: SampleDesc,
     pub buffer_usage: Usage,
     pub buffer_count: u32,
-    pub output_window: Option<HWND>,
+    pub output_window: HWND,
     pub windowed: bool,
     pub swap_effect: SwapEffect,
     pub flags: Option<SwapChainFlag>,
@@ -1575,11 +1575,7 @@ impl From<DXGI_SWAP_CHAIN_DESC> for SwapChainDesc {
             sample_desc: src.SampleDesc.into(),
             buffer_usage: unsafe { std::mem::transmute(src.BufferUsage) },
             buffer_count: src.BufferCount,
-            output_window: if src.OutputWindow == std::ptr::null_mut() {
-                None
-            } else {
-                Some(src.OutputWindow)
-            },
+            output_window: src.OutputWindow,
             windowed: src.Windowed == TRUE,
             swap_effect: unsafe { std::mem::transmute(src.SwapEffect) },
             flags: if src.Flags == 0 {
@@ -1597,7 +1593,7 @@ impl From<SwapChainDesc> for DXGI_SWAP_CHAIN_DESC {
             SampleDesc: src.sample_desc.into(),
             BufferUsage: src.buffer_usage.0,
             BufferCount: src.buffer_count,
-            OutputWindow: src.output_window.unwrap_or(std::ptr::null_mut()),
+            OutputWindow: src.output_window,
             Windowed: to_BOOL(src.windowed),
             SwapEffect: src.swap_effect as u32,
             Flags: src.flags.map_or(0, |f| f.0),

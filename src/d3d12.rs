@@ -1479,6 +1479,15 @@ impl BlendDesc {
         }
     }
 }
+impl Default for BlendDesc {
+    fn default() -> Self {
+        Self {
+            alpha_to_coverage_enable: false,
+            independent_blend_enable: false,
+            render_target: vec![Default::default()],
+        }
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
 #[repr(C)]
@@ -1647,6 +1656,55 @@ pub struct DepthStencilDesc {
     pub front_face: DepthStencilOpDesc,
     pub back_face: DepthStencilOpDesc,
 }
+impl DepthStencilDesc {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn depth_enable(mut self, depth_enable: bool) -> Self {
+        self.depth_enable = depth_enable;
+        self
+    }
+    pub fn depth_write_mask(mut self, depth_write_mask: DepthWriteMask) -> Self {
+        self.depth_write_mask = depth_write_mask;
+        self
+    }
+    pub fn depth_func(mut self, depth_func: ComparisonFunc) -> Self {
+        self.depth_func = depth_func;
+        self
+    }
+    pub fn stencil_enable(mut self, stencil_enable: bool) -> Self {
+        self.stencil_enable = stencil_enable;
+        self
+    }
+    pub fn stencil_read_mask(mut self, stencil_read_mask: u8) -> Self {
+        self.stencil_read_mask = stencil_read_mask;
+        self
+    }
+    pub fn stencil_write_mask(mut self, stencil_write_mask: u8) -> Self {
+        self.stencil_write_mask = stencil_write_mask;
+        self
+    }
+    pub fn front_face(mut self, front_face: DepthStencilOpDesc) -> Self {
+        self.front_face = front_face;
+        self
+    }
+    pub fn back_face(mut self, back_face: DepthStencilOpDesc) -> Self {
+        self.back_face = back_face;
+        self
+    }
+    fn to_c_struct(&self) -> D3D12_DEPTH_STENCIL_DESC {
+        D3D12_DEPTH_STENCIL_DESC {
+            DepthEnable: to_BOOL(self.depth_enable),
+            DepthWriteMask: self.depth_write_mask as u32,
+            DepthFunc: self.depth_func as u32,
+            StencilEnable: to_BOOL(self.stencil_enable),
+            StencilReadMask: self.stencil_read_mask,
+            StencilWriteMask: self.stencil_write_mask,
+            FrontFace: self.front_face.to_c_struct(),
+            BackFace: self.back_face.to_c_struct(),
+        }
+    }
+}
 impl Default for DepthStencilDesc {
     fn default() -> Self {
         Self {
@@ -1658,20 +1716,6 @@ impl Default for DepthStencilDesc {
             stencil_write_mask: DEFAULT_STENCIL_WRITE_MASK,
             front_face: Default::default(),
             back_face: Default::default(),
-        }
-    }
-}
-impl DepthStencilDesc {
-    fn to_c_struct(&self) -> D3D12_DEPTH_STENCIL_DESC {
-        D3D12_DEPTH_STENCIL_DESC {
-            DepthEnable: to_BOOL(self.depth_enable),
-            DepthWriteMask: self.depth_write_mask as u32,
-            DepthFunc: self.depth_func as u32,
-            StencilEnable: to_BOOL(self.stencil_enable),
-            StencilReadMask: self.stencil_read_mask,
-            StencilWriteMask: self.stencil_write_mask,
-            FrontFace: self.front_face.to_c_struct(),
-            BackFace: self.back_face.to_c_struct(),
         }
     }
 }
@@ -1854,6 +1898,35 @@ pub struct DepthStencilOpDesc {
     pub stencil_pass_op: StencilOp,
     pub stencil_func: ComparisonFunc,
 }
+impl DepthStencilOpDesc {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn stencil_fail_op(mut self, stencil_fail_op: StencilOp) -> Self {
+        self.stencil_fail_op = stencil_fail_op;
+        self
+    }
+    pub fn stencil_depth_fail_op(mut self, stencil_depth_fail_op: StencilOp) -> Self {
+        self.stencil_depth_fail_op = stencil_depth_fail_op;
+        self
+    }
+    pub fn stencil_pass_op(mut self, stencil_pass_op: StencilOp) -> Self {
+        self.stencil_pass_op = stencil_pass_op;
+        self
+    }
+    pub fn stencil_func(mut self, stencil_func: ComparisonFunc) -> Self {
+        self.stencil_func = stencil_func;
+        self
+    }
+    fn to_c_struct(&self) -> D3D12_DEPTH_STENCILOP_DESC {
+        D3D12_DEPTH_STENCILOP_DESC {
+            StencilFailOp: self.stencil_fail_op as u32,
+            StencilDepthFailOp: self.stencil_depth_fail_op as u32,
+            StencilPassOp: self.stencil_pass_op as u32,
+            StencilFunc: self.stencil_func as u32,
+        }
+    }
+}
 impl Default for DepthStencilOpDesc {
     fn default() -> Self {
         Self {
@@ -1864,25 +1937,55 @@ impl Default for DepthStencilOpDesc {
         }
     }
 }
-impl DepthStencilOpDesc {
-    fn to_c_struct(&self) -> D3D12_DEPTH_STENCILOP_DESC {
-        D3D12_DEPTH_STENCILOP_DESC {
-            StencilFailOp: self.stencil_fail_op as u32,
-            StencilDepthFailOp: self.stencil_depth_fail_op as u32,
-            StencilPassOp: self.stencil_pass_op as u32,
-            StencilFunc: self.stencil_func as u32,
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
-pub struct DescriptorHeapDesc {
-    pub ty: DescriptorHeapType,
-    pub num_descriptors: u32,
+pub struct DescriptorHeapDesc<Ty, Nm> {
+    pub ty: Ty,
+    pub num_descriptors: Nm,
     pub flags: Option<DescriptorHeapFlags>,
     pub node_mask: u32,
 }
-impl DescriptorHeapDesc {
+impl DescriptorHeapDesc<(), ()> {
+    pub fn new() -> Self {
+        Self {
+            ty: (),
+            num_descriptors: (),
+            flags: None,
+            node_mask: 0,
+        }
+    }
+}
+impl<Ty, Nm> DescriptorHeapDesc<Ty, Nm> {
+    pub fn flags(mut self, flags: DescriptorHeapFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
+    pub fn node_mask(mut self, node_mask: u32) -> Self {
+        self.node_mask = node_mask;
+        self
+    }
+}
+impl<Nm> DescriptorHeapDesc<(), Nm> {
+    pub fn heap_type(self, ty: DescriptorHeapType) -> DescriptorHeapDesc<DescriptorHeapType, Nm> {
+        DescriptorHeapDesc {
+            ty,
+            num_descriptors: self.num_descriptors,
+            flags: self.flags,
+            node_mask: self.node_mask,
+        }
+    }
+}
+impl<Ty> DescriptorHeapDesc<Ty, ()> {
+    pub fn num_descriptors(self, num_descriptors: u32) -> DescriptorHeapDesc<Ty, u32> {
+        DescriptorHeapDesc {
+            ty: self.ty,
+            num_descriptors,
+            flags: self.flags,
+            node_mask: self.node_mask,
+        }
+    }
+}
+impl DescriptorHeapDesc<DescriptorHeapType, u32> {
     fn to_c_struct(&self) -> D3D12_DESCRIPTOR_HEAP_DESC {
         D3D12_DESCRIPTOR_HEAP_DESC {
             Type: self.ty as u32,
@@ -1892,8 +1995,8 @@ impl DescriptorHeapDesc {
         }
     }
 }
-impl From<D3D12_DESCRIPTOR_HEAP_DESC> for DescriptorHeapDesc {
-    fn from(src: D3D12_DESCRIPTOR_HEAP_DESC) -> DescriptorHeapDesc {
+impl From<D3D12_DESCRIPTOR_HEAP_DESC> for DescriptorHeapDesc<DescriptorHeapType, u32> {
+    fn from(src: D3D12_DESCRIPTOR_HEAP_DESC) -> DescriptorHeapDesc<DescriptorHeapType, u32> {
         DescriptorHeapDesc {
             ty: unsafe { std::mem::transmute(src.Type) },
             num_descriptors: src.NumDescriptors,
@@ -2617,7 +2720,7 @@ impl From<GPUVirtualAddressRange> for D3D12_GPU_VIRTUAL_ADDRESS_RANGE {
 // pub struct GPUVirtualAddressRangeAndStride;
 
 #[derive(Clone, Debug)]
-pub struct GraphicsPipelineStateDesc<'a, 'b> {
+pub struct GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
     pub root_signature: Option<RootSignature>,
     pub vs: Option<ShaderBytecode>,
     pub ps: Option<ShaderBytecode>,
@@ -2629,17 +2732,191 @@ pub struct GraphicsPipelineStateDesc<'a, 'b> {
     pub sample_mask: u32,
     pub rasterizer_state: RasterizerDesc,
     pub depth_stencil_state: DepthStencilDesc,
-    pub input_layout: InputLayoutDesc<'b>,
+    pub input_layout: Il,
     pub ib_strip_cut_value: IndexBufferStripCutValue,
     pub primitive_topology_type: PrimitiveTopologyType,
-    pub rtv_formats: Vec<dxgi::Format>,
-    pub dsv_format: dxgi::Format,
+    pub rtv_formats: Rf,
+    pub dsv_format: Df,
     pub sample_desc: dxgi::SampleDesc,
     pub node_mask: u32,
     pub cached_pso: Option<CachedPipelineState>,
     pub flags: Option<PipelineStateFlags>,
 }
-impl<'a, 'b> GraphicsPipelineStateDesc<'a, 'b> {
+impl<'a> GraphicsPipelineStateDesc<'a, (), (), ()> {
+    pub fn new() -> Self {
+        Self {
+            root_signature: None,
+            vs: None,
+            ps: None,
+            ds: None,
+            hs: None,
+            gs: None,
+            stream_output: None,
+            blend_state: Default::default(),
+            sample_mask: std::u32::MAX,
+            rasterizer_state: Default::default(),
+            depth_stencil_state: Default::default(),
+            input_layout: (),
+            ib_strip_cut_value: Default::default(),
+            primitive_topology_type: PrimitiveTopologyType::Triangle,
+            rtv_formats: (),
+            dsv_format: (),
+            sample_desc: Default::default(),
+            node_mask: 0,
+            cached_pso: None,
+            flags: None,
+        }
+    }
+}
+impl<'a, Il, Rf, Df> GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
+    pub fn root_signature(mut self, root_signature: &RootSignature) -> Self {
+        self.root_signature = Some(root_signature.clone());
+        self
+    }
+    pub fn vs(mut self, code: ShaderBytecode) -> Self {
+        self.vs = Some(code);
+        self
+    }
+    pub fn ps(mut self, code: ShaderBytecode) -> Self {
+        self.ps = Some(code);
+        self
+    }
+    pub fn ds(mut self, code: ShaderBytecode) -> Self {
+        self.ds = Some(code);
+        self
+    }
+    pub fn hs(mut self, code: ShaderBytecode) -> Self {
+        self.hs = Some(code);
+        self
+    }
+    pub fn gs(mut self, code: ShaderBytecode) -> Self {
+        self.gs = Some(code);
+        self
+    }
+    pub fn stream_output(mut self, so: StreamOutputDesc<'a>) -> Self {
+        self.stream_output = Some(so);
+        self
+    }
+    pub fn blend_desc(mut self, desc: BlendDesc) -> Self {
+        self.blend_state = desc;
+        self
+    }
+    pub fn sample_mask(mut self, mask: u32) -> Self {
+        self.sample_mask = mask;
+        self
+    }
+    pub fn rasterizer_state(mut self, desc: RasterizerDesc) -> Self {
+        self.rasterizer_state = desc;
+        self
+    }
+    pub fn depth_stencil_state(mut self, desc: DepthStencilDesc) -> Self {
+        self.depth_stencil_state = desc;
+        self
+    }
+    pub fn ib_strip_cut_value(mut self, value: IndexBufferStripCutValue) -> Self {
+        self.ib_strip_cut_value = value;
+        self
+    }
+    pub fn primitive_topology_type(mut self, topology_type: PrimitiveTopologyType) -> Self {
+        self.primitive_topology_type = topology_type;
+        self
+    }
+    pub fn sample_desc(mut self, sample_desc: dxgi::SampleDesc) -> Self {
+        self.sample_desc = sample_desc;
+        self
+    }
+    pub fn node_mask(mut self, node_mask: u32) -> Self {
+        self.node_mask = node_mask;
+        self
+    }
+    pub fn cached_pso(mut self, cached_pso: CachedPipelineState) -> Self {
+        self.cached_pso = Some(cached_pso);
+        self
+    }
+    pub fn flags(mut self, flags: PipelineStateFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
+}
+impl<'a, Rf, Df> GraphicsPipelineStateDesc<'a, (), Rf, Df> {
+    pub fn input_layout<'b>(self, input_layout: InputLayoutDesc<'b>) -> GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, Rf, Df> {
+        GraphicsPipelineStateDesc {
+            root_signature: self.root_signature,
+            vs: self.vs,
+            ps: self.ps,
+            ds: self.ds,
+            hs: self.hs,
+            gs: self.gs,
+            stream_output: self.stream_output,
+            blend_state: self.blend_state,
+            sample_mask: self.sample_mask,
+            rasterizer_state: self.rasterizer_state,
+            depth_stencil_state: self.depth_stencil_state,
+            input_layout,
+            ib_strip_cut_value: self.ib_strip_cut_value,
+            primitive_topology_type: self.primitive_topology_type,
+            rtv_formats: self.rtv_formats,
+            dsv_format: self.dsv_format,
+            sample_desc: self.sample_desc,
+            node_mask: self.node_mask,
+            cached_pso: self.cached_pso,
+            flags: self.flags,
+        }
+    }
+}
+impl<'a, Il, Df> GraphicsPipelineStateDesc<'a, Il, (), Df> {
+    pub fn rtv_formats(self, rtv_formats: Vec<dxgi::Format>) -> GraphicsPipelineStateDesc<'a, Il, Vec<dxgi::Format>, Df> {
+        GraphicsPipelineStateDesc {
+            root_signature: self.root_signature,
+            vs: self.vs,
+            ps: self.ps,
+            ds: self.ds,
+            hs: self.hs,
+            gs: self.gs,
+            stream_output: self.stream_output,
+            blend_state: self.blend_state,
+            sample_mask: self.sample_mask,
+            rasterizer_state: self.rasterizer_state,
+            depth_stencil_state: self.depth_stencil_state,
+            input_layout: self.input_layout,
+            ib_strip_cut_value: self.ib_strip_cut_value,
+            primitive_topology_type: self.primitive_topology_type,
+            rtv_formats,
+            dsv_format: self.dsv_format,
+            sample_desc: self.sample_desc,
+            node_mask: self.node_mask,
+            cached_pso: self.cached_pso,
+            flags: self.flags,
+        }
+    }
+}
+impl<'a, Il, Rf> GraphicsPipelineStateDesc<'a, Il, Rf, ()> {
+    pub fn dsv_format(self, dsv_format: dxgi::Format) -> GraphicsPipelineStateDesc<'a, Il, Rf, dxgi::Format> {
+        GraphicsPipelineStateDesc {
+            root_signature: self.root_signature,
+            vs: self.vs,
+            ps: self.ps,
+            ds: self.ds,
+            hs: self.hs,
+            gs: self.gs,
+            stream_output: self.stream_output,
+            blend_state: self.blend_state,
+            sample_mask: self.sample_mask,
+            rasterizer_state: self.rasterizer_state,
+            depth_stencil_state: self.depth_stencil_state,
+            input_layout: self.input_layout,
+            ib_strip_cut_value: self.ib_strip_cut_value,
+            primitive_topology_type: self.primitive_topology_type,
+            rtv_formats: self.rtv_formats,
+            dsv_format,
+            sample_desc: self.sample_desc,
+            node_mask: self.node_mask,
+            cached_pso: self.cached_pso,
+            flags: self.flags,
+        }
+    }
+}
+impl<'a, 'b> GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, Vec<dxgi::Format>, dxgi::Format> {
     fn to_c_struct(
         &self,
     ) -> (
@@ -2691,7 +2968,7 @@ impl<'a, 'b> GraphicsPipelineStateDesc<'a, 'b> {
 #[derive(Clone, Debug)]
 pub struct HeapDesc {
     pub size_in_bytes: u64,
-    pub properties: HeapProperties,
+    pub properties: HeapProperties<HeapType>,
     pub alignment: u64,
     pub flags: Option<HeapFlags>,
 }
@@ -2721,17 +2998,55 @@ impl From<D3D12_HEAP_DESC> for HeapDesc {
 }
 
 #[derive(Clone, Debug)]
-pub struct HeapProperties {
-    pub ty: HeapType,
+pub struct HeapProperties<Ht> {
+    pub heap_type: Ht,
     pub cpu_page_property: CPUPageProperty,
     pub memory_pool_preference: MemoryPool,
     pub creation_node_mask: u32,
     pub visible_node_mask: u32,
 }
-impl HeapProperties {
+impl HeapProperties<()> {
+    pub fn new() -> Self {
+        Self {
+            heap_type: (),
+            cpu_page_property: CPUPageProperty::Unknown,
+            memory_pool_preference: MemoryPool::Unknown,
+            creation_node_mask: 1,
+            visible_node_mask: 1,
+        }
+    }
+    pub fn heap_type(self, heap_type: HeapType) -> HeapProperties<HeapType> {
+        HeapProperties {
+            heap_type,
+            cpu_page_property: self.cpu_page_property,
+            memory_pool_preference: self.memory_pool_preference,
+            creation_node_mask: self.creation_node_mask,
+            visible_node_mask: self.visible_node_mask,
+        }
+    }
+}
+impl<Ht> HeapProperties<Ht> {
+    pub fn cpu_page_property(mut self, cpu_page_property: CPUPageProperty) -> Self {
+        self.cpu_page_property = cpu_page_property;
+        self
+    }
+    pub fn memory_pool_preference(mut self, memory_pool_preference: MemoryPool) -> Self {
+        self.memory_pool_preference = memory_pool_preference;
+        self
+    }
+    pub fn creation_node_mask(mut self, mask: u32) -> Self {
+        self.creation_node_mask = mask;
+        self
+    }
+    pub fn visible_node_mask(mut self, mask: u32) -> Self {
+        self.visible_node_mask = mask;
+        self
+    }
+}
+impl HeapProperties<HeapType> {
     fn to_c_struct(&self) -> D3D12_HEAP_PROPERTIES {
         D3D12_HEAP_PROPERTIES {
-            Type: self.ty as u32,
+            Type: self.heap_type as u32,
             CPUPageProperty: self.cpu_page_property as u32,
             MemoryPoolPreference: self.memory_pool_preference as u32,
             CreationNodeMask: self.creation_node_mask,
@@ -2739,11 +3054,11 @@ impl HeapProperties {
         }
     }
 }
-impl From<D3D12_HEAP_PROPERTIES> for HeapProperties {
-    fn from(src: D3D12_HEAP_PROPERTIES) -> HeapProperties {
+impl From<D3D12_HEAP_PROPERTIES> for HeapProperties<HeapType> {
+    fn from(src: D3D12_HEAP_PROPERTIES) -> HeapProperties<HeapType> {
         unsafe {
             HeapProperties {
-                ty: std::mem::transmute(src.Type),
+                heap_type: std::mem::transmute(src.Type),
                 cpu_page_property: std::mem::transmute(src.CPUPageProperty),
                 memory_pool_preference: std::mem::transmute(src.MemoryPoolPreference),
                 creation_node_mask: src.CreationNodeMask,
@@ -2865,6 +3180,25 @@ impl<'a> InputLayoutDesc<'a> {
     }
 }
 
+#[macro_export]
+macro_rules! d3d12_input_layout_descs {
+    ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr},)*) => {
+        $crate::d3d12::InputLayoutDesc(vec![
+            $(
+                $crate::d3d12::InputElementDesc {
+                    semantic_name: $name,
+                    semantic_index: $index,
+                    format: $format,
+                    input_slot: $slot,
+                    aligned_byte_offset: $offset,
+                    input_slot_class: $class,
+                    instance_data_step_rate: $rate,
+                },
+            )*
+        ])
+    };
+}
+
 #[derive(Clone, Debug)]
 pub struct LocalRootSignature {
     pub local_root_signature: RootSignature,
@@ -2980,6 +3314,53 @@ pub struct RasterizerDesc {
     pub conservative_raster: ConservativeRasterizationMode,
 }
 impl RasterizerDesc {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn fill_mode(mut self, mode: FillMode) -> Self {
+        self.fill_mode = mode;
+        self
+    }
+    pub fn cull_mode(mut self, mode: CullMode) -> Self {
+        self.cull_mode = mode;
+        self
+    }
+    pub fn front_counter_clockwise(mut self, front_counter_clockwise: bool) -> Self {
+        self.front_counter_clockwise = front_counter_clockwise;
+        self
+    }
+    pub fn depth_bias(mut self, depth_bias: i32) -> Self {
+        self.depth_bias = depth_bias;
+        self
+    }
+    pub fn depth_bias_clamp(mut self, depth_bias_clamp: f32) -> Self {
+        self.depth_bias_clamp = depth_bias_clamp;
+        self
+    }
+    pub fn slope_scaled_depth_bias(mut self, slope_scaled_depth_bias: f32) -> Self {
+        self.slope_scaled_depth_bias = slope_scaled_depth_bias;
+        self
+    }
+    pub fn depth_clip_enable(mut self, depth_clip_enable: bool) -> Self {
+        self.depth_clip_enable = depth_clip_enable;
+        self
+    }
+    pub fn multisample_enable(mut self, multisample_enable: bool) -> Self {
+        self.multisample_enable = multisample_enable;
+        self
+    }
+    pub fn antialiased_line_enable(mut self, antialiased_line_enable: bool) -> Self {
+        self.antialiased_line_enable = antialiased_line_enable;
+        self
+    }
+    pub fn forced_sample_count(mut self, forced_sample_count: u32) -> Self {
+        self.forced_sample_count = forced_sample_count;
+        self
+    }
+    pub fn conservative_raster(mut self, conservative_raster: ConservativeRasterizationMode) -> Self {
+        self.conservative_raster = conservative_raster;
+        self
+    }
     fn to_c_struct(&self) -> D3D12_RASTERIZER_DESC {
         D3D12_RASTERIZER_DESC {
             FillMode: self.fill_mode as u32,
@@ -3279,19 +3660,127 @@ impl<'a, T: IResource> ResourceBarrier<'a, T> {
 }
 
 #[derive(Clone, Debug)]
-pub struct ResourceDesc {
-    pub dimension: ResourceDimension,
+pub struct ResourceDesc<D, W, H, F, L> {
+    pub dimension: D,
     pub alignment: u64,
-    pub width: u64,
-    pub height: u32,
+    pub width: W,
+    pub height: H,
     pub depth_or_array_size: u16,
     pub mip_levels: u16,
-    pub format: dxgi::Format,
+    pub format: F,
     pub sample_desc: dxgi::SampleDesc,
-    pub layout: TextureLayout,
+    pub layout: L,
     pub flags: Option<ResourceFlags>,
 }
-impl ResourceDesc {
+impl ResourceDesc<(), (), (), (), ()> {
+    pub fn new() -> Self {
+        Self {
+            dimension: (),
+            alignment: 0,
+            width: (),
+            height: (),
+            depth_or_array_size: 1,
+            mip_levels: 1,
+            format: (),
+            sample_desc: Default::default(),
+            layout: (),
+            flags: None,
+        }
+    }
+}
+impl<D, W, H, F, L> ResourceDesc<D, W, H, F, L> {
+    pub fn dimension(self, dimension: ResourceDimension) -> ResourceDesc<ResourceDimension, W, H, F, L> {
+        ResourceDesc {
+            dimension,
+            alignment: self.alignment,
+            width: self.width,
+            height: self.height,
+            depth_or_array_size: self.depth_or_array_size,
+            mip_levels: self.mip_levels,
+            format: self.format,
+            sample_desc: self.sample_desc,
+            layout: self.layout,
+            flags: self.flags,
+        }
+    }
+    pub fn alignment(mut self, alignment: u64) -> Self {
+        self.alignment = alignment;
+        self
+    }
+    pub fn width(self, width: u64) -> ResourceDesc<D, u64, H, F, L> {
+        ResourceDesc {
+            dimension: self.dimension,
+            alignment: self.alignment,
+            width,
+            height: self.height,
+            depth_or_array_size: self.depth_or_array_size,
+            mip_levels: self.mip_levels,
+            format: self.format,
+            sample_desc: self.sample_desc,
+            layout: self.layout,
+            flags: self.flags,
+        }
+    }
+    pub fn height(self, height: u32) -> ResourceDesc<D, W, u32, F, L> {
+        ResourceDesc {
+            dimension: self.dimension,
+            alignment: self.alignment,
+            width: self.width,
+            height,
+            depth_or_array_size: self.depth_or_array_size,
+            mip_levels: self.mip_levels,
+            format: self.format,
+            sample_desc: self.sample_desc,
+            layout: self.layout,
+            flags: self.flags,
+        }
+    }
+    pub fn depth_or_array_size(mut self, size: u16) -> Self {
+        self.depth_or_array_size = size;
+        self
+    }
+    pub fn mip_levels(mut self, mip_levels: u16) -> Self {
+        self.mip_levels = mip_levels;
+        self
+    }
+    pub fn format(self, format: dxgi::Format) -> ResourceDesc<D, W, H, dxgi::Format, L> {
+        ResourceDesc {
+            dimension: self.dimension,
+            alignment: self.alignment,
+            width: self.width,
+            height: self.height,
+            depth_or_array_size: self.depth_or_array_size,
+            mip_levels: self.mip_levels,
+            format,
+            sample_desc: self.sample_desc,
+            layout: self.layout,
+            flags: self.flags,
+        }
+    }
+    pub fn sample_desc(mut self, desc: dxgi::SampleDesc) -> Self {
+        self.sample_desc = desc;
+        self
+    }
+    pub fn layout(self, layout: TextureLayout) -> ResourceDesc<D, W, H, F, TextureLayout> {
+        ResourceDesc {
+            dimension: self.dimension,
+            alignment: self.alignment,
+            width: self.width,
+            height: self.height,
+            depth_or_array_size: self.depth_or_array_size,
+            mip_levels: self.mip_levels,
+            format: self.format,
+            sample_desc: self.sample_desc,
+            layout,
+            flags: self.flags,
+        }
+    }
+    pub fn flags(mut self, flags: ResourceFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
+}
+impl ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
     fn to_c_struct(&self) -> D3D12_RESOURCE_DESC {
         D3D12_RESOURCE_DESC {
             Dimension: self.dimension as u32,
@@ -3307,8 +3796,8 @@ impl ResourceDesc {
         }
     }
 }
-impl From<D3D12_RESOURCE_DESC> for ResourceDesc {
-    fn from(src: D3D12_RESOURCE_DESC) -> ResourceDesc {
+impl From<D3D12_RESOURCE_DESC> for ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
+    fn from(src: D3D12_RESOURCE_DESC) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
         unsafe {
             ResourceDesc {
                 dimension: std::mem::transmute(src.Dimension),
@@ -4137,7 +4626,7 @@ pub struct VertexBufferView {
 // pub struct ViewInstanceLocation;
 // pub struct ViewInstancingDesc;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Default, Debug)]
 #[repr(C)]
 pub struct Viewport {
     pub top_left_x: f32,
@@ -4226,16 +4715,17 @@ macro_rules! impl_command_list {
         }
     };
 }
+#[derive(Clone, Debug)]
 pub struct CommandList(ComPtr<ID3D12CommandList>);
 impl_command_list!(CommandList, ID3D12CommandList, CommandList);
 
 #[derive(Clone, Debug)]
-pub struct CommandLists<T: ICommandList> {
-    lists: Vec<T>,
+pub struct CommandLists {
+    lists: Vec<CommandList>,
     ptr_lists: Vec<*mut ID3D12CommandList>,
 }
-impl<T: ICommandList> CommandLists<T> {
-    pub fn new(lists: Vec<T>) -> Self {
+impl CommandLists {
+    pub fn new(lists: Vec<CommandList>) -> Self {
         let ptr_lists = lists
             .iter()
             .map(|l| l.as_com_ptr().as_ptr() as *mut ID3D12CommandList)
@@ -4256,7 +4746,7 @@ pub trait ICommandQueue: IPageable {
         flags: Option<TileMappingFlags>,
     );
     fn end_event(&self);
-    fn execute_command_lists<T: ICommandList>(&self, command_lists: &CommandLists<T>);
+    fn execute_command_lists(&self, command_lists: &CommandLists);
     fn get_clock_calibration(&self) -> Result<GetClockCalibrationResult, HResult>;
     fn get_desc(&self) -> CommandQueueDesc;
     fn get_timestamp_frequency(&self) -> Result<u64, HResult>;
@@ -4308,10 +4798,7 @@ impl ICommandQueue for CommandQueue {
             self.0.EndEvent();
         }
     }
-    fn execute_command_lists<T>(&self, command_lists: &CommandLists<T>)
-    where
-        T: ICommandList,
-    {
+    fn execute_command_lists(&self, command_lists: &CommandLists) {
         unsafe {
             self.0.ExecuteCommandLists(
                 command_lists.ptr_lists.len() as u32,
@@ -4392,7 +4879,7 @@ impl ICommandSignature for CommandSignature {}
 
 pub trait IDescriptorHeap: IPageable {
     fn get_cpu_descriptor_handle_for_heap_start(&self) -> CPUDescriptorHandle;
-    fn get_desc(&self) -> DescriptorHeapDesc;
+    fn get_desc(&self) -> DescriptorHeapDesc<DescriptorHeapType, u32>;
     fn get_gpu_descriptor_handle_for_heap_start(&self) -> GPUDescriptorHandle;
 }
 #[derive(Clone, Debug)]
@@ -4406,7 +4893,7 @@ impl IDescriptorHeap for DescriptorHeap {
             }
         }
     }
-    fn get_desc(&self) -> DescriptorHeapDesc {
+    fn get_desc(&self) -> DescriptorHeapDesc<DescriptorHeapType, u32> {
         unsafe { self.0.GetDesc().into() }
     }
     fn get_gpu_descriptor_handle_for_heap_start(&self) -> GPUDescriptorHandle {
@@ -4469,9 +4956,9 @@ pub trait IDevice: IObject {
     ) -> Result<T, HResult>;
     fn create_committed_resource<T: IResource>(
         &self,
-        heap_properties: HeapProperties,
+        heap_properties: HeapProperties<HeapType>,
         heap_flags: Option<HeapFlags>,
-        desc: ResourceDesc,
+        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_resource_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -4492,7 +4979,7 @@ pub trait IDevice: IObject {
     );
     fn create_descriptor_heap<T: IDescriptorHeap>(
         &self,
-        desc: DescriptorHeapDesc,
+        desc: DescriptorHeapDesc<DescriptorHeapType, u32>,
     ) -> Result<T, HResult>;
     fn create_fence<T: IFence>(
         &self,
@@ -4501,14 +4988,14 @@ pub trait IDevice: IObject {
     ) -> Result<T, HResult>;
     fn create_graphics_pipeline_state<T: IPipelineState>(
         &self,
-        desc: &GraphicsPipelineStateDesc,
+        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
     ) -> Result<T, HResult>;
     fn create_heap<T: IHeap>(&self, desc: HeapDesc) -> Result<T, HResult>;
     fn create_placed_resource<T: IResource>(
         &self,
         heap: &Heap,
         heap_offset: u64,
-        desc: ResourceDesc,
+        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -4521,7 +5008,7 @@ pub trait IDevice: IObject {
     );
     fn create_reserved_resource<T: IResource>(
         &self,
-        desc: ResourceDesc,
+        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -4555,12 +5042,12 @@ pub trait IDevice: IObject {
     fn get_adapter_luid(&self) -> Luid;
     fn get_copyable_footprints(
         &self,
-        resource: ResourceDesc,
+        resource: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         first_subresource: u32,
         num_subresources: u32,
         base_offset: u64,
     ) -> GetCopyableFootprintsResult;
-    fn get_custom_heap_properties(&self, node_mask: u32, heap_type: HeapType) -> HeapProperties;
+    fn get_custom_heap_properties(&self, node_mask: u32, heap_type: HeapType) -> HeapProperties<HeapType>;
     fn get_descriptor_handle_increment_size(
         &self,
         descriptor_heaps_type: DescriptorHeapType,
@@ -4570,7 +5057,7 @@ pub trait IDevice: IObject {
     fn get_resource_allocation_info(
         &self,
         visible_mask: u32,
-        descs: &[ResourceDesc],
+        descs: &[ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
     ) -> ResourceAllocationInfo;
     /*
     fn get_resource_tiling(
@@ -4737,9 +5224,9 @@ macro_rules! impl_device {
             }
             fn create_committed_resource<T: IResource>(
                 &self,
-                heap_properties: HeapProperties,
+                heap_properties: HeapProperties<HeapType>,
                 heap_flags: Option<HeapFlags>,
-                desc: ResourceDesc,
+                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_resource_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -4802,7 +5289,7 @@ macro_rules! impl_device {
             }
             fn create_descriptor_heap<T: IDescriptorHeap>(
                 &self,
-                desc: DescriptorHeapDesc,
+                desc: DescriptorHeapDesc<DescriptorHeapType, u32>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -4836,7 +5323,7 @@ macro_rules! impl_device {
             }
             fn create_graphics_pipeline_state<T: IPipelineState>(
                 &self,
-                desc: &GraphicsPipelineStateDesc,
+                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let (c_descs, _tmp) = desc.to_c_struct();
@@ -4862,7 +5349,7 @@ macro_rules! impl_device {
                 &self,
                 heap: &Heap,
                 heap_offset: u64,
-                desc: ResourceDesc,
+                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -4911,7 +5398,7 @@ macro_rules! impl_device {
             }
             fn create_reserved_resource<T: IResource>(
                 &self,
-                desc: ResourceDesc,
+                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -5027,7 +5514,7 @@ macro_rules! impl_device {
             }
             fn get_copyable_footprints(
                 &self,
-                resource: ResourceDesc,
+                resource: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 first_subresource: u32,
                 num_subresources: u32,
                 base_offset: u64,
@@ -5074,11 +5561,11 @@ macro_rules! impl_device {
                 &self,
                 node_mask: u32,
                 heap_type: HeapType,
-            ) -> HeapProperties {
+            ) -> HeapProperties<HeapType> {
                 unsafe {
                     let props = self.0.GetCustomHeapProperties(node_mask, heap_type as u32);
                     HeapProperties {
-                        ty: std::mem::transmute(props.Type),
+                        heap_type: std::mem::transmute(props.Type),
                         cpu_page_property: std::mem::transmute(props.CPUPageProperty),
                         memory_pool_preference: std::mem::transmute(props.MemoryPoolPreference),
                         creation_node_mask: props.CreationNodeMask,
@@ -5104,7 +5591,7 @@ macro_rules! impl_device {
             fn get_resource_allocation_info(
                 &self,
                 visible_mask: u32,
-                descs: &[ResourceDesc],
+                descs: &[ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
             ) -> ResourceAllocationInfo {
                 unsafe {
                     let c_descs = descs.iter().map(|d| d.to_c_struct()).collect::<Vec<_>>();
@@ -6100,7 +6587,7 @@ pub trait IPipelineLibrary: IDeviceChild {
     fn load_graphics_pipeline<T: IPipelineState>(
         &self,
         name: &str,
-        desc: &GraphicsPipelineStateDesc,
+        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
     ) -> Result<T, HResult>;
     fn serialize(&self) -> Result<Vec<u8>, HResult>;
     fn store_pipeline(&self, name: &str, pipeline: &PipelineState) -> Result<(), HResult>;
@@ -6134,7 +6621,7 @@ macro_rules! impl_pipeline_library {
             fn load_graphics_pipeline<T: IPipelineState>(
                 &self,
                 name: &str,
-                desc: &GraphicsPipelineStateDesc,
+                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let wname = name.encode_utf16().chain(Some(0)).collect::<Vec<_>>();
@@ -6225,9 +6712,9 @@ pub trait IResource: IPageable
 where
     Self: Sized,
 {
-    fn get_desc(&self) -> ResourceDesc;
+    fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>;
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress;
-    fn get_heap_properties(&self) -> Result<(HeapProperties, HeapFlags), HResult>;
+    fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult>;
     fn map<'a, 'b>(
         &self,
         subresource: u32,
@@ -6238,13 +6725,13 @@ where
 pub struct Resource(ComPtr<ID3D12Resource>);
 impl_pageable!(Resource, ID3D12Resource);
 impl IResource for Resource {
-    fn get_desc(&self) -> ResourceDesc {
+    fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
         unsafe { self.0.GetDesc().into() }
     }
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress {
         unsafe { self.0.GetGPUVirtualAddress().into() }
     }
-    fn get_heap_properties(&self) -> Result<(HeapProperties, HeapFlags), HResult> {
+    fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult> {
         let mut properties = D3D12_HEAP_PROPERTIES::default();
         let mut flags = 0;
         let res = unsafe { self.0.GetHeapProperties(&mut properties, &mut flags) };
