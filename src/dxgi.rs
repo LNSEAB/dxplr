@@ -29,6 +29,7 @@ use winapi::um::dxgidebug::*;
 use winapi::um::minwinbase::SECURITY_ATTRIBUTES;
 use winapi::um::unknwnbase::IUnknown;
 use winapi::um::winnt::HANDLE;
+#[cfg(feature = "dxgi1_6")]
 use winapi::um::winnt::HRESULT;
 use winapi::Interface as _;
 
@@ -1132,15 +1133,15 @@ impl From<DXGI_MODE_DESC> for ModeDesc {
         }
     }
 }
-impl From<ModeDesc> for DXGI_MODE_DESC {
-    fn from(src: ModeDesc) -> DXGI_MODE_DESC {
+impl ModeDesc {
+    fn to_c_struct(&self) -> DXGI_MODE_DESC {
         DXGI_MODE_DESC {
-            Width: src.width,
-            Height: src.height,
-            RefreshRate: src.refresh_rate.into(),
-            Format: src.format as u32,
-            ScanlineOrdering: src.scanline_ordering as u32,
-            Scaling: src.scaling as u32,
+            Width: self.width,
+            Height: self.height,
+            RefreshRate: self.refresh_rate.into(),
+            Format: self.format as u32,
+            ScanlineOrdering: self.scanline_ordering as u32,
+            Scaling: self.scaling as u32,
         }
     }
 }
@@ -1171,16 +1172,16 @@ impl From<DXGI_MODE_DESC1> for ModeDesc1 {
     }
 }
 #[cfg(feature = "dxgi1_2")]
-impl From<ModeDesc1> for DXGI_MODE_DESC1 {
-    fn from(src: ModeDesc1) -> DXGI_MODE_DESC1 {
+impl ModeDesc1 {
+    fn to_c_struct(&self) -> DXGI_MODE_DESC1 {
         DXGI_MODE_DESC1 {
-            Width: src.width,
-            Height: src.height,
-            RefreshRate: src.refresh_rate.into(),
-            Format: src.format as u32,
-            ScanlineOrdering: src.scanline_ordering as u32,
-            Scaling: src.scaling as u32,
-            Stereo: to_BOOL(src.stereo),
+            Width: self.width,
+            Height: self.height,
+            RefreshRate: self.refresh_rate.into(),
+            Format: self.format as u32,
+            ScanlineOrdering: self.scanline_ordering as u32,
+            Scaling: self.scaling as u32,
+            Stereo: to_BOOL(self.stereo),
         }
     }
 }
@@ -1497,14 +1498,6 @@ impl Default for SampleDesc {
         }
     }
 }
-impl From<SampleDesc> for DXGI_SAMPLE_DESC {
-    fn from(src: SampleDesc) -> DXGI_SAMPLE_DESC {
-        DXGI_SAMPLE_DESC {
-            Count: src.count,
-            Quality: src.quality,
-        }
-    }
-}
 impl From<DXGI_SAMPLE_DESC> for SampleDesc {
     fn from(src: DXGI_SAMPLE_DESC) -> SampleDesc {
         SampleDesc {
@@ -1546,13 +1539,13 @@ impl From<DXGI_SURFACE_DESC> for SurfaceDesc {
         }
     }
 }
-impl From<SurfaceDesc> for DXGI_SURFACE_DESC {
-    fn from(src: SurfaceDesc) -> DXGI_SURFACE_DESC {
+impl SurfaceDesc {
+    fn to_c_struct(&self) -> DXGI_SURFACE_DESC {
         DXGI_SURFACE_DESC {
-            Width: src.width,
-            Height: src.height,
-            Format: src.format as u32,
-            SampleDesc: src.sample_desc.into(),
+            Width: self.width,
+            Height: self.height,
+            Format: self.format as u32,
+            SampleDesc: self.sample_desc.to_c_struct(),
         }
     }
 }
@@ -1586,39 +1579,170 @@ impl From<DXGI_SWAP_CHAIN_DESC> for SwapChainDesc {
         }
     }
 }
-impl From<SwapChainDesc> for DXGI_SWAP_CHAIN_DESC {
-    fn from(src: SwapChainDesc) -> DXGI_SWAP_CHAIN_DESC {
+impl SwapChainDesc {
+    fn to_c_struct(&self) -> DXGI_SWAP_CHAIN_DESC {
         DXGI_SWAP_CHAIN_DESC {
-            BufferDesc: src.buffer_desc.into(),
-            SampleDesc: src.sample_desc.into(),
-            BufferUsage: src.buffer_usage.0,
-            BufferCount: src.buffer_count,
-            OutputWindow: src.output_window,
-            Windowed: to_BOOL(src.windowed),
-            SwapEffect: src.swap_effect as u32,
-            Flags: src.flags.map_or(0, |f| f.0),
+            BufferDesc: self.buffer_desc.to_c_struct(),
+            SampleDesc: self.sample_desc.to_c_struct(),
+            BufferUsage: self.buffer_usage.0,
+            BufferCount: self.buffer_count,
+            OutputWindow: self.output_window,
+            Windowed: to_BOOL(self.windowed),
+            SwapEffect: self.swap_effect as u32,
+            Flags: self.flags.map_or(0, |f| f.0),
         }
     }
 }
 
 #[cfg(feature = "dxgi1_2")]
 #[derive(Clone, Debug)]
-pub struct SwapChainDesc1 {
-    pub width: u32,
-    pub height: u32,
-    pub format: Format,
+pub struct SwapChainDesc1<W, H, F, BU, BC, SE> {
+    pub width: W,
+    pub height: H,
+    pub format: F,
     pub stereo: bool,
     pub sample_desc: SampleDesc,
-    pub buffer_usage: Usage,
-    pub buffer_count: u32,
+    pub buffer_usage: BU,
+    pub buffer_count: BC,
     pub scaling: Scaling,
-    pub swap_effect: SwapEffect,
+    pub swap_effect: SE,
     pub alpha_mode: AlphaMode,
     pub flags: Option<SwapChainFlag>,
 }
 #[cfg(feature = "dxgi1_2")]
-impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1 {
-    fn from(src: DXGI_SWAP_CHAIN_DESC1) -> SwapChainDesc1 {
+impl SwapChainDesc1<(), (), (), (), (), ()> {
+    pub fn new() -> Self {
+        Self {
+            width: (),
+            height: (),
+            format: (),
+            stereo: false,
+            sample_desc: Default::default(),
+            buffer_usage: (),
+            buffer_count: (),
+            scaling: Scaling::None,
+            swap_effect: (),
+            alpha_mode: AlphaMode::Unspecified,
+            flags: None,
+        }
+    }
+}
+#[cfg(feature = "dxgi1_2")]
+impl<W, H, F, BU, BC, SE> SwapChainDesc1<W, H, F, BU, BC, SE> {
+    pub fn width(self, width: u32) -> SwapChainDesc1<u32, H, F, BU, BC, SE> {
+        SwapChainDesc1 {
+            width,
+            height: self.height,
+            format: self.format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage: self.buffer_usage,
+            buffer_count: self.buffer_count,
+            scaling: self.scaling,
+            swap_effect: self.swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn height(self, height: u32) -> SwapChainDesc1<W, u32, F, BU, BC, SE> {
+        SwapChainDesc1 {
+            width: self.width,
+            height,
+            format: self.format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage: self.buffer_usage,
+            buffer_count: self.buffer_count,
+            scaling: self.scaling,
+            swap_effect: self.swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn format(self, format: Format) -> SwapChainDesc1<W, H, Format, BU, BC, SE> {
+        SwapChainDesc1 {
+            width: self.width,
+            height: self.height,
+            format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage: self.buffer_usage,
+            buffer_count: self.buffer_count,
+            scaling: self.scaling,
+            swap_effect: self.swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn stereo(mut self, stereo: bool) -> Self {
+        self.stereo = stereo;
+        self
+    }
+    pub fn sample_desc(mut self, desc: SampleDesc) -> Self {
+        self.sample_desc = desc;
+        self
+    }
+    pub fn buffer_usage(self, buffer_usage: Usage) -> SwapChainDesc1<W, H, F, Usage, BC, SE> {
+         SwapChainDesc1 {
+            width: self.width,
+            height: self.height,
+            format: self.format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage,
+            buffer_count: self.buffer_count,
+            scaling: self.scaling,
+            swap_effect: self.swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn buffer_count(self, buffer_count: u32) -> SwapChainDesc1<W, H, F, BU, u32, SE> {
+         SwapChainDesc1 {
+            width: self.width,
+            height: self.height,
+            format: self.format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage: self.buffer_usage,
+            buffer_count,
+            scaling: self.scaling,
+            swap_effect: self.swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn scaling(mut self, scaling: Scaling) -> Self {
+        self.scaling = scaling;
+        self
+    }
+    pub fn swap_effect(self, swap_effect: SwapEffect) -> SwapChainDesc1<W, H, F, BU, BC, SwapEffect> {
+         SwapChainDesc1 {
+            width: self.width,
+            height: self.height,
+            format: self.format,
+            stereo: self.stereo,
+            sample_desc: self.sample_desc,
+            buffer_usage: self.buffer_usage,
+            buffer_count: self.buffer_count,
+            scaling: self.scaling,
+            swap_effect,
+            alpha_mode: self.alpha_mode,
+            flags: self.flags,
+        }
+    }
+    pub fn alpha_mode(mut self, alpha_mode: AlphaMode) -> Self {
+        self.alpha_mode = alpha_mode;
+        self
+    }
+    pub fn flags(mut self, flags: SwapChainFlag) -> Self {
+        self.flags = Some(flags);
+        self
+    }
+}
+#[cfg(feature = "dxgi1_2")]
+impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect> {
+    fn from(src: DXGI_SWAP_CHAIN_DESC1) -> Self {
         SwapChainDesc1 {
             width: src.Width,
             height: src.Height,
@@ -1639,20 +1763,20 @@ impl From<DXGI_SWAP_CHAIN_DESC1> for SwapChainDesc1 {
     }
 }
 #[cfg(feature = "dxgi1_2")]
-impl From<SwapChainDesc1> for DXGI_SWAP_CHAIN_DESC1 {
-    fn from(src: SwapChainDesc1) -> DXGI_SWAP_CHAIN_DESC1 {
+impl SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect> {
+    fn to_c_struct(&self) -> DXGI_SWAP_CHAIN_DESC1 {
         DXGI_SWAP_CHAIN_DESC1 {
-            Width: src.width,
-            Height: src.height,
-            Format: src.format as u32,
-            Stereo: to_BOOL(src.stereo),
-            SampleDesc: src.sample_desc.into(),
-            BufferUsage: src.buffer_usage.0,
-            BufferCount: src.buffer_count,
-            Scaling: src.scaling as u32,
-            SwapEffect: src.swap_effect as u32,
-            AlphaMode: src.alpha_mode as u32,
-            Flags: src.flags.map_or(0, |f| f.0),
+            Width: self.width,
+            Height: self.height,
+            Format: self.format as u32,
+            Stereo: to_BOOL(self.stereo),
+            SampleDesc: self.sample_desc.to_c_struct(),
+            BufferUsage: self.buffer_usage.0,
+            BufferCount: self.buffer_count,
+            Scaling: self.scaling as u32,
+            SwapEffect: self.swap_effect as u32,
+            AlphaMode: self.alpha_mode as u32,
+            Flags: self.flags.map_or(0, |f| f.0),
         }
     }
 }
@@ -2081,7 +2205,7 @@ macro_rules! impl_device {
                     let mut obj = std::ptr::null_mut();
                     let res = unsafe {
                         self.0.CreateSurface(
-                            &desc.clone().into(),
+                            &desc.to_c_struct(),
                             num_surfaces,
                             usage.0,
                             &shared_resource.clone().into(),
@@ -2332,21 +2456,21 @@ pub trait IFactory2: IFactory1 {
     fn create_swap_chain_for_composition<T: Interface>(
         &self,
         device: &T,
-        desc: &SwapChainDesc1,
+        desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         restrict_to_output: Option<&Output>,
     ) -> Result<SwapChain1, HResult>;
     fn create_swap_chain_for_core_window<T: Interface, U: Interface>(
         &self,
         device: &T,
         window: &U,
-        desc: &SwapChainDesc1,
+        desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         restrict_to_output: Option<&Output>,
     ) -> Result<SwapChain1, HResult>;
     fn create_swap_chain_for_hwnd<T: Interface>(
         &self,
         device: &T,
         hwnd: HWND,
-        desc: &SwapChainDesc1,
+        desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         fullscreen_desc: Option<&SwapChainFullscreenDesc>,
         restrict_to_output: Option<&Output>,
     ) -> Result<SwapChain1, HResult>;
@@ -2397,7 +2521,7 @@ macro_rules! impl_factory {
             ) -> Result<SwapChain, HResult> {
                 Ok(SwapChain(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
-                    let mut desc = desc.clone().into();
+                    let mut desc = desc.to_c_struct();
                     let res = unsafe {
                         self.0
                             .CreateSwapChain(device.as_unknown(), &mut desc, &mut obj)
@@ -2462,12 +2586,12 @@ macro_rules! impl_factory {
             fn create_swap_chain_for_composition<T: Interface>(
                 &self,
                 device: &T,
-                desc: &SwapChainDesc1,
+                desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
                 restrict_to_output: Option<&Output>,
             ) -> Result<SwapChain1, HResult> {
                 Ok(SwapChain1(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
-                    let desc = desc.clone().into();
+                    let desc = desc.to_c_struct();
                     let res = unsafe {
                         self.0.CreateSwapChainForComposition(
                             device.as_unknown(),
@@ -2484,12 +2608,12 @@ macro_rules! impl_factory {
                 &self,
                 device: &T,
                 window: &U,
-                desc: &SwapChainDesc1,
+                desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
                 restrict_to_output: Option<&Output>,
             ) -> Result<SwapChain1, HResult> {
                 Ok(SwapChain1(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
-                    let desc = desc.clone().into();
+                    let desc = desc.to_c_struct();
                     let res = unsafe {
                         self.0.CreateSwapChainForCoreWindow(
                             device.as_unknown(),
@@ -2507,13 +2631,13 @@ macro_rules! impl_factory {
                 &self,
                 device: &T,
                 hwnd: HWND,
-                desc: &SwapChainDesc1,
+                desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
                 fullscreen_desc: Option<&SwapChainFullscreenDesc>,
                 restrict_to_output: Option<&Output>,
             ) -> Result<SwapChain1, HResult> {
                 Ok(SwapChain1(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
-                    let desc = desc.clone().into();
+                    let desc = desc.to_c_struct();
                     let fullscreen_desc = fullscreen_desc.map(|fd| fd.clone().into());
                     let res = unsafe {
                         self.0.CreateSwapChainForHwnd(
@@ -2713,7 +2837,7 @@ pub trait IFactoryMedia {
         &self,
         device: &T,
         surface: HANDLE,
-        desc: &SwapChainDesc1,
+        desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         restrict_to_output: Option<&Output>,
     ) -> Result<SwapChain1, HResult>;
 }
@@ -2752,12 +2876,12 @@ impl IFactoryMedia for FactoryMedia {
         &self,
         device: &T,
         surface: HANDLE,
-        desc: &SwapChainDesc1,
+        desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         restrict_to_output: Option<&Output>,
     ) -> Result<SwapChain1, HResult> {
         Ok(SwapChain1(ComPtr::new(|| {
             let mut obj = std::ptr::null_mut();
-            let mut desc = desc.clone().into();
+            let mut desc = desc.to_c_struct();
             let res = unsafe {
                 self.0.CreateSwapChainForCompositionSurfaceHandle(
                     device.as_unknown(),
@@ -3252,7 +3376,7 @@ macro_rules! impl_output {
                 let mut desc = Default::default();
                 let res = unsafe {
                     self.0.FindClosestMatchingMode(
-                        &mode_to_match.clone().into(),
+                        &mode_to_match.to_c_struct(),
                         &mut desc,
                         concerned_device.map_or(std::ptr::null_mut(), |p| p.as_unknown()),
                     )
@@ -3369,7 +3493,7 @@ macro_rules! impl_output {
                     concerned_device.map_or(std::ptr::null_mut(), |cd| cd.as_unknown());
                 let res = unsafe {
                     self.0.FindClosestMatchingMode1(
-                        &mode_to_match.clone().into(),
+                        &mode_to_match.to_c_struct(),
                         &mut desc,
                         concerned_device,
                     )
@@ -3883,7 +4007,7 @@ pub trait ISwapChain: Interface {
 pub trait ISwapChain1: ISwapChain {
     fn get_background_color(&self) -> Result<RGBA, HResult>;
     fn get_core_window<T: Interface>(&self) -> Result<T, HResult>;
-    fn get_desc1(&self) -> Result<SwapChainDesc1, HResult>;
+    fn get_desc1(&self) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult>;
     fn get_fullscreen_desc(&self) -> Result<SwapChainFullscreenDesc, HResult>;
     fn get_hwnd(&self) -> Result<HWND, HResult>;
     fn get_restrict_to_output(&self) -> Result<Output, HResult>;
@@ -4035,7 +4159,7 @@ macro_rules! impl_swapchain {
                     hresult(obj as *mut T::APIType, res)
                 })?))
             }
-            fn get_desc1(&self) -> Result<SwapChainDesc1, HResult> {
+            fn get_desc1(&self) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult> {
                 let mut desc = Default::default();
                 let res = unsafe { self.0.GetDesc1(&mut desc) };
                 hresult(desc.into(), res)

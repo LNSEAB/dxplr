@@ -1547,23 +1547,45 @@ impl ClearValue {
 }
 
 #[derive(Clone, Debug)]
-pub struct CommandQueueDesc {
-    pub ty: CommandListType,
+pub struct CommandQueueDesc<T> {
+    pub ty: T,
     pub priority: CommandQueuePriority,
     pub flags: Option<CommandQueueFlags>,
     pub node_mask: u32,
 }
-impl CommandQueueDesc {
-    pub fn new(ty: CommandListType) -> Self {
+impl CommandQueueDesc<()> {
+    pub fn new() -> Self {
         Self {
-            ty,
+            ty: (),
             priority: CommandQueuePriority::Normal,
             flags: None,
             node_mask: 0,
         }
     }
 }
-impl CommandQueueDesc {
+impl<T> CommandQueueDesc<T> {
+    pub fn list_type(self, ty: CommandListType) -> CommandQueueDesc<CommandListType> {
+        CommandQueueDesc {
+            ty,
+            priority: self.priority,
+            flags: self.flags,
+            node_mask: self.node_mask,
+        }
+    }
+    pub fn priority(mut self, priority: CommandQueuePriority) -> Self {
+        self.priority = priority;
+        self
+    }
+    pub fn flags(mut self, flags: CommandQueueFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
+    pub fn node_mask(mut self, node_mask: u32) -> Self {
+        self.node_mask = node_mask;
+        self
+    }
+}
+impl CommandQueueDesc<CommandListType> {
     fn to_c_struct(&self) -> D3D12_COMMAND_QUEUE_DESC {
         D3D12_COMMAND_QUEUE_DESC {
             Type: self.ty as u32,
@@ -1573,8 +1595,8 @@ impl CommandQueueDesc {
         }
     }
 }
-impl From<D3D12_COMMAND_QUEUE_DESC> for CommandQueueDesc {
-    fn from(src: D3D12_COMMAND_QUEUE_DESC) -> CommandQueueDesc {
+impl From<D3D12_COMMAND_QUEUE_DESC> for CommandQueueDesc<CommandListType> {
+    fn from(src: D3D12_COMMAND_QUEUE_DESC) -> CommandQueueDesc<CommandListType> {
         unsafe {
             CommandQueueDesc {
                 ty: std::mem::transmute(src.Type),
@@ -2018,6 +2040,9 @@ pub struct DescriptorRange {
     pub base_shader_register: u32,
     pub register_space: u32,
     pub offset_in_descriptors_from_table_start: u32,
+}
+impl DescriptorRange {
+    pub const OFFSET_APPEND: u32 = 0xffffffff;
 }
 impl From<D3D12_DESCRIPTOR_RANGE> for DescriptorRange {
     fn from(src: D3D12_DESCRIPTOR_RANGE) -> DescriptorRange {
@@ -3204,9 +3229,9 @@ pub struct LocalRootSignature {
     pub local_root_signature: RootSignature,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct MemcpyDest<'a> {
-    pub data: &'a [u8],
+    pub data: &'a mut [u8],
     pub row_pitch: usize,
     pub slice_pitch: usize,
 }
@@ -3790,7 +3815,7 @@ impl ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
             DepthOrArraySize: self.depth_or_array_size,
             MipLevels: self.mip_levels,
             Format: self.format as u32,
-            SampleDesc: self.sample_desc.clone().into(),
+            SampleDesc: self.sample_desc.to_c_struct(),
             Layout: self.layout as u32,
             Flags: self.flags.map_or(0, |f| f.0),
         }
@@ -3941,9 +3966,11 @@ pub struct SamplePosition {
     pub y: i8,
 }
 
+pub const MAX_MAXANISOTROPY: u32 = D3D12_MAX_MAXANISOTROPY;
+
 #[derive(Clone, Debug)]
-pub struct SamplerDesc {
-    pub filter: Filter,
+pub struct SamplerDesc<F> {
+    pub filter: F,
     pub address_u: TextureAddressMode,
     pub address_v: TextureAddressMode,
     pub address_w: TextureAddressMode,
@@ -3954,7 +3981,80 @@ pub struct SamplerDesc {
     pub min_lod: f32,
     pub max_lod: f32,
 }
-impl SamplerDesc {
+impl SamplerDesc<()> {
+    pub fn new() -> Self {
+        Self {
+            filter: (),
+            address_u: TextureAddressMode::Wrap,
+            address_v: TextureAddressMode::Wrap,
+            address_w: TextureAddressMode::Wrap,
+            mip_lod_bias: 0.0,
+            max_anisotropy: MAX_MAXANISOTROPY,
+            comparison_func: ComparisonFunc::Never,
+            border_color: dxgi::RGBA {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 0.0,
+            },
+            min_lod: 0.0,
+            max_lod: std::f32::MAX,
+        }
+    }
+}
+impl<F> SamplerDesc<F> {
+    pub fn filter(self, filter: Filter) -> SamplerDesc<Filter> {
+        SamplerDesc {
+            filter,
+            address_u: self.address_u,
+            address_v: self.address_v,
+            address_w: self.address_w,
+            mip_lod_bias: self.mip_lod_bias,
+            max_anisotropy: self.max_anisotropy,
+            comparison_func: self.comparison_func,
+            border_color: self.border_color,
+            min_lod: self.min_lod,
+            max_lod: self.max_lod,
+        }
+    }
+    pub fn address_u(mut self, address_u: TextureAddressMode) -> Self {
+        self.address_u = address_u;
+        self
+    }
+    pub fn address_v(mut self, address_v: TextureAddressMode) -> Self {
+        self.address_v = address_v;
+        self
+    }
+    pub fn address_w(mut self, address_w: TextureAddressMode) -> Self {
+        self.address_w = address_w;
+        self
+    }
+    pub fn mip_lod_bias(mut self, mip_lod_bias: f32) -> Self {
+        self.mip_lod_bias = mip_lod_bias;
+        self
+    }
+    pub fn max_anisotropy(mut self, max_anisotropy: u32) -> Self {
+        self.max_anisotropy = max_anisotropy;
+        self
+    }
+    pub fn comparison_func(mut self, comparison_func: ComparisonFunc) -> Self {
+        self.comparison_func = comparison_func;
+        self
+    }
+    pub fn border_color(mut self, border_color: dxgi::RGBA) -> Self {
+        self.border_color = border_color;
+        self
+    }
+    pub fn min_lod(mut self, min_lod: f32) -> Self {
+        self.min_lod = min_lod;
+        self
+    }
+    pub fn max_lod(mut self, max_lod: f32) -> Self {
+        self.max_lod = max_lod;
+        self
+    }
+}
+impl SamplerDesc<Filter> {
     fn to_c_struct(&self) -> D3D12_SAMPLER_DESC {
         D3D12_SAMPLER_DESC {
             Filter: self.filter as u32,
@@ -4011,7 +4111,7 @@ impl From<d3d::Blob> for ShaderBytecode {
 pub enum ShaderResourceViewDesc {
     Buffer {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         first_element: u64,
         num_elements: u32,
         structure_byte_stride: u32,
@@ -4019,14 +4119,14 @@ pub enum ShaderResourceViewDesc {
     },
     Texture1D {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         resource_min_lod_clamp: f32,
     },
     Texture1DArray {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         first_array_slice: u32,
@@ -4035,7 +4135,7 @@ pub enum ShaderResourceViewDesc {
     },
     Texture2D {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         plane_slice: u32,
@@ -4043,7 +4143,7 @@ pub enum ShaderResourceViewDesc {
     },
     Texture2DArray {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         first_array_slice: u32,
@@ -4053,31 +4153,31 @@ pub enum ShaderResourceViewDesc {
     },
     Texture2DMS {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
     },
     Texture2DMSArray {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         first_array_slice: u32,
         array_size: u32,
     },
     Texture3D {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         resource_min_lod_clamp: f32,
     },
     TextureCube {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         resource_min_lod_clamp: f32,
     },
     TextureCubeArray {
         format: dxgi::Format,
-        shader_4component_mapping: ShaderComponentMapping,
+        shader_4_component_mapping: ShaderComponentMapping,
         most_detailed_mip: u32,
         mip_levels: u32,
         first_2d_array_face: u32,
@@ -4096,7 +4196,7 @@ impl ShaderResourceViewDesc {
         match self {
             &ShaderResourceViewDesc::Buffer {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 first_element,
                 num_elements,
                 structure_byte_stride,
@@ -4104,7 +4204,7 @@ impl ShaderResourceViewDesc {
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Buffer_mut().FirstElement = first_element;
                 desc.u.Buffer_mut().NumElements = num_elements;
                 desc.u.Buffer_mut().StructureByteStride = structure_byte_stride;
@@ -4112,21 +4212,21 @@ impl ShaderResourceViewDesc {
             },
             &ShaderResourceViewDesc::Texture1D {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 resource_min_lod_clamp,
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture1D_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.Texture1D_mut().MipLevels = mip_levels;
                 desc.u.Texture1D_mut().ResourceMinLODClamp = resource_min_lod_clamp;
             },
             &ShaderResourceViewDesc::Texture1DArray {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 first_array_slice,
@@ -4135,7 +4235,7 @@ impl ShaderResourceViewDesc {
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture1DArray_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.Texture1DArray_mut().MipLevels = mip_levels;
                 desc.u.Texture1DArray_mut().FirstArraySlice = first_array_slice;
@@ -4144,7 +4244,7 @@ impl ShaderResourceViewDesc {
             },
             &ShaderResourceViewDesc::Texture2D {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 plane_slice,
@@ -4152,7 +4252,7 @@ impl ShaderResourceViewDesc {
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture2D_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.Texture2D_mut().MipLevels = mip_levels;
                 desc.u.Texture2D_mut().PlaneSlice = plane_slice;
@@ -4160,7 +4260,7 @@ impl ShaderResourceViewDesc {
             },
             &ShaderResourceViewDesc::Texture2DArray {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 first_array_slice,
@@ -4170,7 +4270,7 @@ impl ShaderResourceViewDesc {
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture2DArray_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.Texture2DArray_mut().MipLevels = mip_levels;
                 desc.u.Texture2DArray_mut().FirstArraySlice = first_array_slice;
@@ -4180,55 +4280,55 @@ impl ShaderResourceViewDesc {
             },
             &ShaderResourceViewDesc::Texture2DMS {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
             } => {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
             }
             &ShaderResourceViewDesc::Texture2DMSArray {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 first_array_slice,
                 array_size,
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture2DMSArray_mut().FirstArraySlice = first_array_slice;
                 desc.u.Texture2DMSArray_mut().ArraySize = array_size;
             },
             &ShaderResourceViewDesc::Texture3D {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 resource_min_lod_clamp,
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.Texture3D_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.Texture3D_mut().MipLevels = mip_levels;
                 desc.u.Texture3D_mut().ResourceMinLODClamp = resource_min_lod_clamp;
             },
             &ShaderResourceViewDesc::TextureCube {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 resource_min_lod_clamp,
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.TextureCube_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.TextureCube_mut().MipLevels = mip_levels;
                 desc.u.TextureCube_mut().ResourceMinLODClamp = resource_min_lod_clamp;
             },
             &ShaderResourceViewDesc::TextureCubeArray {
                 format,
-                shader_4component_mapping,
+                shader_4_component_mapping,
                 most_detailed_mip,
                 mip_levels,
                 first_2d_array_face,
@@ -4237,7 +4337,7 @@ impl ShaderResourceViewDesc {
             } => unsafe {
                 desc.Format = format as u32;
                 desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-                desc.Shader4ComponentMapping = shader_4component_mapping.0;
+                desc.Shader4ComponentMapping = shader_4_component_mapping.0;
                 desc.u.TextureCubeArray_mut().MostDetailedMip = most_detailed_mip;
                 desc.u.TextureCubeArray_mut().MipLevels = mip_levels;
                 desc.u.TextureCubeArray_mut().First2DArrayFace = first_2d_array_face;
@@ -4365,7 +4465,7 @@ impl<'a> StreamOutputDesc<'a> {
 
 // pub struct SubobjectToExportsAssociation;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct SubresourceData<'a> {
     pub data: &'a [u8],
     pub row_pitch: isize,
@@ -4719,21 +4819,6 @@ macro_rules! impl_command_list {
 pub struct CommandList(ComPtr<ID3D12CommandList>);
 impl_command_list!(CommandList, ID3D12CommandList, CommandList);
 
-#[derive(Clone, Debug)]
-pub struct CommandLists {
-    lists: Vec<CommandList>,
-    ptr_lists: Vec<*mut ID3D12CommandList>,
-}
-impl CommandLists {
-    pub fn new(lists: Vec<CommandList>) -> Self {
-        let ptr_lists = lists
-            .iter()
-            .map(|l| l.as_com_ptr().as_ptr() as *mut ID3D12CommandList)
-            .collect::<Vec<_>>();
-        Self { lists, ptr_lists }
-    }
-}
-
 pub trait ICommandQueue: IPageable {
     fn begin_event(&self, metadata: u32, data: *const c_void, size: u32);
     fn copy_tile_mappings(
@@ -4746,9 +4831,9 @@ pub trait ICommandQueue: IPageable {
         flags: Option<TileMappingFlags>,
     );
     fn end_event(&self);
-    fn execute_command_lists(&self, command_lists: &CommandLists);
+    fn execute_command_lists(&self, command_lists: &[CommandList]);
     fn get_clock_calibration(&self) -> Result<GetClockCalibrationResult, HResult>;
-    fn get_desc(&self) -> CommandQueueDesc;
+    fn get_desc(&self) -> CommandQueueDesc<CommandListType>;
     fn get_timestamp_frequency(&self) -> Result<u64, HResult>;
     fn set_marker(&self, metadata: u32, data: *const c_void, size: u32);
     fn signal(&self, fence: &Fence, value: u64) -> Result<(), HResult>;
@@ -4798,11 +4883,12 @@ impl ICommandQueue for CommandQueue {
             self.0.EndEvent();
         }
     }
-    fn execute_command_lists(&self, command_lists: &CommandLists) {
+    fn execute_command_lists(&self, command_lists: &[CommandList]) {
+        let ptrs = command_lists.iter().map(|l| l.as_ptr()).collect::<Vec<_>>();
         unsafe {
             self.0.ExecuteCommandLists(
-                command_lists.ptr_lists.len() as u32,
-                command_lists.ptr_lists.as_ptr(),
+                ptrs.len() as u32,
+                ptrs.as_ptr(),
             );
         }
     }
@@ -4814,7 +4900,7 @@ impl ICommandQueue for CommandQueue {
         };
         hresult(values, res)
     }
-    fn get_desc(&self) -> CommandQueueDesc {
+    fn get_desc(&self) -> CommandQueueDesc<CommandListType> {
         unsafe { self.0.GetDesc().into() }
     }
     fn get_timestamp_frequency(&self) -> Result<u64, HResult> {
@@ -4948,7 +5034,7 @@ pub trait IDevice: IObject {
         command_allocator: &CommandAllocator,
         initial_state: Option<&PipelineState>,
     ) -> Result<T, HResult>;
-    fn create_command_queue<T: ICommandQueue>(&self, desc: CommandQueueDesc) -> Result<T, HResult>;
+    fn create_command_queue<T: ICommandQueue>(&self, desc: CommandQueueDesc<CommandListType>) -> Result<T, HResult>;
     fn create_command_signature<T: ICommandSignature>(
         &self,
         desc: CommandSignatureDesc,
@@ -5017,7 +5103,7 @@ pub trait IDevice: IObject {
         node_mask: u32,
         data: &[u8],
     ) -> Result<T, HResult>;
-    fn create_sampler(&self, desc: SamplerDesc, dest_descriptor: CPUDescriptorHandle);
+    fn create_sampler(&self, desc: SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle);
     fn create_shader_resource_view(
         &self,
         resource: &Resource,
@@ -5042,7 +5128,7 @@ pub trait IDevice: IObject {
     fn get_adapter_luid(&self) -> Luid;
     fn get_copyable_footprints(
         &self,
-        resource: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        resource: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         first_subresource: u32,
         num_subresources: u32,
         base_offset: u64,
@@ -5179,7 +5265,7 @@ macro_rules! impl_device {
             }
             fn create_command_queue<T: ICommandQueue>(
                 &self,
-                desc: CommandQueueDesc,
+                desc: CommandQueueDesc<CommandListType>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -5436,7 +5522,7 @@ macro_rules! impl_device {
                     hresult(obj as *mut <T as Interface>::APIType, res)
                 })?))
             }
-            fn create_sampler(&self, desc: SamplerDesc, dest_descriptor: CPUDescriptorHandle) {
+            fn create_sampler(&self, desc: SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle) {
                 unsafe {
                     self.0.CreateSampler(
                         &desc.to_c_struct(),
@@ -5514,7 +5600,7 @@ macro_rules! impl_device {
             }
             fn get_copyable_footprints(
                 &self,
-                resource: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                resource: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 first_subresource: u32,
                 num_subresources: u32,
                 base_offset: u64,

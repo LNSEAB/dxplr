@@ -145,6 +145,7 @@ pub trait IBlob: Interface {
     fn as_slice(&self) -> &[u8];
     fn as_mut_slice(&mut self) -> &mut [u8];
     fn to_vec(&self) -> Vec<u8>;
+    fn as_cstr(&self) -> Result<&std::ffi::CStr, std::ffi::FromBytesWithNulError>;
 }
 #[derive(Clone, Debug)]
 pub struct Blob(pub(crate) ComPtr<ID3DBlob>);
@@ -177,6 +178,9 @@ impl IBlob for Blob {
     }
     fn to_vec(&self) -> Vec<u8> {
         self.as_slice().to_vec()
+    }
+    fn as_cstr(&self) -> Result<&std::ffi::CStr, std::ffi::FromBytesWithNulError> {
+        std::ffi::CStr::from_bytes_with_nul(self.as_slice())
     }
 }
 
