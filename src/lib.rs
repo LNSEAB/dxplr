@@ -7,6 +7,9 @@ pub mod result;
 mod utility;
 pub mod d3dcompiler;
 
+pub use result::HResult;
+pub use api::{Point, Rect, Guid, Luid};
+
 pub trait Interface {
     type APIType: winapi::Interface;
     fn new(p: com_ptr::ComPtr<Self::APIType>) -> Self;
