@@ -4850,6 +4850,7 @@ pub trait ICommandQueue: IPageable {
     );
     fn wait(&self, fence: &Fence, value: u64) -> Result<(), HResult>;
 }
+#[derive(Clone, Debug)]
 pub struct CommandQueue(ComPtr<ID3D12CommandQueue>);
 impl_pageable!(CommandQueue, ID3D12CommandQueue);
 impl ICommandQueue for CommandQueue {
