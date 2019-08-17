@@ -4046,7 +4046,7 @@ pub trait ISwapChain3: ISwapChain2 {
         height: u32,
         format: Format,
         flags: Option<SwapChainFlag>,
-        node_mask: &[u32],
+        node_mask: Option<&[u32]>,
         present_queue: &[T],
     ) -> Result<(), HResult>;
     fn set_color_space1(&self, color_space: ColorSpaceType) -> Result<(), HResult>;
@@ -4299,7 +4299,7 @@ macro_rules! impl_swapchain {
                 height: u32,
                 format: Format,
                 flags: Option<SwapChainFlag>,
-                node_mask: &[u32],
+                node_mask: Option<&[u32]>,
                 present_queue: &[T],
             ) -> Result<(), HResult> {
                 let mut queue = present_queue
@@ -4313,7 +4313,7 @@ macro_rules! impl_swapchain {
                         height,
                         format as u32,
                         flags.map_or(0, |f| f.0),
-                        node_mask.as_ptr(),
+                        node_mask.map_or(std::ptr::null(), |nm| nm.as_ptr()),
                         queue.as_mut_ptr(),
                     )
                 };
