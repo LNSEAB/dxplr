@@ -5043,30 +5043,30 @@ pub trait IDevice: IObject {
     ) -> Result<T, HResult>;
     fn create_committed_resource<T: IResource>(
         &self,
-        heap_properties: HeapProperties<HeapType>,
+        heap_properties: &HeapProperties<HeapType>,
         heap_flags: Option<HeapFlags>,
-        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_resource_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
     fn create_compute_pipeline_state<T: IPipelineState>(
         &self,
-        desc: ComputePipelineStateDesc,
+        desc: &ComputePipelineStateDesc,
     ) -> Result<T, HResult>;
     fn create_constant_buffer_view(
         &self,
-        desc: ConstantBufferViewDesc,
+        desc: &ConstantBufferViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn create_depth_stencil_view(
         &self,
         resource: &Resource,
-        desc: DepthStencilViewDesc,
+        desc: &DepthStencilViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn create_descriptor_heap<T: IDescriptorHeap>(
         &self,
-        desc: DescriptorHeapDesc<DescriptorHeapType, u32>,
+        desc: &DescriptorHeapDesc<DescriptorHeapType, u32>,
     ) -> Result<T, HResult>;
     fn create_fence<T: IFence>(
         &self,
@@ -5082,7 +5082,7 @@ pub trait IDevice: IObject {
         &self,
         heap: &Heap,
         heap_offset: u64,
-        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -5090,12 +5090,12 @@ pub trait IDevice: IObject {
     fn create_render_target_view(
         &self,
         resource: &Resource,
-        desc: RenderTargetViewDesc,
+        desc: &RenderTargetViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn create_reserved_resource<T: IResource>(
         &self,
-        desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -5104,11 +5104,11 @@ pub trait IDevice: IObject {
         node_mask: u32,
         data: &[u8],
     ) -> Result<T, HResult>;
-    fn create_sampler(&self, desc: SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle);
+    fn create_sampler(&self, desc: &SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle);
     fn create_shader_resource_view(
         &self,
         resource: &Resource,
-        desc: ShaderResourceViewDesc,
+        desc: &ShaderResourceViewDesc,
         dest_dsecriptor: CPUDescriptorHandle,
     );
     fn create_shared_handle<T: Interface>(
@@ -5122,7 +5122,7 @@ pub trait IDevice: IObject {
         &self,
         resource: &Resource,
         counter_resource: Option<&Resource>,
-        desc: UnorderedAccessViewDesc,
+        desc: &UnorderedAccessViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn evict(&self, objects: &[&impl IPageable]) -> Result<(), HResult>;
@@ -5144,7 +5144,7 @@ pub trait IDevice: IObject {
     fn get_resource_allocation_info(
         &self,
         visible_mask: u32,
-        descs: &[ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
+        descs: &[&ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
     ) -> ResourceAllocationInfo;
     /*
     fn get_resource_tiling(
@@ -5176,7 +5176,7 @@ pub trait IDevice1: IDevice {
 pub trait IDevice2: IDevice1 {
     fn create_pipeline_state<T: Interface>(
         &self,
-        desc: PipelineStateStreamDesc,
+        desc: &PipelineStateStreamDesc,
     ) -> Result<T, HResult>;
 }
 macro_rules! impl_device {
@@ -5311,9 +5311,9 @@ macro_rules! impl_device {
             }
             fn create_committed_resource<T: IResource>(
                 &self,
-                heap_properties: HeapProperties<HeapType>,
+                heap_properties: &HeapProperties<HeapType>,
                 heap_flags: Option<HeapFlags>,
-                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_resource_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -5336,7 +5336,7 @@ macro_rules! impl_device {
             }
             fn create_compute_pipeline_state<T: IPipelineState>(
                 &self,
-                desc: ComputePipelineStateDesc,
+                desc: &ComputePipelineStateDesc,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -5352,7 +5352,7 @@ macro_rules! impl_device {
             }
             fn create_constant_buffer_view(
                 &self,
-                desc: ConstantBufferViewDesc,
+                desc: &ConstantBufferViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 unsafe {
@@ -5363,7 +5363,7 @@ macro_rules! impl_device {
             fn create_depth_stencil_view(
                 &self,
                 resource: &Resource,
-                desc: DepthStencilViewDesc,
+                desc: &DepthStencilViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 unsafe {
@@ -5376,7 +5376,7 @@ macro_rules! impl_device {
             }
             fn create_descriptor_heap<T: IDescriptorHeap>(
                 &self,
-                desc: DescriptorHeapDesc<DescriptorHeapType, u32>,
+                desc: &DescriptorHeapDesc<DescriptorHeapType, u32>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -5436,7 +5436,7 @@ macro_rules! impl_device {
                 &self,
                 heap: &Heap,
                 heap_offset: u64,
-                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -5470,7 +5470,7 @@ macro_rules! impl_device {
             fn create_render_target_view(
                 &self,
                 resource: &Resource,
-                desc: RenderTargetViewDesc,
+                desc: &RenderTargetViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 unsafe {
@@ -5485,7 +5485,7 @@ macro_rules! impl_device {
             }
             fn create_reserved_resource<T: IResource>(
                 &self,
-                desc: ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -5523,7 +5523,7 @@ macro_rules! impl_device {
                     hresult(obj as *mut <T as Interface>::APIType, res)
                 })?))
             }
-            fn create_sampler(&self, desc: SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle) {
+            fn create_sampler(&self, desc: &SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle) {
                 unsafe {
                     self.0.CreateSampler(
                         &desc.to_c_struct(),
@@ -5536,7 +5536,7 @@ macro_rules! impl_device {
             fn create_shader_resource_view(
                 &self,
                 resource: &Resource,
-                desc: ShaderResourceViewDesc,
+                desc: &ShaderResourceViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 unsafe {
@@ -5573,7 +5573,7 @@ macro_rules! impl_device {
                 &self,
                 resource: &Resource,
                 counter_resource: Option<&Resource>,
-                desc: UnorderedAccessViewDesc,
+                desc: &UnorderedAccessViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 unsafe {
@@ -5678,7 +5678,7 @@ macro_rules! impl_device {
             fn get_resource_allocation_info(
                 &self,
                 visible_mask: u32,
-                descs: &[ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
+                descs: &[&ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
             ) -> ResourceAllocationInfo {
                 unsafe {
                     let c_descs = descs.iter().map(|d| d.to_c_struct()).collect::<Vec<_>>();
@@ -5811,7 +5811,7 @@ macro_rules! impl_device {
         impl IDevice2 for $s {
             fn create_pipeline_state<T: Interface>(
                 &self,
-                desc: PipelineStateStreamDesc,
+                desc: &PipelineStateStreamDesc,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();

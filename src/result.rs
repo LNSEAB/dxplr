@@ -60,7 +60,7 @@ impl HResult {
     }
 }
 impl Fail for HResult {
-    fn cause(&self) -> Option<&Fail> {
+    fn cause(&self) -> Option<&dyn Fail> {
         self.inner.cause()
     }
     fn backtrace(&self) -> Option<&Backtrace> {
