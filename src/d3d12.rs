@@ -3972,7 +3972,7 @@ pub enum RootParameter1 {
 #[derive(Clone, Debug)]
 pub struct RootSignatureDesc {
     pub parameters: Option<Vec<RootParameter>>,
-    pub static_samplers: Option<Vec<StaticSamplerDesc>>,
+    pub static_samplers: Option<Vec<StaticSamplerDesc<Filter, u32, u32, ShaderVisibility>>>,
     pub flags: Option<RootSignatureFlags>,
 }
 impl RootSignatureDesc {
@@ -3981,12 +3981,15 @@ impl RootSignatureDesc {
             .parameters.as_ref().map(
                 |params| params.iter().map(|param| param.to_c_struct()).collect::<Vec<_>>()
             );
+        let static_samplers = self.static_samplers.as_ref().map(
+            |sss| sss.iter().map(|ss| ss.to_c_struct()).collect::<Vec<_>>()
+        );
         (
             D3D12_ROOT_SIGNATURE_DESC {
                 NumParameters: parameters.as_ref().map_or(0, |params| params.len() as u32),
                 pParameters: parameters.as_ref().map_or(std::ptr::null(), |params| params.as_ptr()),
-                NumStaticSamplers: self.static_samplers.as_ref().map_or(0, |ss| ss.len() as u32),
-                pStaticSamplers: self.static_samplers.as_ref().map_or(std::ptr::null(), |ss| ss.as_ptr() as *const D3D12_STATIC_SAMPLER_DESC),
+                NumStaticSamplers: static_samplers.as_ref().map_or(0, |ss| ss.len() as u32),
+                pStaticSamplers: static_samplers.as_ref().map_or(std::ptr::null(), |ss| ss.as_ptr()),
                 Flags: self.flags.map_or(0, |f| f.0),
             },
             parameters.unwrap_or(Vec::new()),
@@ -3997,7 +4000,7 @@ impl RootSignatureDesc {
 #[derive(Clone, Debug)]
 pub struct RootSignatureDesc1 {
     pub parameters: Vec<RootParameter1>,
-    pub static_samplers: Vec<StaticSamplerDesc>,
+    pub static_samplers: Vec<StaticSamplerDesc<Filter, u32, u32, ShaderVisibility>>,
     pub flags: Option<RootSignatureFlags>,
 }
 
@@ -4424,9 +4427,8 @@ impl<'a> SODeclarationEntry<'a> {
 // pub struct StateSubobject;
 
 #[derive(Clone, Debug)]
-#[repr(C)]
-pub struct StaticSamplerDesc {
-    pub filter: Filter,
+pub struct StaticSamplerDesc<F, Sr, Rs, Sv> {
+    pub filter: F,
     pub address_u: TextureAddressMode,
     pub address_v: TextureAddressMode,
     pub address_w: TextureAddressMode,
@@ -4436,12 +4438,156 @@ pub struct StaticSamplerDesc {
     pub border_color: StaticBorderColor,
     pub min_lod: f32,
     pub max_lod: f32,
-    pub shader_register: u32,
-    pub register_space: u32,
-    pub shader_visibility: ShaderVisibility,
+    pub shader_register: Sr,
+    pub register_space: Rs,
+    pub shader_visibility: Sv,
 }
-impl From<D3D12_STATIC_SAMPLER_DESC> for StaticSamplerDesc {
-    fn from(src: D3D12_STATIC_SAMPLER_DESC) -> StaticSamplerDesc {
+impl StaticSamplerDesc<(), (), (), ()> {
+    pub fn new() -> Self {
+        Self {
+            filter: (),
+            address_u: TextureAddressMode::Wrap,
+            address_v: TextureAddressMode::Wrap,
+            address_w: TextureAddressMode::Wrap,
+            mip_lod_bias: 0.0,
+            max_anisotropy: MAX_MAXANISOTROPY,
+            comparison_func: ComparisonFunc::Never,
+            border_color: StaticBorderColor::OpaqueBlack,
+            min_lod: 0.0,
+            max_lod: std::f32::MAX,
+            shader_register: (),
+            register_space: (),
+            shader_visibility: (),
+        }
+    }
+}
+impl<F, Sr, Rs, Sv> StaticSamplerDesc<F, Sr, Rs, Sv> {
+    pub fn filter(self, filter: Filter) -> StaticSamplerDesc<Filter, Sr, Rs, Sv> {
+        StaticSamplerDesc {
+            filter,
+            address_u: self.address_u,
+            address_v: self.address_v,
+            address_w: self.address_w,
+            mip_lod_bias: self.mip_lod_bias,
+            max_anisotropy: self.max_anisotropy,
+            comparison_func: self.comparison_func,
+            border_color: self.border_color,
+            min_lod: self.min_lod,
+            max_lod: self.max_lod,
+            shader_register: self.shader_register,
+            register_space: self.register_space,
+            shader_visibility: self.shader_visibility,
+        }
+    }
+    pub fn address_u(mut self, address_u: TextureAddressMode) -> Self {
+        self.address_u = address_u;
+        self
+    }
+    pub fn address_v(mut self, address_v: TextureAddressMode) -> Self {
+        self.address_v = address_v;
+        self
+    }
+    pub fn address_w(mut self, address_w: TextureAddressMode) -> Self {
+        self.address_w = address_w;
+        self
+    }
+    pub fn mip_lod_bias(mut self, bias: f32) -> Self {
+        self.mip_lod_bias = bias;
+        self
+    }
+    pub fn max_anisotropy(mut self, max_anisotropy: u32) -> Self {
+        self.max_anisotropy = max_anisotropy;
+        self
+    }
+    pub fn comparison_func(mut self, func: ComparisonFunc) -> Self {
+        self.comparison_func = func;
+        self
+    }
+    pub fn border_color(mut self, border_color: StaticBorderColor) -> Self {
+        self.border_color = border_color;
+        self
+    }
+    pub fn min_lod(mut self, min_lod: f32) -> Self {
+        self.min_lod = min_lod;
+        self
+    }
+    pub fn max_lod(mut self, max_lod: f32) -> Self {
+        self.max_lod = max_lod;
+        self
+    }
+    pub fn shader_register(self, shader_register: u32) -> StaticSamplerDesc<F, u32, Rs, Sv> {
+        StaticSamplerDesc {
+            filter: self.filter,
+            address_u: self.address_u,
+            address_v: self.address_v,
+            address_w: self.address_w,
+            mip_lod_bias: self.mip_lod_bias,
+            max_anisotropy: self.max_anisotropy,
+            comparison_func: self.comparison_func,
+            border_color: self.border_color,
+            min_lod: self.min_lod,
+            max_lod: self.max_lod,
+            shader_register,
+            register_space: self.register_space,
+            shader_visibility: self.shader_visibility,
+        }
+    }
+    pub fn register_space(self, register_space: u32) -> StaticSamplerDesc<F, Sr, u32, Sv> {
+        StaticSamplerDesc {
+            filter: self.filter,
+            address_u: self.address_u,
+            address_v: self.address_v,
+            address_w: self.address_w,
+            mip_lod_bias: self.mip_lod_bias,
+            max_anisotropy: self.max_anisotropy,
+            comparison_func: self.comparison_func,
+            border_color: self.border_color,
+            min_lod: self.min_lod,
+            max_lod: self.max_lod,
+            shader_register: self.shader_register,
+            register_space,
+            shader_visibility: self.shader_visibility,
+        }
+    }
+    pub fn shader_visibility(self, shader_visibility: ShaderVisibility) -> StaticSamplerDesc<F, Sr, Rs, ShaderVisibility> {
+        StaticSamplerDesc {
+            filter: self.filter,
+            address_u: self.address_u,
+            address_v: self.address_v,
+            address_w: self.address_w,
+            mip_lod_bias: self.mip_lod_bias,
+            max_anisotropy: self.max_anisotropy,
+            comparison_func: self.comparison_func,
+            border_color: self.border_color,
+            min_lod: self.min_lod,
+            max_lod: self.max_lod,
+            shader_register: self.shader_register,
+            register_space: self.register_space,
+            shader_visibility,
+        }
+    }
+}
+impl StaticSamplerDesc<Filter, u32, u32, ShaderVisibility> {
+    fn to_c_struct(&self) -> D3D12_STATIC_SAMPLER_DESC {
+        D3D12_STATIC_SAMPLER_DESC {
+            Filter: self.filter as u32,
+            AddressU: self.address_u as u32,
+            AddressV: self.address_v as u32,
+            AddressW: self.address_w as u32,
+            MipLODBias: self.mip_lod_bias,
+            MaxAnisotropy: self.max_anisotropy,
+            ComparisonFunc: self.comparison_func as u32,
+            BorderColor: self.border_color as u32,
+            MinLOD: self.min_lod,
+            MaxLOD: self.max_lod,
+            ShaderRegister: self.shader_register,
+            RegisterSpace: self.register_space,
+            ShaderVisibility: self.shader_visibility as u32,
+        }
+    }
+}
+impl From<D3D12_STATIC_SAMPLER_DESC> for StaticSamplerDesc<Filter, u32, u32, ShaderVisibility> {
+    fn from(src: D3D12_STATIC_SAMPLER_DESC) -> StaticSamplerDesc<Filter, u32, u32, ShaderVisibility> {
         unsafe {
             StaticSamplerDesc {
                 filter: std::mem::transmute(src.Filter),
@@ -6825,6 +6971,12 @@ impl<'a, T: IResource> MappedResourceData<'a, T> {
     pub fn as_mut_slice(&mut self) -> &mut [u8] {
         self.data
     }
+    pub fn as_ptr(&self) -> *const u8 {
+        self.data.as_ptr()
+    }
+    pub fn as_mut_ptr(&mut self) -> *mut u8 {
+        self.data.as_mut_ptr()
+    }
     // pub fn read_from_subresource();
     // pub fn write_from_subresource();
 }
@@ -7004,7 +7156,7 @@ pub fn create_device<T: IDevice>(
 }
 
 pub fn serialize_root_signature(
-    desc: RootSignatureDesc,
+    desc: &RootSignatureDesc,
     version: d3d::RootSignatureVersion,
 ) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
     let mut obj = std::ptr::null_mut();
