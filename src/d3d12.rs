@@ -1663,6 +1663,28 @@ impl From<CPUDescriptorHandle> for D3D12_CPU_DESCRIPTOR_HANDLE {
         D3D12_CPU_DESCRIPTOR_HANDLE { ptr: src.ptr }
     }
 }
+impl std::ops::Add<usize> for CPUDescriptorHandle {
+    type Output = Self;
+    fn add(self, rhs: usize) -> Self {
+        Self { ptr: self.ptr + rhs }
+    }
+}
+impl std::ops::Sub<usize> for CPUDescriptorHandle {
+    type Output = Self;
+    fn sub(self, rhs: usize) -> Self {
+        Self { ptr: self.ptr - rhs }
+    }
+}
+impl std::ops::AddAssign<usize> for CPUDescriptorHandle {
+    fn add_assign(&mut self, rhs: usize) {
+        self.ptr += rhs;
+    }
+}
+impl std::ops::SubAssign<usize> for CPUDescriptorHandle {
+    fn sub_assign(&mut self, rhs: usize) {
+        self.ptr -= rhs;
+    }
+}
 
 pub const DEFAULT_STENCIL_READ_MASK: u8 = 0xff;
 pub const DEFAULT_STENCIL_WRITE_MASK: u8 = 0xff;
@@ -2708,6 +2730,28 @@ pub struct GPUDescriptorHandle {
 impl From<GPUDescriptorHandle> for D3D12_GPU_DESCRIPTOR_HANDLE {
     fn from(src: GPUDescriptorHandle) -> D3D12_GPU_DESCRIPTOR_HANDLE {
         D3D12_GPU_DESCRIPTOR_HANDLE { ptr: src.ptr }
+    }
+}
+impl std::ops::Add<u64> for GPUDescriptorHandle {
+    type Output = Self;
+    fn add(self, rhs: u64) -> Self {
+        Self { ptr: self.ptr + rhs }
+    }
+}
+impl std::ops::Sub<u64> for GPUDescriptorHandle {
+    type Output = Self;
+    fn sub(self, rhs: u64) -> Self {
+        Self { ptr: self.ptr - rhs }
+    }
+}
+impl std::ops::AddAssign<u64> for GPUDescriptorHandle {
+    fn add_assign(&mut self, rhs: u64) {
+        self.ptr += rhs;
+    }
+}
+impl std::ops::SubAssign<u64> for GPUDescriptorHandle {
+    fn sub_assign(&mut self, rhs: u64) {
+        self.ptr -= rhs;
     }
 }
 
