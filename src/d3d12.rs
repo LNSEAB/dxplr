@@ -3286,12 +3286,22 @@ pub struct MemcpyDest<'a> {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct NodeMask(pub u32);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct PackedMipInfo {
     pub num_standard_mips: u8,
     pub num_packed_mips: u8,
     pub num_tiles_for_packed_mips: u32,
     pub start_tile_index_in_overall_resource: u32,
+}
+impl From<D3D12_PACKED_MIP_INFO> for PackedMipInfo {
+    fn from(src: D3D12_PACKED_MIP_INFO) -> PackedMipInfo {
+        PackedMipInfo {
+            num_standard_mips: src.NumStandardMips,
+            num_packed_mips: src.NumPackedMips,
+            num_tiles_for_packed_mips: src.NumTilesForPackedMips,
+            start_tile_index_in_overall_resource: src.StartTileIndexInOverallResource,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -4695,12 +4705,22 @@ pub struct SubresourceRangeUint64 {
     pub range: RangeUint64,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct SubresourceTiling {
-    pub width_intiles: u32,
+    pub width_in_tiles: u32,
     pub height_in_tiles: u16,
     pub depth_in_tiles: u16,
     pub start_tile_index_in_overall_resource: u32,
+}
+impl From<D3D12_SUBRESOURCE_TILING> for SubresourceTiling {
+    fn from(src: D3D12_SUBRESOURCE_TILING) -> SubresourceTiling {
+        SubresourceTiling {
+            width_in_tiles: src.WidthInTiles,
+            height_in_tiles: src.HeightInTiles,
+            depth_in_tiles: src.DepthInTiles,
+            start_tile_index_in_overall_resource: src.StartTileIndexInOverallResource,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -4747,23 +4767,32 @@ pub struct TileRegionSize {
     pub height: u16,
     pub depth: u16,
 }
-impl From<TileRegionSize> for D3D12_TILE_REGION_SIZE {
-    fn from(src: TileRegionSize) -> D3D12_TILE_REGION_SIZE {
+impl TileRegionSize {
+    fn to_c_struct(&self) -> D3D12_TILE_REGION_SIZE {
         D3D12_TILE_REGION_SIZE {
-            NumTiles: src.num_tiles,
-            UseBox: to_BOOL(src.use_box),
-            Width: src.width,
-            Height: src.height,
-            Depth: src.depth,
+            NumTiles: self.num_tiles,
+            UseBox: to_BOOL(self.use_box),
+            Width: self.width,
+            Height: self.height,
+            Depth: self.depth,
         }
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct TileShape {
     pub width_in_texels: u32,
     pub height_in_texels: u32,
     pub depth_in_texels: u32,
+}
+impl From<D3D12_TILE_SHAPE> for TileShape {
+    fn from(src: D3D12_TILE_SHAPE) -> TileShape {
+        TileShape {
+            width_in_texels: src.WidthInTexels,
+            height_in_texels: src.HeightInTexels,
+            depth_in_texels: src.DepthInTexels,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -4774,13 +4803,13 @@ pub struct TiledResourceCoordinate {
     pub z: u32,
     pub subresource: u32,
 }
-impl From<TiledResourceCoordinate> for D3D12_TILED_RESOURCE_COORDINATE {
-    fn from(src: TiledResourceCoordinate) -> D3D12_TILED_RESOURCE_COORDINATE {
+impl TiledResourceCoordinate {
+    fn to_c_struct(&self) -> D3D12_TILED_RESOURCE_COORDINATE {
         D3D12_TILED_RESOURCE_COORDINATE {
-            X: src.x,
-            Y: src.y,
-            Z: src.z,
-            Subresource: src.subresource,
+            X: self.x,
+            Y: self.y,
+            Z: self.z,
+            Subresource: self.subresource,
         }
     }
 }
@@ -5061,10 +5090,10 @@ impl ICommandQueue for CommandQueue {
         unsafe {
             self.0.CopyTileMappings(
                 dst_resource.0.as_ptr(),
-                &dst_region_start_coordinate.clone().into(),
+                &dst_region_start_coordinate.clone().to_c_struct(),
                 src_resource.0.as_ptr(),
-                &src_region_start_coordinate.clone().into(),
-                &region_size.into(),
+                &src_region_start_coordinate.clone().to_c_struct(),
+                &region_size.to_c_struct(),
                 flags.map_or(0, |f| f.0),
             );
         }
@@ -5124,7 +5153,7 @@ impl ICommandQueue for CommandQueue {
         );
         assert!(range_flags.len() == range_tile_counts.map_or(0, |rtcs| rtcs.len()));
         let rrscs = resource_region_start_coordinates.map_or(Vec::new(), |v| {
-            v.iter().map(|rsc| rsc.clone().into()).collect::<Vec<_>>()
+            v.iter().map(|rsc| rsc.clone().to_c_struct()).collect::<Vec<_>>()
         });
         unsafe {
             self.0.UpdateTileMappings(
@@ -5192,7 +5221,8 @@ pub struct GetCopyableFootprintsResult {
 
 #[derive(Clone, Debug)]
 pub struct GetResourceTilingResult {
-    pub packed_mip_desc: Vec<PackedMipInfo>,
+    pub num_tiles_for_entire_resource: u32,
+    pub packed_mip_desc: PackedMipInfo,
     pub standard_tile_shape_for_non_packed_mips: TileShape,
     pub subresource_tilings_for_non_packed_mips: Vec<SubresourceTiling>,
 }
@@ -5225,10 +5255,10 @@ pub trait IDevice: IObject {
         command_allocator: &CommandAllocator,
         initial_state: Option<&PipelineState>,
     ) -> Result<T, HResult>;
-    fn create_command_queue<T: ICommandQueue>(&self, desc: CommandQueueDesc<CommandListType>) -> Result<T, HResult>;
+    fn create_command_queue<T: ICommandQueue>(&self, desc: &CommandQueueDesc<CommandListType>) -> Result<T, HResult>;
     fn create_command_signature<T: ICommandSignature>(
         &self,
-        desc: CommandSignatureDesc,
+        desc: &CommandSignatureDesc,
         root_signature: &RootSignature,
     ) -> Result<T, HResult>;
     fn create_committed_resource<T: IResource>(
@@ -5336,13 +5366,12 @@ pub trait IDevice: IObject {
         visible_mask: u32,
         descs: &[&ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
     ) -> ResourceAllocationInfo;
-    /*
     fn get_resource_tiling(
         &self,
-        tiled_resource: &Resource,
+        resource: &Resource,
+        num_subresource_tiling: u32,
         first_subresource_tiling_to_get: u32,
     ) -> GetResourceTilingResult;
-    */
     fn make_resident(&self, objects: &[&impl IPageable]) -> Result<(), HResult>;
     fn open_shared_handle<T: Interface>(&self, nt_handle: HANDLE) -> Result<T, HResult>;
     fn open_shared_handle_by_name(&self, name: &str, access: u32) -> Result<HANDLE, HResult>;
@@ -5456,7 +5485,7 @@ macro_rules! impl_device {
             }
             fn create_command_queue<T: ICommandQueue>(
                 &self,
-                desc: CommandQueueDesc<CommandListType>,
+                desc: &CommandQueueDesc<CommandListType>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -5472,7 +5501,7 @@ macro_rules! impl_device {
             }
             fn create_command_signature<T: ICommandSignature>(
                 &self,
-                desc: CommandSignatureDesc,
+                desc: &CommandSignatureDesc,
                 root_signature: &RootSignature,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
@@ -5883,10 +5912,36 @@ macro_rules! impl_device {
                     }
                 }
             }
-            /*
-            fn get_resource_tiling(&self, tiled_resource: &Resource, first_subresource_tiling_to_get: u32) -> GetResourceTilingResult {
+            fn get_resource_tiling(
+                &self,
+                resource: &Resource,
+                num_subresource_tiling: u32,
+                first_subresource_tiling_to_get: u32,
+            ) -> GetResourceTilingResult {
+                let mut num_tiles = 0;
+                let mut packed_mip_desc = Default::default();
+                let mut tile_shape = Default::default();
+                let mut num_subresource = num_subresource_tiling;
+                let mut tilings = Vec::with_capacity(num_subresource as usize);
+                unsafe {
+                    self.0.GetResourceTiling(
+                        resource.as_ptr(),
+                        &mut num_tiles,
+                        &mut packed_mip_desc,
+                        &mut tile_shape,
+                        &mut num_subresource,
+                        first_subresource_tiling_to_get,
+                        tilings.as_mut_ptr(),
+                    );
+                    tilings.set_len(num_subresource as usize);
+                }
+                GetResourceTilingResult {
+                    num_tiles_for_entire_resource: num_tiles,
+                    packed_mip_desc: packed_mip_desc.into(),
+                    standard_tile_shape_for_non_packed_mips: tile_shape.into(),
+                    subresource_tilings_for_non_packed_mips: tilings.into_iter().map(|t| t.into()).collect::<Vec<_>>(),
+                }
             }
-            */
             fn make_resident(&self, objects: &[&impl IPageable]) -> Result<(), HResult> {
                 let mut ptrs = objects
                     .iter()
@@ -6129,7 +6184,15 @@ pub trait IGraphicsCommandList: ICommandList {
         src: &TextureCopyLocation<impl IResource>,
         src_box: Option<Box3D>,
     );
-    // fn copy_tiles();
+    fn copy_tiles(
+        &self,
+        tiled_resource: &Resource,
+        tile_region_start_coordinate: &TiledResourceCoordinate,
+        tile_region_size: &TileRegionSize,
+        buffer: &Resource,
+        buffer_start_offset_in_bytes: u64,
+        flags: Option<TileCopyFlags>,
+    );
     fn discard_resouce(&self, resource: &Resource, region: DiscardRegion);
     fn dispatch(
         &self,
@@ -6420,7 +6483,26 @@ macro_rules! impl_graphics_command_list {
                     )
                 }
             }
-            // fn copy_tiles();
+            fn copy_tiles(
+                &self,
+                tiled_resource: &Resource,
+                tile_region_start_coordinate: &TiledResourceCoordinate,
+                tile_region_size: &TileRegionSize,
+                buffer: &Resource,
+                buffer_start_offset_in_bytes: u64,
+                flags: Option<TileCopyFlags>,
+            ) {
+                unsafe {
+                    self.0.CopyTiles(
+                        tiled_resource.as_ptr(),
+                        &tile_region_start_coordinate.to_c_struct(),
+                        &tile_region_size.to_c_struct(),
+                        buffer.as_ptr(),
+                        buffer_start_offset_in_bytes,
+                        flags.map_or(0, |f| f.0)
+                    );
+                }
+            }
             fn discard_resouce(&self, resource: &Resource, region: DiscardRegion) {
                 unsafe {
                     self.0
