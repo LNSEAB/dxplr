@@ -4462,7 +4462,7 @@ impl StaticSamplerDesc<(), (), (), ()> {
             mip_lod_bias: 0.0,
             max_anisotropy: MAX_MAXANISOTROPY,
             comparison_func: ComparisonFunc::Never,
-            border_color: StaticBorderColor::OpaqueBlack,
+            border_color: StaticBorderColor::TransparentBlack,
             min_lod: 0.0,
             max_lod: std::f32::MAX,
             shader_register: (),
