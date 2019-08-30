@@ -3274,8 +3274,8 @@ pub struct LocalRootSignature {
 }
 
 #[derive(Debug)]
-pub struct MemcpyDest<'a> {
-    pub data: &'a mut [u8],
+pub struct MemcpyDest {
+    pub data: *mut u8,
     pub row_pitch: usize,
     pub slice_pitch: usize,
 }
@@ -4666,8 +4666,8 @@ impl<'a> StreamOutputDesc<'a> {
 // pub struct SubobjectToExportsAssociation;
 
 #[derive(Debug)]
-pub struct SubresourceData<'a> {
-    pub data: &'a [u8],
+pub struct SubresourceData {
+    pub data: *const u8,
     pub row_pitch: isize,
     pub slice_pitch: isize,
 }
