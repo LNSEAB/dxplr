@@ -4,6 +4,15 @@ version = "0.0.0"
 authors = ["LNSEAB <lnseab@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
+description = "Rust wrapper around D3D12 and DXGI"
+keywords = ["windows", "directx", "d3d12", "dxgi"]
+readme = "README.md"
+repository = "https://github.com/LNSEAB/dxplr"
+documentation = "https://docs.rs/dxplr"
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+features = ["dxgi1_6", "d3dcompiler"]
 
 [features]
 dxgi1_2 = ["winapi/dxgi1_2"]
@@ -25,7 +34,6 @@ winapi = { version = "0.3.7", features = [
 	"d3dcommon",
 	"dxgi",
 	"dxgidebug",
-	"d3d11",
 	"d3d12",
 	"d3d12sdklayers",
 ] }
