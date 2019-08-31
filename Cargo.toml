@@ -1,6 +1,6 @@
 [package]
 name = "dxplr"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["LNSEAB <lnseab@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
