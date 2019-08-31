@@ -30,6 +30,7 @@ where
     Ok(v)
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! impl_interface {
     ($s: ident, $api_type: ident) => {
@@ -70,6 +71,7 @@ macro_rules! impl_interface {
     };
 }
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! impl_bitflag_operators {
     ($s: ident) => {

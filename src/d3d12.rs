@@ -3986,7 +3986,7 @@ pub struct RootSignatureDesc {
     pub flags: Option<RootSignatureFlags>,
 }
 impl RootSignatureDesc {
-    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC, Vec<D3D12_ROOT_PARAMETER>) {
+    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC, Vec<D3D12_ROOT_PARAMETER>, Vec<D3D12_STATIC_SAMPLER_DESC>) {
         let parameters = self
             .parameters.as_ref().map(
                 |params| params.iter().map(|param| param.to_c_struct()).collect::<Vec<_>>()
@@ -4003,6 +4003,7 @@ impl RootSignatureDesc {
                 Flags: self.flags.map_or(0, |f| f.0),
             },
             parameters.unwrap_or(Vec::new()),
+            static_samplers.unwrap_or(Vec::new()),
         )
     }
 }
@@ -7243,7 +7244,7 @@ pub fn serialize_root_signature(
 ) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
     let mut obj = std::ptr::null_mut();
     let mut err = std::ptr::null_mut();
-    let (c_desc, _tmp) = desc.to_c_struct();
+    let (c_desc, _tmp, _static_samplers) = desc.to_c_struct();
     unsafe {
         let res = D3D12SerializeRootSignature(&c_desc, version.into(), &mut obj, &mut err);
         if res < 0 {
