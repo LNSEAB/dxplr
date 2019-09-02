@@ -17,6 +17,7 @@ use winapi::um::synchapi::*;
 use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::HANDLE;
 use winapi::Interface as _;
+use std::any::Any;
 
 pub struct EventHandle(std::sync::Arc<Handle>);
 impl EventHandle {
@@ -2079,7 +2080,6 @@ impl From<D3D12_DESCRIPTOR_RANGE> for DescriptorRange {
 }
 
 #[derive(Clone, Debug)]
-#[repr(C)]
 pub struct DescriptorRange1 {
     pub range_type: DescriptorRangeType,
     pub num_descriptors: u32,
@@ -2087,6 +2087,30 @@ pub struct DescriptorRange1 {
     pub register_space: u32,
     pub flags: Option<DescriptorRangeFlags>,
     pub offset_in_descriptors_from_table_start: u32,
+}
+impl DescriptorRange1 {
+    fn to_c_struct(&self) -> D3D12_DESCRIPTOR_RANGE1 {
+        D3D12_DESCRIPTOR_RANGE1 {
+            RangeType: self.range_type as u32,
+            NumDescriptors: self.num_descriptors,
+            BaseShaderRegister: self.base_shader_register,
+            RegisterSpace: self.register_space,
+            Flags: self.flags.map_or(0, |f| f.0 as u32),
+            OffsetInDescriptorsFromTableStart: self.offset_in_descriptors_from_table_start,
+        }
+    }
+}
+impl From<D3D12_DESCRIPTOR_RANGE1> for DescriptorRange1 {
+    fn from(src: D3D12_DESCRIPTOR_RANGE1) -> DescriptorRange1 {
+        DescriptorRange1 {
+            range_type: unsafe { std::mem::transmute(src.RangeType) },
+            num_descriptors: src.NumDescriptors,
+            base_shader_register: src.BaseShaderRegister,
+            register_space: src.RegisterSpace,
+            flags: if src.Flags == 0 { None } else { Some(DescriptorRangeFlags(src.Flags)) },
+            offset_in_descriptors_from_table_start: src.OffsetInDescriptorsFromTableStart,
+        }
+    }
 }
 
 // pub struct DeviceRemovedExtendedData;
@@ -2934,7 +2958,7 @@ impl<'a, Rf, Df> GraphicsPipelineStateDesc<'a, (), Rf, Df> {
     }
 }
 impl<'a, Il, Df> GraphicsPipelineStateDesc<'a, Il, (), Df> {
-    pub fn rtv_formats(self, rtv_formats: Vec<dxgi::Format>) -> GraphicsPipelineStateDesc<'a, Il, Vec<dxgi::Format>, Df> {
+    pub fn rtv_formats<'b>(self, rtv_formats: &'b [dxgi::Format]) -> GraphicsPipelineStateDesc<'a, Il, &'b [dxgi::Format], Df> {
         GraphicsPipelineStateDesc {
             root_signature: self.root_signature,
             vs: self.vs,
@@ -2985,7 +3009,7 @@ impl<'a, Il, Rf> GraphicsPipelineStateDesc<'a, Il, Rf, ()> {
         }
     }
 }
-impl<'a, 'b> GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, Vec<dxgi::Format>, dxgi::Format> {
+impl<'a, 'b, 'c> GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, &'c [dxgi::Format], dxgi::Format> {
     fn to_c_struct(
         &self,
     ) -> (
@@ -3911,7 +3935,7 @@ pub enum RootParameter {
         shader_visibility: ShaderVisibility,
     },
     Descriptor {
-        ty: RootParameterType,
+        parameter_type: RootParameterType,
         shader_register: u32,
         register_space: u32,
         shader_visibility: ShaderVisibility,
@@ -3944,12 +3968,12 @@ impl RootParameter {
                 obj.ShaderVisibility = *shader_visibility as u32;
             },
             RootParameter::Descriptor {
-                ty,
+                parameter_type,
                 shader_register,
                 register_space,
                 shader_visibility,
             } => unsafe {
-                obj.ParameterType = *ty as u32;
+                obj.ParameterType = *parameter_type as u32;
                 obj.u.Descriptor_mut().ShaderRegister = *shader_register;
                 obj.u.Descriptor_mut().RegisterSpace = *register_space;
                 obj.ShaderVisibility = *shader_visibility as u32;
@@ -3958,11 +3982,44 @@ impl RootParameter {
         obj
     }
 }
+impl From<D3D12_ROOT_PARAMETER> for RootParameter {
+    fn from(src: D3D12_ROOT_PARAMETER) -> RootParameter {
+        match src.ParameterType {
+            D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE => unsafe {
+                let ranges = std::slice::from_raw_parts(
+                    src.u.DescriptorTable().pDescriptorRanges,
+                    src.u.DescriptorTable().NumDescriptorRanges as usize,
+                );
+                RootParameter::DescriptorTable {
+                    descriptor_ranges: ranges.iter().map(|r| r.clone().into()).collect::<Vec<_>>(),
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS => unsafe {
+                RootParameter::Constants {
+                    shader_register: src.u.Constants().ShaderRegister,
+                    register_space: src.u.Constants().RegisterSpace,
+                    num_32bit_values: src.u.Constants().Num32BitValues,
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            D3D12_ROOT_PARAMETER_TYPE_CBV | D3D12_ROOT_PARAMETER_TYPE_SRV | D3D12_ROOT_PARAMETER_TYPE_UAV => unsafe {
+                RootParameter::Descriptor {
+                    parameter_type: std::mem::transmute(src.ParameterType),
+                    shader_register: src.u.Descriptor().ShaderRegister,
+                    register_space: src.u.Descriptor().RegisterSpace,
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            _ => unreachable!(),
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum RootParameter1 {
     DescriptorTable1 {
-        descriptor_ranges: Vec<DescriptorRange>,
+        descriptor_ranges: Vec<DescriptorRange1>,
         shader_visibility: ShaderVisibility,
     },
     Constants {
@@ -3972,11 +4029,91 @@ pub enum RootParameter1 {
         shader_visibility: ShaderVisibility,
     },
     Descriptor1 {
+        parameter_type: RootParameterType,
         shader_register: u32,
         register_space: u32,
         flags: Option<RootDescriptorFlags>,
         shader_visibility: ShaderVisibility,
     },
+}
+impl RootParameter1 {
+    fn to_c_struct(&self) -> (D3D12_ROOT_PARAMETER1, Vec<D3D12_DESCRIPTOR_RANGE1>) {
+        let mut obj = D3D12_ROOT_PARAMETER1::default();
+        match self {
+            RootParameter1::DescriptorTable1 {
+                descriptor_ranges,
+                shader_visibility,
+            } => unsafe {
+                let dr = descriptor_ranges.iter().map(|r| r.to_c_struct()).collect::<Vec<_>>();
+                obj.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                obj.u.DescriptorTable_mut().NumDescriptorRanges = dr.len() as u32;
+                obj.u.DescriptorTable_mut().pDescriptorRanges = dr.as_ptr();
+                obj.ShaderVisibility = *shader_visibility as u32;
+                (obj, dr)
+            },
+            RootParameter1::Constants {
+                shader_register,
+                register_space,
+                num_32bit_values,
+                shader_visibility,
+            } => unsafe {
+                obj.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+                obj.u.Constants_mut().ShaderRegister = *shader_register;
+                obj.u.Constants_mut().RegisterSpace = *register_space;
+                obj.u.Constants_mut().Num32BitValues = *num_32bit_values;
+                obj.ShaderVisibility = *shader_visibility as u32;
+                (obj, Vec::new())
+            },
+            RootParameter1::Descriptor1 {
+                parameter_type,
+                shader_register,
+                register_space,
+                flags,
+                shader_visibility,
+            } => unsafe {
+                obj.ParameterType = *parameter_type as u32;
+                obj.u.Descriptor_mut().ShaderRegister = *shader_register;
+                obj.u.Descriptor_mut().RegisterSpace = *register_space;
+                obj.u.Descriptor_mut().Flags = flags.map_or(0, |f| f.0 as u32);
+                obj.ShaderVisibility = *shader_visibility as u32;
+                (obj, Vec::new())
+            },
+        }
+    }
+}
+impl From<D3D12_ROOT_PARAMETER1> for RootParameter1 {
+    fn from(src: D3D12_ROOT_PARAMETER1) -> RootParameter1 {
+        match src.ParameterType {
+            D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE => unsafe {
+                let ranges = std::slice::from_raw_parts(
+                    src.u.DescriptorTable().pDescriptorRanges,
+                    src.u.DescriptorTable().NumDescriptorRanges as usize,
+                );
+                RootParameter1::DescriptorTable1 {
+                    descriptor_ranges: ranges.iter().map(|r| r.clone().into()).collect::<Vec<_>>(),
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS => unsafe {
+                RootParameter1::Constants {
+                    shader_register: src.u.Constants().ShaderRegister,
+                    register_space: src.u.Constants().RegisterSpace,
+                    num_32bit_values: src.u.Constants().Num32BitValues,
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            D3D12_ROOT_PARAMETER_TYPE_CBV | D3D12_ROOT_PARAMETER_TYPE_SRV | D3D12_ROOT_PARAMETER_TYPE_UAV => unsafe {
+                RootParameter1::Descriptor1 {
+                    parameter_type: std::mem::transmute(src.ParameterType),
+                    shader_register: src.u.Descriptor().ShaderRegister,
+                    register_space: src.u.Descriptor().RegisterSpace,
+                    flags: if src.u.Descriptor().Flags == 0 { None } else { Some(RootDescriptorFlags(src.u.Descriptor().Flags)) },
+                    shader_visibility: std::mem::transmute(src.ShaderVisibility),
+                }
+            },
+            _ => unreachable!(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -3986,7 +4123,7 @@ pub struct RootSignatureDesc {
     pub flags: Option<RootSignatureFlags>,
 }
 impl RootSignatureDesc {
-    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC, Vec<D3D12_ROOT_PARAMETER>, Vec<D3D12_STATIC_SAMPLER_DESC>) {
+    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC, (Vec<D3D12_ROOT_PARAMETER>, Vec<D3D12_STATIC_SAMPLER_DESC>)) {
         let parameters = self
             .parameters.as_ref().map(
                 |params| params.iter().map(|param| param.to_c_struct()).collect::<Vec<_>>()
@@ -4002,17 +4139,97 @@ impl RootSignatureDesc {
                 pStaticSamplers: static_samplers.as_ref().map_or(std::ptr::null(), |ss| ss.as_ptr()),
                 Flags: self.flags.map_or(0, |f| f.0),
             },
-            parameters.unwrap_or(Vec::new()),
-            static_samplers.unwrap_or(Vec::new()),
+            (parameters.unwrap_or(Vec::new()), static_samplers.unwrap_or(Vec::new())),
         )
+    }
+}
+impl From<D3D12_ROOT_SIGNATURE_DESC> for RootSignatureDesc {
+    fn from(src: D3D12_ROOT_SIGNATURE_DESC) -> RootSignatureDesc {
+        unsafe {
+            let parameters = if src.pParameters == std::ptr::null_mut() {
+                None
+            } else {
+                Some(std::slice::from_raw_parts(src.pParameters, src.NumParameters as usize).iter().map(
+                    |param| param.clone().into()
+                ).collect::<Vec<_>>())
+            };
+            let static_samplers = if src.pStaticSamplers == std::ptr::null_mut() {
+                None
+            } else {
+                Some(std::slice::from_raw_parts(src.pStaticSamplers, src.NumStaticSamplers as usize).iter().map(
+                    |ss| ss.clone().into()
+                ).collect::<Vec<_>>())
+            };
+            let flags = if src.Flags == D3D12_ROOT_SIGNATURE_FLAG_NONE {
+                None
+            } else {
+                Some(RootSignatureFlags(src.Flags))
+            };
+            RootSignatureDesc {
+                parameters,
+                static_samplers,
+                flags,
+            }
+        }
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct RootSignatureDesc1 {
-    pub parameters: Vec<RootParameter1>,
-    pub static_samplers: Vec<StaticSamplerDesc<Filter, u32, u32, ShaderVisibility>>,
+    pub parameters: Option<Vec<RootParameter1>>,
+    pub static_samplers: Option<Vec<StaticSamplerDesc<Filter, u32, u32, ShaderVisibility>>>,
     pub flags: Option<RootSignatureFlags>,
+}
+impl RootSignatureDesc1 {
+    fn to_c_struct(&self) -> (D3D12_ROOT_SIGNATURE_DESC1, ((Vec<D3D12_ROOT_PARAMETER1>, Vec<Vec<D3D12_DESCRIPTOR_RANGE1>>), Vec<D3D12_STATIC_SAMPLER_DESC>)) {
+        let parameters: Option<(Vec<D3D12_ROOT_PARAMETER1>, Vec<Vec<D3D12_DESCRIPTOR_RANGE1>>)> = self
+            .parameters.as_ref().map(
+                |params| params.iter().map(|param| param.to_c_struct()).unzip()
+            );
+        let static_samplers = self.static_samplers.as_ref().map(
+            |sss| sss.iter().map(|ss| ss.to_c_struct()).collect::<Vec<_>>()
+        );
+        (
+            D3D12_ROOT_SIGNATURE_DESC1 {
+                NumParameters: parameters.as_ref().map_or(0, |params| params.0.len() as u32),
+                pParameters: parameters.as_ref().map_or(std::ptr::null(), |params| params.0.as_ptr()),
+                NumStaticSamplers: static_samplers.as_ref().map_or(0, |ss| ss.len() as u32),
+                pStaticSamplers: static_samplers.as_ref().map_or(std::ptr::null(), |ss| ss.as_ptr()),
+                Flags: self.flags.map_or(0, |f| f.0),
+            },
+            (parameters.unwrap_or((Vec::new(), Vec::new())), static_samplers.unwrap_or(Vec::new())),
+        )
+    }
+}
+impl From<D3D12_ROOT_SIGNATURE_DESC1> for RootSignatureDesc1 {
+    fn from(src: D3D12_ROOT_SIGNATURE_DESC1) -> RootSignatureDesc1 {
+        unsafe {
+            let parameters = if src.pParameters == std::ptr::null_mut() {
+                None
+            } else {
+                Some(std::slice::from_raw_parts(src.pParameters, src.NumParameters as usize).iter().map(
+                    |param| param.clone().into()
+                ).collect::<Vec<_>>())
+            };
+            let static_samplers = if src.pStaticSamplers == std::ptr::null_mut() {
+                None
+            } else {
+                Some(std::slice::from_raw_parts(src.pStaticSamplers, src.NumStaticSamplers as usize).iter().map(
+                    |ss| ss.clone().into()
+                ).collect::<Vec<_>>())
+            };
+            let flags = if src.Flags == D3D12_ROOT_SIGNATURE_FLAG_NONE {
+                None
+            } else {
+                Some(RootSignatureFlags(src.Flags))
+            };
+            RootSignatureDesc1 {
+                parameters,
+                static_samplers,
+                flags,
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -4933,7 +5150,45 @@ impl UnorderedAccessViewDesc {
 }
 
 // pub struct VersionedDeviceRemovedExtendedData;
-// pub struct VersionedRootSignatureDesc;
+
+pub enum VersionedRootSignatureDesc {
+    Desc1_0(RootSignatureDesc),
+    Desc1_1(RootSignatureDesc1),
+}
+impl VersionedRootSignatureDesc {
+    fn to_c_struct(&self) -> (D3D12_VERSIONED_ROOT_SIGNATURE_DESC, Box<dyn Any>) {
+        let mut obj = D3D12_VERSIONED_ROOT_SIGNATURE_DESC::default();
+        match self {
+            VersionedRootSignatureDesc::Desc1_0(desc) => unsafe {
+                let c_desc = desc.to_c_struct();
+                obj.Version = D3D_ROOT_SIGNATURE_VERSION_1_0;
+                *obj.u.Desc_1_0_mut() = c_desc.0;
+                (obj, Box::new(c_desc.1))
+            },
+            VersionedRootSignatureDesc::Desc1_1(desc) => unsafe {
+                let c_desc = desc.to_c_struct();
+                obj.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
+                *obj.u.Desc_1_1_mut() = c_desc.0;
+                (obj, Box::new(c_desc.1))
+            },
+        }
+    }
+}
+impl From<D3D12_VERSIONED_ROOT_SIGNATURE_DESC> for VersionedRootSignatureDesc {
+    fn from(src: D3D12_VERSIONED_ROOT_SIGNATURE_DESC) -> VersionedRootSignatureDesc {
+        unsafe {
+            match src.Version {
+                D3D_ROOT_SIGNATURE_VERSION_1_0 => {
+                    VersionedRootSignatureDesc::Desc1_0(src.u.Desc_1_0().clone().into())
+                },
+                D3D_ROOT_SIGNATURE_VERSION_1_1 => {
+                    VersionedRootSignatureDesc::Desc1_1(src.u.Desc_1_1().clone().into())
+                },
+                _ => unimplemented!(),
+            }
+        }
+    }
+}
 
 #[derive(Clone, Debug)]
 #[repr(C)]
@@ -5296,7 +5551,7 @@ pub trait IDevice: IObject {
     ) -> Result<T, HResult>;
     fn create_graphics_pipeline_state<T: IPipelineState>(
         &self,
-        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
+        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, &[dxgi::Format], dxgi::Format>,
     ) -> Result<T, HResult>;
     fn create_heap<T: IHeap>(&self, desc: HeapDesc) -> Result<T, HResult>;
     fn create_placed_resource<T: IResource>(
@@ -5630,7 +5885,7 @@ macro_rules! impl_device {
             }
             fn create_graphics_pipeline_state<T: IPipelineState>(
                 &self,
-                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
+                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, &[dxgi::Format], dxgi::Format>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let (c_descs, _tmp) = desc.to_c_struct();
@@ -6947,7 +7202,7 @@ pub trait IPipelineLibrary: IDeviceChild {
     fn load_graphics_pipeline<T: IPipelineState>(
         &self,
         name: &str,
-        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
+        desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, &[dxgi::Format], dxgi::Format>,
     ) -> Result<T, HResult>;
     fn serialize(&self) -> Result<Vec<u8>, HResult>;
     fn store_pipeline(&self, name: &str, pipeline: &PipelineState) -> Result<(), HResult>;
@@ -6981,7 +7236,7 @@ macro_rules! impl_pipeline_library {
             fn load_graphics_pipeline<T: IPipelineState>(
                 &self,
                 name: &str,
-                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, Vec<dxgi::Format>, dxgi::Format>,
+                desc: &GraphicsPipelineStateDesc<InputLayoutDesc<'_>, &[dxgi::Format], dxgi::Format>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let wname = name.encode_utf16().chain(Some(0)).collect::<Vec<_>>();
@@ -7145,68 +7400,33 @@ impl_interface!(RootSignatureDeserializer, ID3D12RootSignatureDeserializer);
 impl IRootSignatureDeserializer for RootSignatureDeserializer {
     fn get_root_signature_desc(&self) -> RootSignatureDesc {
         unsafe {
-            let desc = *self.0.GetRootSignatureDesc();
-            let parameters_array = if desc.pParameters == std::ptr::null() {
-                None
+            (*self.0.GetRootSignatureDesc()).into()
+        }
+    }
+}
+
+pub trait IVersionedRootSignatureDeserializer {
+    fn get_root_signature_desc_at_version(&self, convert_to_version: d3d::RootSignatureVersion) -> Result<VersionedRootSignatureDesc, HResult>;
+    fn get_unconverted_root_signature_desc(&self) -> VersionedRootSignatureDesc;
+}
+#[derive(Clone, Debug)]
+pub struct VersionedRootSignatureDeserializer(ComPtr<ID3D12VersionedRootSignatureDeserializer>);
+impl_interface!(VersionedRootSignatureDeserializer, ID3D12VersionedRootSignatureDeserializer);
+impl IVersionedRootSignatureDeserializer for VersionedRootSignatureDeserializer {
+    fn get_root_signature_desc_at_version(&self, convert_to_version: d3d::RootSignatureVersion) -> Result<VersionedRootSignatureDesc, HResult> {
+        let mut desc = std::ptr::null_mut();
+        unsafe {
+            let res = self.0.GetRootSignatureDescAtVersion(convert_to_version.into(), &mut desc);
+            if res < 0 {
+                Err(res.into())
             } else {
-                Some(std::slice::from_raw_parts(desc.pParameters, desc.NumParameters as usize))
-            };
-            let mut parameters = if desc.NumParameters == 0 {
-                None
-            } else {
-                Some(Vec::with_capacity(desc.NumParameters as usize))
-            };
-            if let Some(params_array) = parameters_array {
-                for param in params_array {
-                    let elem = match param.ParameterType {
-                        D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE => RootParameter::DescriptorTable {
-                            descriptor_ranges: std::slice::from_raw_parts(
-                                param.u.DescriptorTable().pDescriptorRanges,
-                                param.u.DescriptorTable().NumDescriptorRanges as usize,
-                            )
-                            .iter()
-                            .map(|dt| dt.clone().into())
-                            .collect::<Vec<_>>(),
-                            shader_visibility: std::mem::transmute(param.ShaderVisibility),
-                        },
-                        D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS => RootParameter::Constants {
-                            shader_register: param.u.Constants().ShaderRegister,
-                            register_space: param.u.Constants().RegisterSpace,
-                            num_32bit_values: param.u.Constants().Num32BitValues,
-                            shader_visibility: std::mem::transmute(param.ShaderVisibility),
-                        },
-                        D3D12_ROOT_PARAMETER_TYPE_CBV
-                        | D3D12_ROOT_PARAMETER_TYPE_SRV
-                        | D3D12_ROOT_PARAMETER_TYPE_UAV => RootParameter::Descriptor {
-                            ty: std::mem::transmute(param.ParameterType),
-                            shader_register: param.u.Constants().ShaderRegister,
-                            register_space: param.u.Constants().RegisterSpace,
-                            shader_visibility: std::mem::transmute(param.ShaderVisibility),
-                        },
-                        _ => unreachable!(),
-                    };
-                    parameters.as_mut().unwrap().push(elem);
-                }
+                Ok((*desc).into())
             }
-            let static_samplers_array = if desc.pStaticSamplers == std::ptr::null() {
-                None
-            } else {
-                Some(std::slice::from_raw_parts(desc.pStaticSamplers, desc.NumStaticSamplers as usize))
-            };
-            let static_samplers = static_samplers_array.map(|ssa| ssa
-                .iter()
-                .map(|ss| ss.clone().into())
-                .collect::<Vec<_>>()
-            );
-            RootSignatureDesc {
-                parameters,
-                static_samplers,
-                flags: if desc.Flags == 0 {
-                    None
-                } else {
-                    Some(RootSignatureFlags(desc.Flags))
-                },
-            }
+        }
+    }
+    fn get_unconverted_root_signature_desc(&self) -> VersionedRootSignatureDesc {
+        unsafe {
+            (*self.0.GetUnconvertedRootSignatureDesc()).into()
         }
     }
 }
@@ -7244,9 +7464,32 @@ pub fn serialize_root_signature(
 ) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
     let mut obj = std::ptr::null_mut();
     let mut err = std::ptr::null_mut();
-    let (c_desc, _tmp, _static_samplers) = desc.to_c_struct();
+    let (c_desc, _tmp) = desc.to_c_struct();
     unsafe {
         let res = D3D12SerializeRootSignature(&c_desc, version.into(), &mut obj, &mut err);
+        if res < 0 {
+            Err((
+                res.into(),
+                if err != std::ptr::null_mut() {
+                    Some(d3d::Blob::new(ComPtr::from_raw(err)))
+                } else {
+                    None
+                },
+            ))
+        } else {
+            Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
+        }
+    }
+}
+
+pub fn serialize_versioned_root_signature(
+    desc: &VersionedRootSignatureDesc,
+) ->  Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
+    let mut obj = std::ptr::null_mut();
+    let mut err = std::ptr::null_mut();
+    let (c_desc, _tmp) = desc.to_c_struct();
+    unsafe {
+        let res = D3D12SerializeVersionedRootSignature(&c_desc, &mut obj, &mut err);
         if res < 0 {
             Err((
                 res.into(),

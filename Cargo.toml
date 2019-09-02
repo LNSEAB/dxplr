@@ -24,7 +24,7 @@ d3dcompiler = ["winapi/d3dcompiler"]
 
 [dependencies]
 com_ptr = "0.1.2"
-winapi = { version = "0.3.7", features = [
+winapi = { version = "0.3.8", features = [
 	"impl-default",
 	"winbase",
 	"winuser",
