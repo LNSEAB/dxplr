@@ -2,13 +2,13 @@ pub mod api;
 pub mod d3d;
 pub mod d3d12;
 mod d3d12sdklayers;
+pub mod d3dcompiler;
 pub mod dxgi;
 pub mod result;
 mod utility;
-pub mod d3dcompiler;
 
+pub use api::{Guid, Luid, Point, Rect};
 pub use result::HResult;
-pub use api::{Point, Rect, Guid, Luid};
 
 pub trait Interface {
     type APIType: winapi::Interface;

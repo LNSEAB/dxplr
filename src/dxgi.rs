@@ -1683,7 +1683,7 @@ impl<W, H, F, BU, BC, SE> SwapChainDesc1<W, H, F, BU, BC, SE> {
         self
     }
     pub fn buffer_usage(self, buffer_usage: Usage) -> SwapChainDesc1<W, H, F, Usage, BC, SE> {
-         SwapChainDesc1 {
+        SwapChainDesc1 {
             width: self.width,
             height: self.height,
             format: self.format,
@@ -1698,7 +1698,7 @@ impl<W, H, F, BU, BC, SE> SwapChainDesc1<W, H, F, BU, BC, SE> {
         }
     }
     pub fn buffer_count(self, buffer_count: u32) -> SwapChainDesc1<W, H, F, BU, u32, SE> {
-         SwapChainDesc1 {
+        SwapChainDesc1 {
             width: self.width,
             height: self.height,
             format: self.format,
@@ -1716,8 +1716,11 @@ impl<W, H, F, BU, BC, SE> SwapChainDesc1<W, H, F, BU, BC, SE> {
         self.scaling = scaling;
         self
     }
-    pub fn swap_effect(self, swap_effect: SwapEffect) -> SwapChainDesc1<W, H, F, BU, BC, SwapEffect> {
-         SwapChainDesc1 {
+    pub fn swap_effect(
+        self,
+        swap_effect: SwapEffect,
+    ) -> SwapChainDesc1<W, H, F, BU, BC, SwapEffect> {
+        SwapChainDesc1 {
             width: self.width,
             height: self.height,
             format: self.format,
@@ -4007,7 +4010,9 @@ pub trait ISwapChain: Interface {
 pub trait ISwapChain1: ISwapChain {
     fn get_background_color(&self) -> Result<RGBA, HResult>;
     fn get_core_window<T: Interface>(&self) -> Result<T, HResult>;
-    fn get_desc1(&self) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult>;
+    fn get_desc1(
+        &self,
+    ) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult>;
     fn get_fullscreen_desc(&self) -> Result<SwapChainFullscreenDesc, HResult>;
     fn get_hwnd(&self) -> Result<HWND, HResult>;
     fn get_restrict_to_output(&self) -> Result<Output, HResult>;
@@ -4159,7 +4164,9 @@ macro_rules! impl_swapchain {
                     hresult(obj as *mut T::APIType, res)
                 })?))
             }
-            fn get_desc1(&self) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult> {
+            fn get_desc1(
+                &self,
+            ) -> Result<SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>, HResult> {
                 let mut desc = Default::default();
                 let res = unsafe { self.0.GetDesc1(&mut desc) };
                 hresult(desc.into(), res)
