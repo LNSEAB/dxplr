@@ -1,3 +1,4 @@
+use crate::api::WindowHandle;
 use crate::api::*;
 use crate::result::{hresult, HResult};
 use crate::utility::*;
@@ -2446,7 +2447,7 @@ pub trait IFactory: Interface {
     fn get_window_association(&self) -> Result<HWND, HResult>;
     fn make_window_association(
         &self,
-        hwnd: HWND,
+        hwnd: &impl WindowHandle,
         flags: Option<MakeWindowAssociationFlag>,
     ) -> Result<(), HResult>;
 }
@@ -2472,7 +2473,7 @@ pub trait IFactory2: IFactory1 {
     fn create_swap_chain_for_hwnd<T: Interface>(
         &self,
         device: &T,
-        hwnd: HWND,
+        hwnd: &impl WindowHandle,
         desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
         fullscreen_desc: Option<&SwapChainFullscreenDesc>,
         restrict_to_output: Option<&Output>,
@@ -2480,9 +2481,17 @@ pub trait IFactory2: IFactory1 {
     fn get_shared_resource_adapter_luid(&self, resource: HANDLE) -> Result<Luid, HResult>;
     fn is_windowed_stereo_enabled(&self) -> bool;
     fn register_occlusion_status_event(&self, hevent: HANDLE) -> Result<u32, HResult>;
-    fn register_occlusion_status_window(&self, hwnd: HWND, msg: UINT) -> Result<u32, HResult>;
+    fn register_occlusion_status_window(
+        &self,
+        hwnd: &impl WindowHandle,
+        msg: UINT,
+    ) -> Result<u32, HResult>;
     fn register_stereo_status_event(&self, hevent: HANDLE) -> Result<u32, HResult>;
-    fn register_stereo_status_window(&self, hwnd: HWND, msg: UINT) -> Result<u32, HResult>;
+    fn register_stereo_status_window(
+        &self,
+        hwnd: &impl WindowHandle,
+        msg: UINT,
+    ) -> Result<u32, HResult>;
     fn unregister_occlusion_status(&self, cookie: u32);
     fn unregister_stereo_status(&self, cookie: u32);
 }
@@ -2548,10 +2557,13 @@ macro_rules! impl_factory {
             }
             fn make_window_association(
                 &self,
-                hwnd: HWND,
+                hwnd: &impl WindowHandle,
                 flags: Option<MakeWindowAssociationFlag>,
             ) -> Result<(), HResult> {
-                let res = unsafe { self.0.MakeWindowAssociation(hwnd, flags.map_or(0, |f| f.0)) };
+                let res = unsafe {
+                    self.0
+                        .MakeWindowAssociation(hwnd.as_hwnd(), flags.map_or(0, |f| f.0))
+                };
                 hresult((), res.into())
             }
         }
@@ -2633,7 +2645,7 @@ macro_rules! impl_factory {
             fn create_swap_chain_for_hwnd<T: Interface>(
                 &self,
                 device: &T,
-                hwnd: HWND,
+                hwnd: &impl WindowHandle,
                 desc: &SwapChainDesc1<u32, u32, Format, Usage, u32, SwapEffect>,
                 fullscreen_desc: Option<&SwapChainFullscreenDesc>,
                 restrict_to_output: Option<&Output>,
@@ -2645,7 +2657,7 @@ macro_rules! impl_factory {
                     let res = unsafe {
                         self.0.CreateSwapChainForHwnd(
                             device.as_unknown(),
-                            hwnd,
+                            hwnd.as_hwnd(),
                             &desc,
                             fullscreen_desc.map_or(std::ptr::null(), |fd| &fd),
                             restrict_to_output
@@ -2671,11 +2683,14 @@ macro_rules! impl_factory {
             }
             fn register_occlusion_status_window(
                 &self,
-                hwnd: HWND,
+                hwnd: &impl WindowHandle,
                 msg: UINT,
             ) -> Result<u32, HResult> {
                 let mut cookie = 0;
-                let res = unsafe { self.0.RegisterOcclusionStatusWindow(hwnd, msg, &mut cookie) };
+                let res = unsafe {
+                    self.0
+                        .RegisterOcclusionStatusWindow(hwnd.as_hwnd(), msg, &mut cookie)
+                };
                 hresult(cookie, res.into())
             }
             fn register_stereo_status_event(&self, hevent: HANDLE) -> Result<u32, HResult> {
@@ -2683,9 +2698,16 @@ macro_rules! impl_factory {
                 let res = unsafe { self.0.RegisterStereoStatusEvent(hevent, &mut cookie) };
                 hresult(cookie, res.into())
             }
-            fn register_stereo_status_window(&self, hwnd: HWND, msg: UINT) -> Result<u32, HResult> {
+            fn register_stereo_status_window(
+                &self,
+                hwnd: &impl WindowHandle,
+                msg: UINT,
+            ) -> Result<u32, HResult> {
                 let mut cookie = 0;
-                let res = unsafe { self.0.RegisterStereoStatusWindow(hwnd, msg, &mut cookie) };
+                let res = unsafe {
+                    self.0
+                        .RegisterStereoStatusWindow(hwnd.as_hwnd(), msg, &mut cookie)
+                };
                 hresult(cookie, res.into())
             }
             fn unregister_occlusion_status(&self, cookie: u32) {

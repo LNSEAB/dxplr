@@ -38,3 +38,10 @@ winapi = { version = "0.3.8", features = [
 	"d3d12sdklayers",
 ] }
 failure = "0.1.5"
+
+[dev-dependencies]
+winit = "0.19.3"
+
+[[example]]
+name = "triangle"
+required-features = ["dxgi1_4", "d3dcompiler"]

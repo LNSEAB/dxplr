@@ -1,3 +1,4 @@
+use crate::api::EventHandle;
 use crate::api::Rect;
 use crate::api::*;
 use crate::d3d;
@@ -14,31 +15,8 @@ use winapi::ctypes::c_void;
 use winapi::shared::windef::RECT;
 use winapi::um::d3d12::*;
 use winapi::um::minwinbase::SECURITY_ATTRIBUTES;
-use winapi::um::synchapi::*;
-use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::HANDLE;
 use winapi::Interface as _;
-
-pub struct EventHandle(std::sync::Arc<Handle>);
-impl EventHandle {
-    pub fn new() -> Self {
-        unsafe {
-            let h = CreateEventW(std::ptr::null_mut(), 0, 0, std::ptr::null());
-            assert!(h != std::ptr::null_mut());
-            Self(std::sync::Arc::new(Handle::new(h)))
-        }
-    }
-    pub fn wait(&self, timeout: Option<u32>) {
-        unsafe {
-            WaitForSingleObject(self.0.as_raw_handle(), timeout.unwrap_or(INFINITE));
-        }
-    }
-    fn as_raw_handle(&self) -> HANDLE {
-        self.0.as_raw_handle()
-    }
-}
-unsafe impl Send for EventHandle {}
-unsafe impl Sync for EventHandle {}
 
 /*
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -1193,6 +1171,7 @@ impl Default for ShaderComponentMapping {
         Self::DEFAULT
     }
 }
+pub const DEFAULT_4_COMPONENT_MAPPING: ShaderComponentMapping = ShaderComponentMapping::DEFAULT;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -2058,6 +2037,8 @@ impl From<D3D12_DESCRIPTOR_HEAP_DESC> for DescriptorHeapDesc<DescriptorHeapType,
         }
     }
 }
+
+pub const DESCRIPTOR_RANGE_OFFSET_APPEND: u32 = DescriptorRange::OFFSET_APPEND;
 
 #[derive(Clone, Debug)]
 #[repr(C)]

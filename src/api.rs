@@ -1,8 +1,9 @@
 use winapi::shared::guiddef::GUID;
-use winapi::shared::windef::{POINT, RECT};
+use winapi::shared::windef::{HWND, POINT, RECT};
 use winapi::um::handleapi::*;
-use winapi::um::winnt::HANDLE;
-use winapi::um::winnt::LUID;
+use winapi::um::synchapi::*;
+use winapi::um::winbase::INFINITE;
+use winapi::um::winnt::{HANDLE, LUID};
 
 #[derive(Clone, Copy)]
 pub struct Guid(pub GUID);
@@ -136,3 +137,53 @@ impl Drop for Handle {
 }
 unsafe impl Send for Handle {}
 unsafe impl Sync for Handle {}
+
+pub struct EventHandle(std::sync::Arc<Handle>);
+impl EventHandle {
+    pub fn new() -> Self {
+        unsafe {
+            let h = CreateEventW(std::ptr::null_mut(), 0, 0, std::ptr::null());
+            assert!(h != std::ptr::null_mut());
+            Self(std::sync::Arc::new(Handle::new(h)))
+        }
+    }
+    pub fn wait(&self, timeout: Option<u32>) {
+        unsafe {
+            WaitForSingleObject(self.0.as_raw_handle(), timeout.unwrap_or(INFINITE));
+        }
+    }
+    pub fn as_raw_handle(&self) -> HANDLE {
+        self.0.as_raw_handle()
+    }
+}
+unsafe impl Send for EventHandle {}
+unsafe impl Sync for EventHandle {}
+
+pub trait WindowHandle {
+    fn as_hwnd(&self) -> HWND;
+    fn as_ptr(&self) -> *const std::ffi::c_void;
+}
+impl WindowHandle for HWND {
+    fn as_hwnd(&self) -> HWND {
+        self.clone()
+    }
+    fn as_ptr(&self) -> *const std::ffi::c_void {
+        self.clone() as *const _
+    }
+}
+impl WindowHandle for *const std::ffi::c_void {
+    fn as_hwnd(&self) -> HWND {
+        self.clone() as HWND
+    }
+    fn as_ptr(&self) -> *const std::ffi::c_void {
+        self.clone()
+    }
+}
+impl WindowHandle for *mut std::ffi::c_void {
+    fn as_hwnd(&self) -> HWND {
+        self.clone() as HWND
+    }
+    fn as_ptr(&self) -> *const std::ffi::c_void {
+        self.clone()
+    }
+}

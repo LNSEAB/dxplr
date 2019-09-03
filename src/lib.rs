@@ -7,7 +7,7 @@ pub mod dxgi;
 pub mod result;
 mod utility;
 
-pub use api::{Guid, Luid, Point, Rect};
+pub use api::{EventHandle, Guid, Luid, Point, Rect, WindowHandle};
 pub use result::HResult;
 
 pub trait Interface {
