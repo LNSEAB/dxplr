@@ -5596,7 +5596,7 @@ pub struct GetResourceTilingResult {
 
 pub trait IDevice: IObject {
     fn check_feature_support<T: CheckFeatureSupport>(&self, args: T::Args) -> Result<T, HResult>;
-    fn copy_descriptors(
+    unsafe fn copy_descriptors(
         &self,
         dest_descriptor_range_starts: &[CPUDescriptorHandle],
         dest_descriptor_range_sizes: &[u32],
@@ -5604,7 +5604,7 @@ pub trait IDevice: IObject {
         src_descriptor_range_sizes: &[u32],
         descriptor_heaps_type: DescriptorHeapType,
     );
-    fn copy_descriptors_simple(
+    unsafe fn copy_descriptors_simple(
         &self,
         num_descriptors: u32,
         dest_descriptor_range_starts: &CPUDescriptorHandle,
@@ -5643,12 +5643,12 @@ pub trait IDevice: IObject {
         &self,
         desc: &ComputePipelineStateDesc,
     ) -> Result<T, HResult>;
-    fn create_constant_buffer_view(
+    unsafe fn create_constant_buffer_view(
         &self,
         desc: &ConstantBufferViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
-    fn create_depth_stencil_view(
+    unsafe fn create_depth_stencil_view(
         &self,
         resource: &Resource,
         desc: &DepthStencilViewDesc,
@@ -5677,7 +5677,7 @@ pub trait IDevice: IObject {
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
     fn create_query_heap<T: IQueryHeap>(&self, desc: QueryHeapDesc) -> Result<T, HResult>;
-    fn create_render_target_view(
+    unsafe fn create_render_target_view(
         &self,
         resource: &Resource,
         desc: &RenderTargetViewDesc,
@@ -5695,7 +5695,7 @@ pub trait IDevice: IObject {
         data: &[u8],
     ) -> Result<T, HResult>;
     fn create_sampler(&self, desc: &SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle);
-    fn create_shader_resource_view(
+    unsafe fn create_shader_resource_view(
         &self,
         resource: &Resource,
         desc: &ShaderResourceViewDesc,
@@ -5708,7 +5708,7 @@ pub trait IDevice: IObject {
         access: u32,
         name: &str,
     ) -> Result<HANDLE, HResult>;
-    fn create_unordered_access_view(
+    unsafe fn create_unordered_access_view(
         &self,
         resource: &Resource,
         counter_resource: Option<&Resource>,
@@ -5782,7 +5782,7 @@ macro_rules! impl_device {
             ) -> Result<T, HResult> {
                 T::check_feature_support(self.0.as_ptr() as *mut ID3D12Device, args)
             }
-            fn copy_descriptors(
+            unsafe fn copy_descriptors(
                 &self,
                 dest_descriptor_range_starts: &[CPUDescriptorHandle],
                 dest_descriptor_range_sizes: &[u32],
@@ -5790,37 +5790,33 @@ macro_rules! impl_device {
                 src_descriptor_range_sizes: &[u32],
                 descriptor_heaps_type: DescriptorHeapType,
             ) {
-                unsafe {
-                    self.0.CopyDescriptors(
-                        dest_descriptor_range_starts.len() as u32,
-                        dest_descriptor_range_starts.as_ptr() as *const D3D12_CPU_DESCRIPTOR_HANDLE,
-                        dest_descriptor_range_sizes.as_ptr(),
-                        src_descriptor_range_start.len() as u32,
-                        src_descriptor_range_start.as_ptr() as *const D3D12_CPU_DESCRIPTOR_HANDLE,
-                        src_descriptor_range_sizes.as_ptr(),
-                        descriptor_heaps_type as u32,
-                    );
-                }
+                self.0.CopyDescriptors(
+                    dest_descriptor_range_starts.len() as u32,
+                    dest_descriptor_range_starts.as_ptr() as *const D3D12_CPU_DESCRIPTOR_HANDLE,
+                    dest_descriptor_range_sizes.as_ptr(),
+                    src_descriptor_range_start.len() as u32,
+                    src_descriptor_range_start.as_ptr() as *const D3D12_CPU_DESCRIPTOR_HANDLE,
+                    src_descriptor_range_sizes.as_ptr(),
+                    descriptor_heaps_type as u32,
+                );
             }
-            fn copy_descriptors_simple(
+            unsafe fn copy_descriptors_simple(
                 &self,
                 num_descriptors: u32,
                 dest_descriptor_range_starts: &CPUDescriptorHandle,
                 src_descriptor_range_starts: &CPUDescriptorHandle,
                 descriptor_heaps_type: DescriptorHeapType,
             ) {
-                unsafe {
-                    self.0.CopyDescriptorsSimple(
-                        num_descriptors,
-                        D3D12_CPU_DESCRIPTOR_HANDLE {
-                            ptr: dest_descriptor_range_starts.ptr,
-                        },
-                        D3D12_CPU_DESCRIPTOR_HANDLE {
-                            ptr: src_descriptor_range_starts.ptr,
-                        },
-                        descriptor_heaps_type as u32,
-                    );
-                }
+                self.0.CopyDescriptorsSimple(
+                    num_descriptors,
+                    D3D12_CPU_DESCRIPTOR_HANDLE {
+                        ptr: dest_descriptor_range_starts.ptr,
+                    },
+                    D3D12_CPU_DESCRIPTOR_HANDLE {
+                        ptr: src_descriptor_range_starts.ptr,
+                    },
+                    descriptor_heaps_type as u32,
+                );
             }
             fn create_command_allocator<T: ICommandAllocator>(
                 &self,
@@ -5943,29 +5939,24 @@ macro_rules! impl_device {
                     hresult(obj as *mut <T as Interface>::APIType, res)
                 })?))
             }
-            fn create_constant_buffer_view(
+            unsafe fn create_constant_buffer_view(
                 &self,
                 desc: &ConstantBufferViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                unsafe {
-                    self.0
-                        .CreateConstantBufferView(&desc.to_c_struct(), dest_descriptor.into());
-                }
+                self.0.CreateConstantBufferView(&desc.to_c_struct(), dest_descriptor.into());
             }
-            fn create_depth_stencil_view(
+            unsafe fn create_depth_stencil_view(
                 &self,
                 resource: &Resource,
                 desc: &DepthStencilViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                unsafe {
-                    self.0.CreateDepthStencilView(
-                        resource.0.as_ptr(),
-                        &desc.to_c_struct(),
-                        dest_descriptor.into(),
-                    );
-                }
+                self.0.CreateDepthStencilView(
+                    resource.0.as_ptr(),
+                    &desc.to_c_struct(),
+                    dest_descriptor.into(),
+                );
             }
             fn create_descriptor_heap<T: IDescriptorHeap>(
                 &self,
@@ -6064,13 +6055,12 @@ macro_rules! impl_device {
                     hresult(obj as *mut <T as Interface>::APIType, res)
                 })?))
             }
-            fn create_render_target_view(
+            unsafe fn create_render_target_view(
                 &self,
                 resource: &Resource,
                 desc: &RenderTargetViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                unsafe {
                     self.0.CreateRenderTargetView(
                         resource.0.as_ptr(),
                         &desc.to_c_struct(),
@@ -6078,7 +6068,6 @@ macro_rules! impl_device {
                             ptr: dest_descriptor.ptr,
                         },
                     );
-                }
             }
             fn create_reserved_resource<T: IResource>(
                 &self,
@@ -6134,21 +6123,19 @@ macro_rules! impl_device {
                     );
                 }
             }
-            fn create_shader_resource_view(
+            unsafe fn create_shader_resource_view(
                 &self,
                 resource: &Resource,
                 desc: &ShaderResourceViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                unsafe {
-                    self.0.CreateShaderResourceView(
-                        resource.0.as_ptr(),
-                        &desc.to_c_struct(),
-                        D3D12_CPU_DESCRIPTOR_HANDLE {
-                            ptr: dest_descriptor.ptr,
-                        },
-                    );
-                }
+                self.0.CreateShaderResourceView(
+                    resource.0.as_ptr(),
+                    &desc.to_c_struct(),
+                    D3D12_CPU_DESCRIPTOR_HANDLE {
+                        ptr: dest_descriptor.ptr,
+                    },
+                );
             }
             fn create_shared_handle<T: Interface>(
                 &self,
@@ -6170,24 +6157,22 @@ macro_rules! impl_device {
                 };
                 hresult(handle, res)
             }
-            fn create_unordered_access_view(
+            unsafe fn create_unordered_access_view(
                 &self,
                 resource: &Resource,
                 counter_resource: Option<&Resource>,
                 desc: &UnorderedAccessViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                unsafe {
-                    self.0.CreateUnorderedAccessView(
-                        resource.as_com_ptr().as_ptr(),
-                        counter_resource
-                            .map_or(std::ptr::null_mut(), |cr| cr.as_com_ptr().as_ptr()),
-                        &desc.to_c_struct(),
-                        D3D12_CPU_DESCRIPTOR_HANDLE {
-                            ptr: dest_descriptor.ptr,
-                        },
-                    );
-                }
+                self.0.CreateUnorderedAccessView(
+                    resource.as_com_ptr().as_ptr(),
+                    counter_resource
+                        .map_or(std::ptr::null_mut(), |cr| cr.as_com_ptr().as_ptr()),
+                    &desc.to_c_struct(),
+                    D3D12_CPU_DESCRIPTOR_HANDLE {
+                        ptr: dest_descriptor.ptr,
+                    },
+                );
             }
             fn evict(&self, objects: &[&impl IPageable]) -> Result<(), HResult> {
                 let mut ptrs = objects
@@ -6538,7 +6523,7 @@ pub trait IGraphicsCommandList: ICommandList {
         &self,
         view_gpu_handle_in_current_heap: GPUDescriptorHandle,
         view_cpu_handle: CPUDescriptorHandle,
-        resource: Resource,
+        resource: &Resource,
         values: [f32; 4],
         rects: &[Rect],
     );
@@ -6546,7 +6531,7 @@ pub trait IGraphicsCommandList: ICommandList {
         &self,
         view_gpu_handle_in_current_heap: GPUDescriptorHandle,
         view_cpu_handle: CPUDescriptorHandle,
-        resource: Resource,
+        resource: &Resource,
         values: [u32; 4],
         rects: &[Rect],
     );
@@ -6785,7 +6770,7 @@ macro_rules! impl_graphics_command_list {
                 &self,
                 view_gpu_handle_in_current_heap: GPUDescriptorHandle,
                 view_cpu_handle: CPUDescriptorHandle,
-                resource: Resource,
+                resource: &Resource,
                 values: [f32; 4],
                 rects: &[Rect],
             ) {
@@ -6804,7 +6789,7 @@ macro_rules! impl_graphics_command_list {
                 &self,
                 view_gpu_handle_in_current_heap: GPUDescriptorHandle,
                 view_cpu_handle: CPUDescriptorHandle,
-                resource: Resource,
+                resource: &Resource,
                 values: [u32; 4],
                 rects: &[Rect],
             ) {

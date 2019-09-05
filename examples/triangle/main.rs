@@ -107,7 +107,7 @@ impl Triangle {
             let mut rts = Vec::new();
             for i in 0..2 {
                 let rt = swap_chain.get_buffer::<d3d12::Resource>(i).unwrap();
-                device.create_render_target_view(&rt, &desc, handle);
+                unsafe { device.create_render_target_view(&rt, &desc, handle) };
                 rts.push(rt);
                 handle += offset;
             }
