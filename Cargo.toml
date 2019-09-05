@@ -41,7 +41,12 @@ failure = "0.1.5"
 
 [dev-dependencies]
 winit = "0.19.3"
+image = "0.22.1"
 
 [[example]]
 name = "triangle"
+required-features = ["dxgi1_4", "d3dcompiler"]
+
+[[example]]
+name = "texture"
 required-features = ["dxgi1_4", "d3dcompiler"]
