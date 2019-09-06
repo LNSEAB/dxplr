@@ -9,7 +9,9 @@ pub mod dxgi;
 pub mod result;
 mod utility;
 
+#[doc(inline)]
 pub use api::{EventHandle, Guid, Luid, Point, Rect, WindowHandle};
+#[doc(inline)]
 pub use result::HResult;
 
 /// Defines the `IUnknown` interface and utility methods for Rust.

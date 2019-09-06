@@ -10,6 +10,7 @@ use winapi::um::d3dcommon::*;
 use winapi::Interface as _;
 
 #[cfg(feature = "d3dcompiler")]
+#[doc(inline)]
 pub use crate::d3dcompiler::*;
 
 /// Driver type options.

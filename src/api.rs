@@ -165,7 +165,7 @@ impl EventHandle {
         }
     }
 
-    /// Waits until the signaled state or the timeout.
+    /// Waits until the signaled state or the timeout (a unit of millseconds).
     pub fn wait(&self, timeout: Option<Duration>) {
         unsafe {
             WaitForSingleObject(self.0.as_raw_handle(), timeout.map_or(INFINITE, |d| d.as_millis() as u32));
