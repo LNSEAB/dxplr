@@ -38,6 +38,7 @@ impl From<HRESULT> for HResultKind {
     }
 }
 
+/// wrapped around `HRESULT`
 #[derive(Debug)]
 pub struct HResult {
     inner: Context<HResultKind>,

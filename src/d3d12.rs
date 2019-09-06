@@ -3306,6 +3306,20 @@ impl<'a> InputLayoutDesc<'a> {
     }
 }
 
+/// Helper macro for a d3d12::InputLayoutDesc
+///
+/// ## Examples
+///
+/// ```
+/// use dxplr;
+/// use dxplr::d3d12_input_layout_descs;
+///
+/// let descs = d3d12_input_layout_descs![
+///     {"POSITION", 0, dxplr::dxgi::Format::R32G32B32Float, 0, 0, dxplr::d3d12::InputClassification::PerVertexData, 0},
+///     {"COLOR", 0, dxplr::dxgi::Format::R32G32B32A32Float, 0, dxplr::d3d12::APPEND_ALIGNED_ELEMENT, dxplr::d3d12::InputClassification::PerVertexData, 0},
+/// ];
+/// ```
+///
 #[macro_export]
 macro_rules! d3d12_input_layout_descs {
     ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr},)*) => {

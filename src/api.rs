@@ -4,10 +4,13 @@ use winapi::um::handleapi::*;
 use winapi::um::synchapi::*;
 use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::{HANDLE, LUID};
+use std::time::Duration;
 
+/// Represents a globally unique identifier (GUID).
 #[derive(Clone, Copy)]
 pub struct Guid(pub GUID);
 impl Guid {
+    /// Creates a GUID.
     pub const fn new(data1: u32, data2: u16, data3: u16, data4: [u8; 8]) -> Self {
         Self(GUID {
             Data1: data1,
@@ -40,8 +43,16 @@ impl std::fmt::Debug for Guid {
         write!(f, "}}")
     }
 }
+impl std::fmt::Display for Guid {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        std::fmt::Debug::fmt(self, f)
+    }
+}
+
+/// Represents a universally unique identifier (UUID).
 pub type Uuid = Guid;
 
+/// Represents a local identifier for an adapter.
 #[derive(Clone, Debug)]
 pub struct Luid(pub u64);
 impl From<LUID> for Luid {
@@ -58,6 +69,7 @@ impl From<Luid> for LUID {
     }
 }
 
+/// Represents a point in a two dimensions plane.
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Point {
@@ -65,6 +77,7 @@ pub struct Point {
     pub y: i32,
 }
 impl Point {
+    /// Creates a new `Point`.
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
@@ -80,6 +93,7 @@ impl From<Point> for POINT {
     }
 }
 
+/// Represents a rectangle in two dimensions plane.
 #[derive(Clone, Copy, Default, Debug, PartialEq, Eq)]
 #[repr(C)]
 pub struct Rect {
@@ -89,6 +103,7 @@ pub struct Rect {
     pub bottom: i32,
 }
 impl Rect {
+    /// Creates a new `Rect`.
     pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
         Self {
             left,
@@ -138,8 +153,10 @@ impl Drop for Handle {
 unsafe impl Send for Handle {}
 unsafe impl Sync for Handle {}
 
+/// Wrapped around a event object.
 pub struct EventHandle(std::sync::Arc<Handle>);
 impl EventHandle {
+    /// Creates a event object.
     pub fn new() -> Self {
         unsafe {
             let h = CreateEventW(std::ptr::null_mut(), 0, 0, std::ptr::null());
@@ -147,11 +164,15 @@ impl EventHandle {
             Self(std::sync::Arc::new(Handle::new(h)))
         }
     }
-    pub fn wait(&self, timeout: Option<u32>) {
+
+    /// Waits until the signaled state or the timeout.
+    pub fn wait(&self, timeout: Option<Duration>) {
         unsafe {
-            WaitForSingleObject(self.0.as_raw_handle(), timeout.unwrap_or(INFINITE));
+            WaitForSingleObject(self.0.as_raw_handle(), timeout.map_or(INFINITE, |d| d.as_millis() as u32));
         }
     }
+
+    /// Returns a `HANDLE`.
     pub fn as_raw_handle(&self) -> HANDLE {
         self.0.as_raw_handle()
     }
@@ -159,6 +180,7 @@ impl EventHandle {
 unsafe impl Send for EventHandle {}
 unsafe impl Sync for EventHandle {}
 
+/// A trait for converting a value to a 'HWND' and a `c_void` pointer.
 pub trait WindowHandle {
     fn as_hwnd(&self) -> HWND;
     fn as_ptr(&self) -> *const std::ffi::c_void;

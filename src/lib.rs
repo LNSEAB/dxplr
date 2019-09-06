@@ -1,3 +1,5 @@
+//! (Experimental) A thin Rust wrapper around D3D12 and DXGI.
+
 pub mod api;
 pub mod d3d;
 pub mod d3d12;
@@ -10,6 +12,7 @@ mod utility;
 pub use api::{EventHandle, Guid, Luid, Point, Rect, WindowHandle};
 pub use result::HResult;
 
+/// Defines the `IUnknown` interface and utility methods for Rust.
 pub trait Interface {
     type APIType: winapi::Interface;
     fn new(p: com_ptr::ComPtr<Self::APIType>) -> Self;

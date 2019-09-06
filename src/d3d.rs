@@ -12,6 +12,7 @@ use winapi::Interface as _;
 #[cfg(feature = "d3dcompiler")]
 pub use crate::d3dcompiler::*;
 
+/// Driver type options.
 #[derive(Clone, Copy, Debug)]
 #[repr(u32)]
 pub enum DriverType {
@@ -23,6 +24,7 @@ pub enum DriverType {
     Warp = D3D_DRIVER_TYPE_WARP,
 }
 
+/// Used to indicate the primitive topology.
 #[derive(Clone, Copy, Debug)]
 #[repr(u32)]
 pub enum PrimitiveTopology {
@@ -70,6 +72,7 @@ pub enum PrimitiveTopology {
     ControlPointPatchlist32 = D3D_PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST,
 }
 
+/// Represents a feature level.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct FeatureLevel(pub u32, pub u32);
 impl From<FeatureLevel> for D3D_FEATURE_LEVEL {
@@ -83,6 +86,7 @@ impl From<D3D_FEATURE_LEVEL> for FeatureLevel {
     }
 }
 
+/// Represents a root signature version.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct RootSignatureVersion(pub u32, pub u32);
 impl From<RootSignatureVersion> for D3D_ROOT_SIGNATURE_VERSION {
@@ -104,6 +108,7 @@ impl From<D3D_ROOT_SIGNATURE_VERSION> for RootSignatureVersion {
     }
 }
 
+/// Indicates a shader model.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct ShaderModel(pub u32, pub u32);
 impl From<ShaderModel> for D3D_SHADER_MODEL {
@@ -117,6 +122,7 @@ impl From<D3D_SHADER_MODEL> for ShaderModel {
     }
 }
 
+/// Defines a shader macro.
 #[derive(Clone, Debug)]
 pub struct ShaderMacro<'a, 'b> {
     name: &'a str,
@@ -138,6 +144,7 @@ impl<'a, 'b> ShaderMacro<'a, 'b> {
     }
 }
 
+/// Defines the ID3D12Blob interface.
 pub trait IBlob: Interface {
     fn get_buffer_pointer(&self) -> *const c_void;
     fn get_buffer_pointer_mut(&mut self) -> *mut c_void;
@@ -147,6 +154,8 @@ pub trait IBlob: Interface {
     fn to_vec(&self) -> Vec<u8>;
     fn as_cstr(&self) -> Result<&std::ffi::CStr, std::ffi::FromBytesWithNulError>;
 }
+
+/// Wrapped around ID3D12Blob.
 #[derive(Clone, Debug)]
 pub struct Blob(pub(crate) ComPtr<ID3DBlob>);
 impl_interface!(Blob, ID3DBlob);

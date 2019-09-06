@@ -1,6 +1,6 @@
 # dxplr
 
-(Experimaental) A thin Rust wrapper around D3D12 and DXGI
+(Experimental) A thin Rust wrapper around D3D12 and DXGI
 
 ## License
 
