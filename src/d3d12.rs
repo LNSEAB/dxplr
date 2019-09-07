@@ -5664,7 +5664,7 @@ pub trait IDevice: IObject {
     );
     unsafe fn create_depth_stencil_view(
         &self,
-        resource: &Resource,
+        resource: Option<&Resource>,
         desc: &DepthStencilViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
@@ -5693,7 +5693,7 @@ pub trait IDevice: IObject {
     fn create_query_heap<T: IQueryHeap>(&self, desc: QueryHeapDesc) -> Result<T, HResult>;
     unsafe fn create_render_target_view(
         &self,
-        resource: &Resource,
+        resource: Option<&Resource>,
         desc: &RenderTargetViewDesc,
         dest_descriptor: CPUDescriptorHandle,
     );
@@ -5711,7 +5711,7 @@ pub trait IDevice: IObject {
     fn create_sampler(&self, desc: &SamplerDesc<Filter>, dest_descriptor: CPUDescriptorHandle);
     unsafe fn create_shader_resource_view(
         &self,
-        resource: &Resource,
+        resource: Option<&Resource>,
         desc: &ShaderResourceViewDesc,
         dest_dsecriptor: CPUDescriptorHandle,
     );
@@ -5724,7 +5724,7 @@ pub trait IDevice: IObject {
     ) -> Result<HANDLE, HResult>;
     unsafe fn create_unordered_access_view(
         &self,
-        resource: &Resource,
+        resource: Option<&Resource>,
         counter_resource: Option<&Resource>,
         desc: &UnorderedAccessViewDesc,
         dest_descriptor: CPUDescriptorHandle,
@@ -5962,12 +5962,12 @@ macro_rules! impl_device {
             }
             unsafe fn create_depth_stencil_view(
                 &self,
-                resource: &Resource,
+                resource: Option<&Resource>,
                 desc: &DepthStencilViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 self.0.CreateDepthStencilView(
-                    resource.0.as_ptr(),
+                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
                     &desc.to_c_struct(),
                     dest_descriptor.into(),
                 );
@@ -6071,12 +6071,12 @@ macro_rules! impl_device {
             }
             unsafe fn create_render_target_view(
                 &self,
-                resource: &Resource,
+                resource: Option<&Resource>,
                 desc: &RenderTargetViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                     self.0.CreateRenderTargetView(
-                        resource.0.as_ptr(),
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
                         &desc.to_c_struct(),
                         D3D12_CPU_DESCRIPTOR_HANDLE {
                             ptr: dest_descriptor.ptr,
@@ -6139,12 +6139,12 @@ macro_rules! impl_device {
             }
             unsafe fn create_shader_resource_view(
                 &self,
-                resource: &Resource,
+                resource: Option<&Resource>,
                 desc: &ShaderResourceViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 self.0.CreateShaderResourceView(
-                    resource.0.as_ptr(),
+                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
                     &desc.to_c_struct(),
                     D3D12_CPU_DESCRIPTOR_HANDLE {
                         ptr: dest_descriptor.ptr,
@@ -6173,15 +6173,14 @@ macro_rules! impl_device {
             }
             unsafe fn create_unordered_access_view(
                 &self,
-                resource: &Resource,
+                resource: Option<&Resource>,
                 counter_resource: Option<&Resource>,
                 desc: &UnorderedAccessViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
                 self.0.CreateUnorderedAccessView(
-                    resource.as_com_ptr().as_ptr(),
-                    counter_resource
-                        .map_or(std::ptr::null_mut(), |cr| cr.as_com_ptr().as_ptr()),
+                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                    counter_resource.map_or(std::ptr::null_mut(), |cr| cr.as_ptr()),
                     &desc.to_c_struct(),
                     D3D12_CPU_DESCRIPTOR_HANDLE {
                         ptr: dest_descriptor.ptr,
