@@ -106,7 +106,7 @@ impl Renderer {
             let mut rts = Vec::new();
             for i in 0..2 {
                 let rt = swap_chain.get_buffer::<d3d12::Resource>(i).unwrap();
-                unsafe { device.create_render_target_view(Some(&rt), &desc, handle) };
+                unsafe { device.create_render_target_view(Some(&rt), Some(&desc), handle) };
                 rts.push(rt);
                 handle += offset;
             }
@@ -262,14 +262,14 @@ impl Renderer {
         unsafe {
             self.device.create_shader_resource_view(
                 Some(&texture),
-                &d3d12::ShaderResourceViewDesc::Texture2D {
+                Some(&d3d12::ShaderResourceViewDesc::Texture2D {
                     format: dxgi::Format::R8G8B8A8Unorm,
                     shader_4_component_mapping: d3d12::DEFAULT_4_COMPONENT_MAPPING,
                     mip_levels: 1,
                     most_detailed_mip: 0,
                     plane_slice: 0,
                     resource_min_lod_clamp: 0.0,
-                },
+                }),
                 resource_heap.get_cpu_descriptor_handle_for_heap_start(),
             );
         }

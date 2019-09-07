@@ -5665,7 +5665,7 @@ pub trait IDevice: IObject {
     unsafe fn create_depth_stencil_view(
         &self,
         resource: Option<&Resource>,
-        desc: &DepthStencilViewDesc,
+        desc: Option<&DepthStencilViewDesc>,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn create_descriptor_heap<T: IDescriptorHeap>(
@@ -5694,7 +5694,7 @@ pub trait IDevice: IObject {
     unsafe fn create_render_target_view(
         &self,
         resource: Option<&Resource>,
-        desc: &RenderTargetViewDesc,
+        desc: Option<&RenderTargetViewDesc>,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn create_reserved_resource<T: IResource>(
@@ -5712,7 +5712,7 @@ pub trait IDevice: IObject {
     unsafe fn create_shader_resource_view(
         &self,
         resource: Option<&Resource>,
-        desc: &ShaderResourceViewDesc,
+        desc: Option<&ShaderResourceViewDesc>,
         dest_dsecriptor: CPUDescriptorHandle,
     );
     fn create_shared_handle<T: Interface>(
@@ -5726,7 +5726,7 @@ pub trait IDevice: IObject {
         &self,
         resource: Option<&Resource>,
         counter_resource: Option<&Resource>,
-        desc: &UnorderedAccessViewDesc,
+        desc: Option<&UnorderedAccessViewDesc>,
         dest_descriptor: CPUDescriptorHandle,
     );
     fn evict(&self, objects: &[&impl IPageable]) -> Result<(), HResult>;
@@ -5963,12 +5963,13 @@ macro_rules! impl_device {
             unsafe fn create_depth_stencil_view(
                 &self,
                 resource: Option<&Resource>,
-                desc: &DepthStencilViewDesc,
+                desc: Option<&DepthStencilViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
+                let cdesc = desc.map(|d| d.to_c_struct());
                 self.0.CreateDepthStencilView(
                     resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                    &desc.to_c_struct(),
+                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
                     dest_descriptor.into(),
                 );
             }
@@ -6072,12 +6073,13 @@ macro_rules! impl_device {
             unsafe fn create_render_target_view(
                 &self,
                 resource: Option<&Resource>,
-                desc: &RenderTargetViewDesc,
+                desc: Option<&RenderTargetViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
+                    let cdesc = desc.map(|d| d.to_c_struct());
                     self.0.CreateRenderTargetView(
                         resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                        &desc.to_c_struct(),
+                        cdesc.map_or(std::ptr::null_mut(), |d| &d),
                         D3D12_CPU_DESCRIPTOR_HANDLE {
                             ptr: dest_descriptor.ptr,
                         },
@@ -6140,12 +6142,13 @@ macro_rules! impl_device {
             unsafe fn create_shader_resource_view(
                 &self,
                 resource: Option<&Resource>,
-                desc: &ShaderResourceViewDesc,
+                desc: Option<&ShaderResourceViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
+                let cdesc = desc.map(|d| d.to_c_struct());
                 self.0.CreateShaderResourceView(
                     resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                    &desc.to_c_struct(),
+                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
                     D3D12_CPU_DESCRIPTOR_HANDLE {
                         ptr: dest_descriptor.ptr,
                     },
@@ -6175,13 +6178,14 @@ macro_rules! impl_device {
                 &self,
                 resource: Option<&Resource>,
                 counter_resource: Option<&Resource>,
-                desc: &UnorderedAccessViewDesc,
+                desc: Option<&UnorderedAccessViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
+                let cdesc = desc.map(|d| d.to_c_struct());
                 self.0.CreateUnorderedAccessView(
                     resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
                     counter_resource.map_or(std::ptr::null_mut(), |cr| cr.as_ptr()),
-                    &desc.to_c_struct(),
+                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
                     D3D12_CPU_DESCRIPTOR_HANDLE {
                         ptr: dest_descriptor.ptr,
                     },
