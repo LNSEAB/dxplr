@@ -50,3 +50,7 @@ required-features = ["dxgi1_4", "d3dcompiler"]
 [[example]]
 name = "texture"
 required-features = ["dxgi1_4", "d3dcompiler"]
+
+[[example]]
+name = "compute"
+required-features = ["d3dcompiler"]

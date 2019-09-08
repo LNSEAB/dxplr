@@ -227,12 +227,13 @@ impl Renderer {
                 Vertex::new([w, -h, 0.0], [1.0, 1.0]),
                 Vertex::new([-w, -h, 0.0], [0.0, 1.0]),
             ];
-            let mut data = vertex_buffer.map(0, None).unwrap();
+            let data = vertex_buffer.map(0, None).unwrap();
             std::ptr::copy_nonoverlapping(
                 vertices.as_ptr() as *const u8,
                 data.as_mut_ptr(),
                 (std::mem::size_of::<Vertex>() * 6) as usize,
             );
+            vertex_buffer.unmap(0, None);
         }
         let vbv = d3d12::VertexBufferView {
             buffer_location: vertex_buffer.get_gpu_virtual_address(),
@@ -287,12 +288,13 @@ impl Renderer {
             None
         ).unwrap();
         unsafe {
-            let mut data = intermediate.map(0, None).unwrap();
+            let data = intermediate.map(0, None).unwrap();
             for y in 0..texture_desc.height as isize {
                 let src = image.as_ptr().offset((image.width() * 4) as isize * y);
                 let dest = data.as_mut_ptr().offset(footprints.layouts[0].footprint.row_pitch as isize * y);
                 std::ptr::copy_nonoverlapping(src, dest, (image.width() * 4) as usize);
             }
+            intermediate.unmap(0, None);
         }
         let src = d3d12::TextureCopyLocation::PlacedFootprint {
             resource: &intermediate,

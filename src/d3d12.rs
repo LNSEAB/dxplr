@@ -1601,19 +1601,48 @@ pub struct CommandSignatureDesc<'a> {
 
 #[derive(Clone, Debug)]
 pub struct ComputePipelineStateDesc {
-    pub root_signature: RootSignature,
-    pub cs: ShaderBytecode,
+    pub root_signature: Option<RootSignature>,
+    pub cs: Option<ShaderBytecode>,
     pub node_mask: u32,
-    pub cached_pso: CachedPipelineState,
+    pub cached_pso: Option<CachedPipelineState>,
     pub flags: Option<PipelineStateFlags>,
 }
 impl ComputePipelineStateDesc {
+    pub fn new() -> Self {
+        Self {
+            root_signature: None,
+            cs: None,
+            node_mask: 0,
+            cached_pso: None,
+            flags: None,
+        }
+    }
+    pub fn root_signature(mut self, root_signature: &RootSignature) -> Self {
+        self.root_signature = Some(root_signature.clone());
+        self
+    }
+    pub fn cs(mut self, code: ShaderBytecode) -> Self {
+        self.cs = Some(code);
+        self
+    }
+    pub fn node_mask(mut self, mask: u32) -> Self {
+        self.node_mask = mask;
+        self
+    }
+    pub fn cached_pso(mut self, cached_pso: CachedPipelineState) -> Self {
+        self.cached_pso = Some(cached_pso);
+        self
+    }
+    pub fn flags(mut self, flags: PipelineStateFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
     fn to_c_struct(&self) -> D3D12_COMPUTE_PIPELINE_STATE_DESC {
         D3D12_COMPUTE_PIPELINE_STATE_DESC {
-            pRootSignature: self.root_signature.0.as_ptr(),
-            CS: self.cs.to_c_struct(),
+            pRootSignature: self.root_signature.as_ref().map_or(std::ptr::null_mut(), |rs| rs.as_ptr()),
+            CS: self.cs.as_ref().map_or(Default::default(), |code| code.to_c_struct()),
             NodeMask: self.node_mask,
-            CachedPSO: self.cached_pso.to_c_struct(),
+            CachedPSO: self.cached_pso.as_ref().map_or(Default::default(), |cached| cached.to_c_struct()),
             Flags: self.flags.map_or(0, |f| f.0),
         }
     }
@@ -3438,11 +3467,28 @@ pub struct Range {
     pub begin: usize,
     pub end: usize,
 }
+impl Range {
+    pub fn new(begin: usize, end: usize) -> Self {
+        Self {
+            begin,
+            end,
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
+#[repr(C)]
 pub struct RangeUint64 {
     pub begin: u64,
     pub end: u64,
+}
+impl RangeUint64 {
+    pub fn new(begin: u64, end: u64) -> Self {
+        Self {
+            begin,
+            end,
+        }
+    }
 }
 
 pub const DEFAULT_DEPTH_BIAS: u32 = D3D12_DEFAULT_DEPTH_BIAS;
@@ -5966,12 +6012,19 @@ macro_rules! impl_device {
                 desc: Option<&DepthStencilViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                let cdesc = desc.map(|d| d.to_c_struct());
-                self.0.CreateDepthStencilView(
-                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
-                    dest_descriptor.into(),
-                );
+                if desc.is_none() {
+                    self.0.CreateDepthStencilView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        std::ptr::null(),
+                        dest_descriptor.into(),
+                    );
+                } else {
+                    self.0.CreateDepthStencilView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        &desc.unwrap().to_c_struct(),
+                        dest_descriptor.into(),
+                    );
+                }
             }
             fn create_descriptor_heap<T: IDescriptorHeap>(
                 &self,
@@ -6076,14 +6129,23 @@ macro_rules! impl_device {
                 desc: Option<&RenderTargetViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                    let cdesc = desc.map(|d| d.to_c_struct());
+                if desc.is_none() {
                     self.0.CreateRenderTargetView(
                         resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                        cdesc.map_or(std::ptr::null_mut(), |d| &d),
+                        std::ptr::null(),
                         D3D12_CPU_DESCRIPTOR_HANDLE {
                             ptr: dest_descriptor.ptr,
                         },
                     );
+                } else {
+                    self.0.CreateRenderTargetView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        &desc.unwrap().to_c_struct(),
+                        D3D12_CPU_DESCRIPTOR_HANDLE {
+                            ptr: dest_descriptor.ptr,
+                        },
+                    );
+                }
             }
             fn create_reserved_resource<T: IResource>(
                 &self,
@@ -6145,14 +6207,23 @@ macro_rules! impl_device {
                 desc: Option<&ShaderResourceViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                let cdesc = desc.map(|d| d.to_c_struct());
-                self.0.CreateShaderResourceView(
-                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
-                    D3D12_CPU_DESCRIPTOR_HANDLE {
-                        ptr: dest_descriptor.ptr,
-                    },
-                );
+                if desc.is_none() {
+                    self.0.CreateShaderResourceView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        std::ptr::null(),
+                        D3D12_CPU_DESCRIPTOR_HANDLE {
+                            ptr: dest_descriptor.ptr,
+                        },
+                    );
+                } else {
+                    self.0.CreateShaderResourceView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        &desc.unwrap().to_c_struct(),
+                        D3D12_CPU_DESCRIPTOR_HANDLE {
+                            ptr: dest_descriptor.ptr,
+                        },
+                    );
+                }
             }
             fn create_shared_handle<T: Interface>(
                 &self,
@@ -6181,15 +6252,25 @@ macro_rules! impl_device {
                 desc: Option<&UnorderedAccessViewDesc>,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                let cdesc = desc.map(|d| d.to_c_struct());
-                self.0.CreateUnorderedAccessView(
-                    resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
-                    counter_resource.map_or(std::ptr::null_mut(), |cr| cr.as_ptr()),
-                    cdesc.map_or(std::ptr::null_mut(), |d| &d),
-                    D3D12_CPU_DESCRIPTOR_HANDLE {
-                        ptr: dest_descriptor.ptr,
-                    },
-                );
+                if desc.is_none() {
+                    self.0.CreateUnorderedAccessView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        counter_resource.map_or(std::ptr::null_mut(), |cr| cr.as_ptr()),
+                        std::ptr::null(),
+                        D3D12_CPU_DESCRIPTOR_HANDLE {
+                            ptr: dest_descriptor.ptr,
+                        },
+                    );
+                } else {
+                    self.0.CreateUnorderedAccessView(
+                        resource.map_or(std::ptr::null_mut(), |r| r.as_ptr()),
+                        counter_resource.map_or(std::ptr::null_mut(), |cr| cr.as_ptr()),
+                        &desc.unwrap().to_c_struct(),
+                        D3D12_CPU_DESCRIPTOR_HANDLE {
+                            ptr: dest_descriptor.ptr,
+                        },
+                    );
+                }
             }
             fn evict(&self, objects: &[&impl IPageable]) -> Result<(), HResult> {
                 let mut ptrs = objects
@@ -7431,41 +7512,6 @@ pub struct QueryHeap(ComPtr<ID3D12QueryHeap>);
 impl_pageable!(QueryHeap, ID3D12QueryHeap);
 impl IQueryHeap for QueryHeap {}
 
-pub struct MappedResourceData<'a, T: IResource> {
-    resource: T,
-    subresource: u32,
-    range: Option<Range>,
-    data: &'a mut [u8],
-}
-impl<'a, T: IResource> MappedResourceData<'a, T> {
-    pub fn as_slice(&self) -> &[u8] {
-        self.data
-    }
-    pub fn as_mut_slice(&mut self) -> &mut [u8] {
-        self.data
-    }
-    pub fn as_ptr(&self) -> *const u8 {
-        self.data.as_ptr()
-    }
-    pub fn as_mut_ptr(&mut self) -> *mut u8 {
-        self.data.as_mut_ptr()
-    }
-    // pub fn read_from_subresource();
-    // pub fn write_from_subresource();
-}
-impl<'a, T: IResource> Drop for MappedResourceData<'a, T> {
-    fn drop(&mut self) {
-        unsafe {
-            (*(self.resource.as_ptr() as *mut ID3D12Resource)).Unmap(
-                self.subresource,
-                self.range.map_or(std::ptr::null(), |r| {
-                    &r as *const Range as *const D3D12_RANGE
-                }),
-            )
-        }
-    }
-}
-
 pub trait IResource: IPageable
 where
     Self: Sized,
@@ -7473,11 +7519,12 @@ where
     fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>;
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress;
     fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult>;
-    fn map<'a, 'b>(
+    unsafe fn map<'a>(
         &self,
         subresource: u32,
-        range: Option<Range>,
-    ) -> Result<MappedResourceData<'a, Self>, HResult>;
+        read_range: Option<Range>,
+    ) -> Result<&'a mut [u8], HResult>;
+    unsafe fn unmap(&self, subresource: u32, written_range: Option<Range>);
 }
 #[derive(Clone, Debug)]
 pub struct Resource(ComPtr<ID3D12Resource>);
@@ -7495,35 +7542,31 @@ impl IResource for Resource {
         let res = unsafe { self.0.GetHeapProperties(&mut properties, &mut flags) };
         hresult((properties.into(), HeapFlags(flags)), res)
     }
-    fn map<'a, 'b>(
+    unsafe fn map<'a>(
         &self,
         subresource: u32,
-        range: Option<Range>,
-    ) -> Result<MappedResourceData<'a, Self>, HResult> {
+        read_range: Option<Range>,
+    ) -> Result<&'a mut [u8], HResult> {
         let desc = self.get_desc();
         let mut p = std::ptr::null_mut();
-        let res = unsafe {
-            self.0.Map(
-                subresource,
-                range.map_or(std::ptr::null(), |r| {
-                    &r as *const Range as *const D3D12_RANGE
-                }),
-                &mut p,
-            )
-        };
-        let size = range.map_or(
+        let res = self.0.Map(
+            subresource,
+            read_range.as_ref().map_or(std::ptr::null(), |r| {
+                r as *const Range as *const D3D12_RANGE
+            }),
+            &mut p,
+        );
+        let size = read_range.map_or(
             desc.width as usize * desc.height as usize * desc.depth_or_array_size as usize,
             |r| r.end - r.begin,
         );
         hresult(
-            MappedResourceData {
-                resource: self.clone(),
-                subresource,
-                range,
-                data: unsafe { std::slice::from_raw_parts_mut(p as *mut u8, size) },
-            },
+            std::slice::from_raw_parts_mut(p as *mut u8, size),
             res,
         )
+    }
+    unsafe fn unmap(&self, subresource: u32, write_range: Option<Range>) {
+        self.0.Unmap(subresource, write_range.as_ref().map_or(std::ptr::null(), |r| r as *const Range as *const D3D12_RANGE));
     }
 }
 

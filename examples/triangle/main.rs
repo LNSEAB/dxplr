@@ -131,12 +131,13 @@ impl Triangle {
             .unwrap();
 
         unsafe {
-            let mut data = vertex_buffer.map(0, None).unwrap();
+            let data = vertex_buffer.map(0, None).unwrap();
             std::ptr::copy_nonoverlapping(
                 VERTICES.as_ptr() as *const u8,
                 data.as_mut_ptr(),
                 (std::mem::size_of::<Vertex>() * 3) as usize,
             );
+            vertex_buffer.unmap(0, None);
         }
         let vbv = d3d12::VertexBufferView {
             buffer_location: vertex_buffer.get_gpu_virtual_address(),
