@@ -1433,6 +1433,28 @@ impl From<u64> for GPUVirtualAddress {
         GPUVirtualAddress(src)
     }
 }
+impl std::ops::Add<u64> for GPUVirtualAddress {
+    type Output = Self;
+    fn add(self, rhs: u64) -> Self {
+        Self(self.0 + rhs)
+    }
+}
+impl std::ops::Sub<u64> for GPUVirtualAddress {
+    type Output = Self;
+    fn sub(self, rhs: u64) -> Self {
+        Self(self.0 - rhs)
+    }
+}
+impl std::ops::AddAssign<u64> for GPUVirtualAddress {
+    fn add_assign(&mut self, rhs: u64) {
+        self.0 += rhs;
+    }
+}
+impl std::ops::SubAssign<u64> for GPUVirtualAddress {
+    fn sub_assign(&mut self, rhs: u64) {
+        self.0 -= rhs;
+    }
+}
 
 // pub struct AutoBreadcrumbNode;
 
