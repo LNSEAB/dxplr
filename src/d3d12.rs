@@ -5,7 +5,7 @@ use crate::d3d;
 use crate::d3d::IBlob;
 pub use crate::d3d12sdklayers::*;
 use crate::dxgi;
-use crate::result::{hresult, HResult};
+use crate::result::{hresult, HResult, ErrorMessageObject, ErrorMessage};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
@@ -5719,7 +5719,7 @@ pub trait IDevice: IObject {
         heap_flags: Option<HeapFlags>,
         desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
         initial_resource_state: ResourceStates,
-        optimized_clear_value: Option<ClearValue>,
+        optimized_clear_value: Option<&ClearValue>,
     ) -> Result<T, HResult>;
     fn create_compute_pipeline_state<T: IPipelineState>(
         &self,
@@ -5986,7 +5986,7 @@ macro_rules! impl_device {
                 heap_flags: Option<HeapFlags>,
                 desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
                 initial_resource_state: ResourceStates,
-                optimized_clear_value: Option<ClearValue>,
+                optimized_clear_value: Option<&ClearValue>,
             ) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -7675,21 +7675,14 @@ pub fn create_device<T: IDevice>(
 pub fn serialize_root_signature(
     desc: &RootSignatureDesc,
     version: d3d::RootSignatureVersion,
-) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
+) -> Result<d3d::Blob, ErrorMessage> {
     let mut obj = std::ptr::null_mut();
     let mut err = std::ptr::null_mut();
     let (c_desc, _tmp) = desc.to_c_struct();
     unsafe {
         let res = D3D12SerializeRootSignature(&c_desc, version.into(), &mut obj, &mut err);
         if res < 0 {
-            Err((
-                res.into(),
-                if err != std::ptr::null_mut() {
-                    Some(d3d::Blob::new(ComPtr::from_raw(err)))
-                } else {
-                    None
-                },
-            ))
+            Err(ErrorMessageObject::new(res.into(), err).into())
         } else {
             Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
         }

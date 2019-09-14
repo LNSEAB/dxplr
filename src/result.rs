@@ -1,7 +1,10 @@
 use failure::{Backtrace, Context, Fail};
+use crate::d3d::{Blob, IBlob};
+use winapi::um::d3dcommon::ID3DBlob;
 use winapi::ctypes::c_void;
 use winapi::um::winbase::*;
 use winapi::um::winnt::HRESULT;
+use com_ptr::ComPtr;
 
 #[derive(Clone, PartialEq, Eq, Debug, Fail)]
 pub enum HResultKind {
@@ -131,4 +134,87 @@ impl PartialEq<HResultKind> for HResult {
 
 pub fn hresult<T>(obj: T, res: HRESULT) -> Result<T, HResult> {
     com_ptr::hresult(obj, res).map_err(|res| res.into())
+}
+
+#[derive(Debug, Fail)]
+pub struct ErrorMessageObject {
+    hresult: HResult,
+    message: Option<String>,
+}
+impl ErrorMessageObject {
+    pub(crate) fn new(hresult: HResult, message: *mut ID3DBlob) -> Self {
+        let msg = if message != std::ptr::null_mut() {
+            unsafe { Some(Blob(ComPtr::from_raw(message))) }
+        } else {
+            None
+        };
+        Self {
+            hresult,
+            message: if let Some(blob) = msg {
+                if let Ok(cstr) = blob.as_cstr() {
+                    if let Ok(s) = cstr.to_str() {
+                        Some(s.into())
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            },
+        }
+    }
+}
+impl std::fmt::Display for ErrorMessageObject {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if let Some(s) = &self.message {
+            write!(f, "{}", s)
+        } else {
+            write!(f, "{}", self.hresult)
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ErrorMessage {
+    inner: Context<ErrorMessageObject>,
+}
+impl ErrorMessage {
+    pub fn new(inner: Context<ErrorMessageObject>) -> Self {
+        Self { inner }
+    }
+    pub fn hresult(&self) -> &HResult {
+        &self.inner.get_context().hresult
+    }
+    pub fn message(&self) -> Option<&str> {
+        if let Some(s) = &self.inner.get_context().message {
+            Some(s.as_str())
+        } else {
+            None
+        }
+    }
+}
+impl Fail for ErrorMessage {
+    fn cause(&self) -> Option<&dyn Fail> {
+        self.inner.cause()
+    }
+    fn backtrace(&self) -> Option<&Backtrace> {
+        self.inner.backtrace()
+    }
+}
+impl std::fmt::Display for ErrorMessage {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.inner.get_context())
+    }
+}
+impl From<ErrorMessageObject> for ErrorMessage {
+    fn from(src: ErrorMessageObject) -> ErrorMessage {
+        ErrorMessage::new(Context::new(src))
+    }
+}
+impl From<Context<ErrorMessageObject>> for ErrorMessage {
+    fn from(src: Context<ErrorMessageObject>) -> ErrorMessage {
+        ErrorMessage::new(src)
+    }
 }

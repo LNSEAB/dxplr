@@ -2,7 +2,7 @@
 
 use crate::d3d::{Blob, ShaderMacro};
 use crate::impl_bitflag_operators;
-use crate::result::HResult;
+use crate::result::{ErrorMessage, ErrorMessageObject};
 use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
 use winapi::um::d3dcompiler::*;
@@ -52,7 +52,7 @@ pub fn compile(
     target: &str,
     flags1: Option<CompileFlags>,
     flags2: Option<CompileEffectFlags>,
-) -> Result<Blob, (HResult, Blob)> {
+) -> Result<Blob, ErrorMessage> {
     let c_src_name = src_name.map(|name| std::ffi::CString::new(name).unwrap());
     let c_macros: Option<(Vec<_>, Vec<_>)> =
         macros.map(|ms| ms.iter().map(|m| m.to_c_struct()).unzip());
@@ -81,7 +81,7 @@ pub fn compile(
             &mut err_blob,
         );
         if res < 0 {
-            Err((res.into(), Blob(ComPtr::from_raw(err_blob))))
+            Err(ErrorMessageObject::new(res.into(), err_blob).into())
         } else {
             Ok(Blob(ComPtr::from_raw(blob)))
         }
