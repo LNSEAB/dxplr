@@ -7691,21 +7691,14 @@ pub fn serialize_root_signature(
 
 pub fn serialize_versioned_root_signature(
     desc: &VersionedRootSignatureDesc,
-) -> Result<d3d::Blob, (HResult, Option<d3d::Blob>)> {
+) -> Result<d3d::Blob, ErrorMessage> {
     let mut obj = std::ptr::null_mut();
     let mut err = std::ptr::null_mut();
     let (c_desc, _tmp) = desc.to_c_struct();
     unsafe {
         let res = D3D12SerializeVersionedRootSignature(&c_desc, &mut obj, &mut err);
         if res < 0 {
-            Err((
-                res.into(),
-                if err != std::ptr::null_mut() {
-                    Some(d3d::Blob::new(ComPtr::from_raw(err)))
-                } else {
-                    None
-                },
-            ))
+            Err(ErrorMessageObject::new(res.into(), err).into())
         } else {
             Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
         }
