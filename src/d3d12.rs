@@ -3328,7 +3328,7 @@ impl<'a> InputElementDesc<'a> {
                 Format: self.format as u32,
                 InputSlot: self.input_slot,
                 AlignedByteOffset: self.aligned_byte_offset,
-                InputSlotClass: self.instance_data_step_rate as u32,
+                InputSlotClass: self.input_slot_class as u32,
                 InstanceDataStepRate: self.instance_data_step_rate,
             },
             name,
