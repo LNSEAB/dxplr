@@ -1,10 +1,10 @@
-use failure::{Backtrace, Context, Fail};
 use crate::d3d::{Blob, IBlob};
-use winapi::um::d3dcommon::ID3DBlob;
+use com_ptr::ComPtr;
+use failure::{Backtrace, Context, Fail};
 use winapi::ctypes::c_void;
+use winapi::um::d3dcommon::ID3DBlob;
 use winapi::um::winbase::*;
 use winapi::um::winnt::HRESULT;
-use com_ptr::ComPtr;
 
 #[derive(Clone, PartialEq, Eq, Debug, Fail)]
 pub enum HResultKind {

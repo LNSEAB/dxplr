@@ -1,10 +1,10 @@
+use std::time::Duration;
 use winapi::shared::guiddef::GUID;
 use winapi::shared::windef::{HWND, POINT, RECT};
 use winapi::um::handleapi::*;
 use winapi::um::synchapi::*;
 use winapi::um::winbase::INFINITE;
 use winapi::um::winnt::{HANDLE, LUID};
-use std::time::Duration;
 
 /// Represents a globally unique identifier (GUID).
 #[derive(Clone, Copy)]
@@ -134,12 +134,12 @@ impl From<Rect> for RECT {
     }
 }
 
-pub(crate) struct Handle(HANDLE);
+pub struct Handle(HANDLE);
 impl Handle {
-    pub(crate) fn new(p: HANDLE) -> Self {
+    pub fn new(p: HANDLE) -> Self {
         Self(p)
     }
-    pub(crate) fn as_raw_handle(&self) -> HANDLE {
+    pub fn as_raw_handle(&self) -> HANDLE {
         self.0
     }
 }
@@ -168,7 +168,10 @@ impl EventHandle {
     /// Waits until the signaled state or the timeout (a unit of millseconds).
     pub fn wait(&self, timeout: Option<Duration>) {
         unsafe {
-            WaitForSingleObject(self.0.as_raw_handle(), timeout.map_or(INFINITE, |d| d.as_millis() as u32));
+            WaitForSingleObject(
+                self.0.as_raw_handle(),
+                timeout.map_or(INFINITE, |d| d.as_millis() as u32),
+            );
         }
     }
 

@@ -1,11 +1,15 @@
 # dxplr
 
-(Experimental) A thin Rust wrapper around D3D12 and DXGI.
+(Experimental) A thin Rust wrapper around D3D11, D3D12 and DXGI.
 
 ## Features
 
 The following features can be specified.
 
+* `d3d11_1`
+* `d3d11_2`
+* `d3d11_3`
+* `d3d11_4`
 * `dxgi1_2`
 * `dxgi1_3`
 * `dxgi1_4`

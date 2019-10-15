@@ -5,7 +5,7 @@ use crate::d3d;
 use crate::d3d::IBlob;
 pub use crate::d3d12sdklayers::*;
 use crate::dxgi;
-use crate::result::{hresult, HResult, ErrorMessageObject, ErrorMessage};
+use crate::result::{hresult, ErrorMessage, ErrorMessageObject, HResult};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
@@ -1661,10 +1661,19 @@ impl ComputePipelineStateDesc {
     }
     fn to_c_struct(&self) -> D3D12_COMPUTE_PIPELINE_STATE_DESC {
         D3D12_COMPUTE_PIPELINE_STATE_DESC {
-            pRootSignature: self.root_signature.as_ref().map_or(std::ptr::null_mut(), |rs| rs.as_ptr()),
-            CS: self.cs.as_ref().map_or(Default::default(), |code| code.to_c_struct()),
+            pRootSignature: self
+                .root_signature
+                .as_ref()
+                .map_or(std::ptr::null_mut(), |rs| rs.as_ptr()),
+            CS: self
+                .cs
+                .as_ref()
+                .map_or(Default::default(), |code| code.to_c_struct()),
             NodeMask: self.node_mask,
-            CachedPSO: self.cached_pso.as_ref().map_or(Default::default(), |cached| cached.to_c_struct()),
+            CachedPSO: self
+                .cached_pso
+                .as_ref()
+                .map_or(Default::default(), |cached| cached.to_c_struct()),
             Flags: self.flags.map_or(0, |f| f.0),
         }
     }
@@ -3070,7 +3079,10 @@ impl<'a, 'b, 'c>
     ) -> (
         D3D12_GRAPHICS_PIPELINE_STATE_DESC,
         (
-            (Vec<D3D12_SO_DECLARATION_ENTRY>, Vec<std::ffi::CString>),
+            (
+                Vec<D3D12_SO_DECLARATION_ENTRY>,
+                Vec<Option<std::ffi::CString>>,
+            ),
             (Vec<D3D12_INPUT_ELEMENT_DESC>, Vec<std::ffi::CString>),
         ),
     ) {
@@ -3491,10 +3503,7 @@ pub struct Range {
 }
 impl Range {
     pub fn new(begin: usize, end: usize) -> Self {
-        Self {
-            begin,
-            end,
-        }
+        Self { begin, end }
     }
 }
 
@@ -3506,10 +3515,7 @@ pub struct RangeUint64 {
 }
 impl RangeUint64 {
     pub fn new(begin: u64, end: u64) -> Self {
-        Self {
-            begin,
-            end,
-        }
+        Self { begin, end }
     }
 }
 
@@ -4814,19 +4820,21 @@ impl ShaderResourceViewDesc {
 #[derive(Clone, Debug)]
 pub struct SODeclarationEntry<'a> {
     pub stream: u32,
-    pub semantic_name: &'a str,
+    pub semantic_name: Option<&'a str>,
     pub semantic_index: u32,
     pub start_component: u8,
     pub component_count: u8,
     pub output_slot: u8,
 }
 impl<'a> SODeclarationEntry<'a> {
-    fn to_c_struct(&self) -> (D3D12_SO_DECLARATION_ENTRY, std::ffi::CString) {
-        let name = std::ffi::CString::new(self.semantic_name).unwrap();
+    fn to_c_struct(&self) -> (D3D12_SO_DECLARATION_ENTRY, Option<std::ffi::CString>) {
+        let name = self
+            .semantic_name
+            .map_or(None, |s| Some(std::ffi::CString::new(s).unwrap()));
         (
             D3D12_SO_DECLARATION_ENTRY {
                 Stream: self.stream,
-                SemanticName: name.as_ptr(),
+                SemanticName: name.as_ref().map_or(std::ptr::null(), |n| n.as_ptr()),
                 SemanticIndex: self.semantic_index,
                 StartComponent: self.start_component,
                 ComponentCount: self.component_count,
@@ -5047,7 +5055,10 @@ impl<'a> StreamOutputDesc<'a> {
         &self,
     ) -> (
         D3D12_STREAM_OUTPUT_DESC,
-        (Vec<D3D12_SO_DECLARATION_ENTRY>, Vec<std::ffi::CString>),
+        (
+            Vec<D3D12_SO_DECLARATION_ENTRY>,
+            Vec<Option<std::ffi::CString>>,
+        ),
     ) {
         let (sod, strs): (Vec<_>, Vec<_>) = self
             .so_declaration
@@ -5395,15 +5406,51 @@ pub struct VertexBufferView {
 // pub struct ViewInstanceLocation;
 // pub struct ViewInstancingDesc;
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct Viewport {
-    pub top_left_x: f32,
-    pub top_left_y: f32,
-    pub width: f32,
-    pub height: f32,
-    pub min_depth: f32,
-    pub max_depth: f32,
+    top_left_x: f32,
+    top_left_y: f32,
+    width: f32,
+    height: f32,
+    min_depth: f32,
+    max_depth: f32,
+}
+impl Viewport {
+    pub fn new() -> Self {
+        Self {
+            top_left_x: 0.0,
+            top_left_y: 0.0,
+            width: 0.0,
+            height: 0.0,
+            min_depth: 0.0,
+            max_depth: 1.0,
+        }
+    }
+    pub fn top_left_x(mut self, top_left_x: f32) -> Self {
+        self.top_left_x = top_left_x;
+        self
+    }
+    pub fn top_left_y(mut self, top_left_y: f32) -> Self {
+        self.top_left_y = top_left_y;
+        self
+    }
+    pub fn width(mut self, width: f32) -> Self {
+        self.width = width;
+        self
+    }
+    pub fn height(mut self, height: f32) -> Self {
+        self.height = height;
+        self
+    }
+    pub fn min_depth(mut self, min_depth: f32) -> Self {
+        self.min_depth = min_depth;
+        self
+    }
+    pub fn max_depth(mut self, max_depth: f32) -> Self {
+        self.max_depth = max_depth;
+        self
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -6026,7 +6073,8 @@ macro_rules! impl_device {
                 desc: &ConstantBufferViewDesc,
                 dest_descriptor: CPUDescriptorHandle,
             ) {
-                self.0.CreateConstantBufferView(&desc.to_c_struct(), dest_descriptor.into());
+                self.0
+                    .CreateConstantBufferView(&desc.to_c_struct(), dest_descriptor.into());
             }
             unsafe fn create_depth_stencil_view(
                 &self,
@@ -7582,13 +7630,15 @@ impl IResource for Resource {
             desc.width as usize * desc.height as usize * desc.depth_or_array_size as usize,
             |r| r.end - r.begin,
         );
-        hresult(
-            std::slice::from_raw_parts_mut(p as *mut u8, size),
-            res,
-        )
+        hresult(std::slice::from_raw_parts_mut(p as *mut u8, size), res)
     }
     unsafe fn unmap(&self, subresource: u32, write_range: Option<Range>) {
-        self.0.Unmap(subresource, write_range.as_ref().map_or(std::ptr::null(), |r| r as *const Range as *const D3D12_RANGE));
+        self.0.Unmap(
+            subresource,
+            write_range.as_ref().map_or(std::ptr::null(), |r| {
+                r as *const Range as *const D3D12_RANGE
+            }),
+        );
     }
 }
 

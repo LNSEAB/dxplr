@@ -157,7 +157,7 @@ impl Triangle {
                 .unwrap()
         };
         let pipeline = {
-            let file = File::open("examples/triangle/simple.hlsl").unwrap();
+            let file = File::open("examples/d3d12/triangle/simple.hlsl").unwrap();
             let mut reader = BufReader::new(file);
             let mut data = Vec::new();
             reader.read_to_end(&mut data).unwrap();
@@ -232,12 +232,9 @@ impl Triangle {
             .unwrap();
         self.cmd_list
             .set_graphics_root_signature(&self.root_signature);
-        self.cmd_list.rs_set_viewports(&[d3d12::Viewport {
-            width: swap_chain_desc.width as f32,
-            height: swap_chain_desc.height as f32,
-            max_depth: 1.0,
-            ..Default::default()
-        }]);
+        self.cmd_list.rs_set_viewports(&[d3d12::Viewport::new()
+            .width(swap_chain_desc.width as f32)
+            .height(swap_chain_desc.height as f32)]);
         self.cmd_list.rs_set_scissor_rects(&[dxplr::Rect {
             left: 0,
             top: 0,

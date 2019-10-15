@@ -15,6 +15,10 @@ default-target = "x86_64-pc-windows-msvc"
 features = ["dxgi1_6", "d3dcompiler"]
 
 [features]
+d3d11_1 = ["winapi/d3d11_1"]
+d3d11_2 = ["d3d11_1", "winapi/d3d11_2"]
+d3d11_3 = ["d3d11_2", "winapi/d3d11_3"]
+d3d11_4 = ["d3d11_3", "winapi/d3d11_4"]
 dxgi1_2 = ["winapi/dxgi1_2"]
 dxgi1_3 = ["dxgi1_2", "winapi/dxgi1_3"]
 dxgi1_4 = ["dxgi1_3", "winapi/dxgi1_4"]
@@ -34,6 +38,7 @@ winapi = { version = "0.3.8", features = [
 	"d3dcommon",
 	"dxgi",
 	"dxgidebug",
+	"d3d11",
 	"d3d12",
 	"d3d12sdklayers",
 ] }
@@ -44,13 +49,26 @@ winit = "0.19.3"
 image = "0.22.1"
 
 [[example]]
-name = "triangle"
+name = "d3d11_triangle"
+path = "./examples/d3d11/triangle/main.rs"
 required-features = ["dxgi1_4", "d3dcompiler"]
 
 [[example]]
-name = "texture"
+name = "d3d11_texture"
+path = "./examples/d3d11/texture/main.rs"
 required-features = ["dxgi1_4", "d3dcompiler"]
 
 [[example]]
-name = "compute"
+name = "d3d12_triangle"
+path = "./examples/d3d12/triangle/main.rs"
+required-features = ["dxgi1_4", "d3dcompiler"]
+
+[[example]]
+name = "d3d12_texture"
+path = "./examples/d3d12/texture/main.rs"
+required-features = ["dxgi1_4", "d3dcompiler"]
+
+[[example]]
+name = "d3d12_compute"
+path = "./examples/d3d12/compute/main.rs"
 required-features = ["d3dcompiler"]

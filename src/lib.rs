@@ -1,7 +1,8 @@
-//! (Experimental) A thin Rust wrapper around D3D12 and DXGI.
+//! (Experimental) A thin Rust wrapper around D3D1, D3D12 and DXGI.
 
 pub mod api;
 pub mod d3d;
+pub mod d3d11;
 pub mod d3d12;
 mod d3d12sdklayers;
 pub mod d3dcompiler;
