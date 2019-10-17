@@ -6,8 +6,6 @@ use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
 use com_ptr;
 use com_ptr::ComPtr;
-#[cfg(feature = "dxgi1_2")]
-use winapi::ctypes::c_void;
 use winapi::shared::dxgi::*;
 #[cfg(feature = "dxgi1_2")]
 use winapi::shared::dxgi1_2::*;
@@ -33,6 +31,7 @@ use winapi::um::winnt::HANDLE;
 #[cfg(feature = "dxgi1_6")]
 use winapi::um::winnt::HRESULT;
 use winapi::Interface as _;
+use std::ffi::c_void;
 
 #[derive(Clone, Copy, Debug)]
 pub struct DebugID(Guid);
