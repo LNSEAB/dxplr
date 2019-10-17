@@ -3,6 +3,7 @@
 pub mod api;
 pub mod d3d;
 pub mod d3d11;
+mod d3d11sdklayers;
 pub mod d3d12;
 mod d3d12sdklayers;
 pub mod d3dcompiler;

@@ -47,7 +47,7 @@ impl Triangle {
             None,
             d3d::DriverType::Hardware,
             None,
-            None,
+            Some(d3d11::CreateDeviceFlags::Debug),
             &[d3d::FeatureLevel(11, 0)],
             &dxgi::SwapChainDesc::new()
                 .buffer_desc(

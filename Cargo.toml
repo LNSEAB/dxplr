@@ -39,6 +39,7 @@ winapi = { version = "0.3.8", features = [
 	"dxgi",
 	"dxgidebug",
 	"d3d11",
+	"d3d11sdklayers",
 	"d3d12",
 	"d3d12sdklayers",
 ] }

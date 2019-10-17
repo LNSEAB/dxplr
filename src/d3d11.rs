@@ -6,12 +6,15 @@ use crate::result::{hresult, HResult};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
+pub use crate::d3d11sdklayers::*;
 use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
 use winapi::shared::windef::RECT;
 use winapi::um::d3d11::*;
 use winapi::um::d3dcommon::*;
 use winapi::Interface as _;
+use std::ffi::OsString;
+use std::os::windows::ffi::OsStringExt;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct AsyncGetDataFlag(u32);
@@ -3584,6 +3587,8 @@ impl From<D3D11_VIEWPORT> for Viewport {
 
 pub trait IDeviceChild: Interface {
     fn get_device(&self) -> Device;
+    fn get_name(&self) -> Result<String, HResult>;
+    fn set_name(&self, name: &str) -> Result<(), HResult>;
 }
 macro_rules! impl_devicechild {
     ($s: ident, $interface: ident) => {
@@ -3594,6 +3599,36 @@ macro_rules! impl_devicechild {
                 unsafe {
                     self.0.GetDevice(&mut obj);
                     Device(ComPtr::from_raw(obj))
+                }
+            }
+            fn get_name(&self) -> Result<String, HResult> {
+                unsafe {
+                    let mut sz = 0;
+                    let res = self.0.GetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        &mut sz,
+                        std::ptr::null_mut()
+                    );
+                    let mut sz = hresult(sz, res)?;
+                    let mut buf = Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
+                    let res = self.0.GetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        &mut sz,
+                        buf.as_mut_ptr() as *mut c_void
+                    );
+                    let buf = hresult(buf, res)?;
+                    Ok(OsString::from_wide(&buf).to_string_lossy().to_string())
+                }
+            }
+            fn set_name(&self, name: &str) -> Result<(), HResult> {
+                unsafe {
+                    let wname = name.encode_utf16().chain(Some(0)).collect::<Vec<u16>>();
+                    let res = self.0.SetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        (std::mem::size_of::<u16>() * wname.len()) as u32,
+                        wname.as_ptr() as *const c_void
+                    );
+                    hresult((), res)
                 }
             }
         }
@@ -4101,6 +4136,8 @@ pub trait IDevice: Interface {
     fn get_immediate_context(&self) -> DeviceContext;
     fn open_shared_resource<T: Interface>(&self, resource: &Handle) -> Result<T, HResult>;
     fn set_exception_mode(&self, flags: Option<RaiseFlags>) -> Result<(), HResult>;
+    fn get_name(&self) -> Result<String, HResult>;
+    fn set_name(&self, name: &str) -> Result<(), HResult>;
 }
 #[derive(Clone, Debug)]
 pub struct Device(ComPtr<ID3D11Device>);
@@ -4203,7 +4240,7 @@ macro_rules! impl_device {
                     let res = unsafe {
                         self.0.CreateBuffer(
                             &desc.to_c_struct(),
-                            c_initial_data.map_or(std::ptr::null(), |d| &d),
+                            c_initial_data.as_ref().map_or(std::ptr::null(), |d| d),
                             &mut obj,
                         )
                     };
@@ -4620,6 +4657,36 @@ macro_rules! impl_device {
             fn set_exception_mode(&self, flags: Option<RaiseFlags>) -> Result<(), HResult> {
                 let res = unsafe { self.0.SetExceptionMode(flags.map_or(0, |f| f.0)) };
                 hresult((), res)
+            }
+            fn get_name(&self) -> Result<String, HResult> {
+                unsafe {
+                    let mut sz = 0;
+                    let res = self.0.GetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        &mut sz,
+                        std::ptr::null_mut()
+                    );
+                    let mut sz = hresult(sz, res)?;
+                    let mut buf = Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
+                    let res = self.0.GetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        &mut sz,
+                        buf.as_mut_ptr() as *mut c_void
+                    );
+                    let buf = hresult(buf, res)?;
+                    Ok(OsString::from_wide(&buf).to_string_lossy().to_string())
+                }
+            }
+            fn set_name(&self, name: &str) -> Result<(), HResult> {
+                unsafe {
+                    let wname = name.encode_utf16().chain(Some(0)).collect::<Vec<u16>>();
+                    let res = self.0.SetPrivateData(
+                        &WKPDID_D3DDebugObjectNameW,
+                        (std::mem::size_of::<u16>() * wname.len()) as u32,
+                        wname.as_ptr() as *const c_void
+                    );
+                    hresult((), res)
+                }
             }
         }
     };
