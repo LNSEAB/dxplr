@@ -22,7 +22,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -32,7 +32,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_dxgi1_2.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -42,7 +42,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_dxgi1_3.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -52,7 +52,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_dxgi1_4.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -62,7 +62,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_dxgi1_5.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -72,7 +72,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_dxgi1_6.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -82,7 +82,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_d3d11_1.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -92,7 +92,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_d3d11_2.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -102,7 +102,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_d3d11_3.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -112,7 +112,7 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_d3d11_4.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
@@ -122,5 +122,5 @@ steps:
       inputs:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result_d3dcompiler.xml'
-      condition: succeedOrFailed()
+      condition: succeededOrFailed()
       continueOnError: true
