@@ -14,160 +14,58 @@ steps:
         rustc -V
         cargo -V
       displayName: install rust
-    - script: |
-        cargo install cargo2junit
-      displayName: install cargo2junit
 
     - script: |
-        cargo test -- -Z unstable-options --format json > result.json
+        cargo test
       displayName: test dxplr
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_2" -- -Z unstable-options --format json > result.json
+        cargo test --features="dxgi1_2"
       displayName: test dxplr dxgi1_2
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_3" -- -Z unstable-options --format json > result.json
+        cargo test --features="dxgi1_3"
       displayName: test dxplr dxgi1_3
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_4" -- -Z unstable-options --format json > result.json
+        cargo test --features="dxgi1_4"
       displayName: test dxplr dxgi1_4
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_5" -- -Z unstable-options --format json > result.json
+        cargo test --features="dxgi1_5"
       displayName: test dxplr dxgi1_5
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_6" -- -Z unstable-options --format json > result.json
+        cargo test --features="dxgi1_6"
       displayName: test dxplr dxgi1_6
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_1" -- -Z unstable-options --format json > result.json
+        cargo test --features="d3d11_1"
       displayName: test dxplr d3d11_1
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_2" -- -Z unstable-options --format json > result.json
+        cargo test --features="d3d11_2"
       displayName: test dxplr d3d11_2
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_3" -- -Z unstable-options --format json > result.json
+        cargo test --features="d3d11_3"
       displayName: test dxplr d3d11_3
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_4" -- -Z unstable-options --format json > result.json
+        cargo test --features="d3d11_4"
       displayName: test dxplr d3d11_4
       continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
-      continueOnError: true
 
     - script: |
-        cargo test --features="d3dcompiler" -- -Z unstable-options --format json > result.json
+        cargo test --features="d3dcompiler"
       displayName: test dxplr d3dcompiler
-      continueOnError: true
-    - script: |
-        cargo2junit result.json > result.xml
-      displayName: cargo2junit
-      continueOnError: true
-    - task: PublishTestResults@2
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'result.xml'
       continueOnError: true
