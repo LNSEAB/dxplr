@@ -17,7 +17,6 @@ install:
 build: off
 
 test_script:
-  - cargo build --features="dxgi1_1"
   - cargo build --features="dxgi1_2"
   - cargo build --features="dxgi1_3"
   - cargo build --features="dxgi1_4"
