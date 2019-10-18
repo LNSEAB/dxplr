@@ -269,8 +269,4 @@ mod tests {
         );
         assert_eq!(ShaderModel(5, 1), D3D_SHADER_MODEL_5_1.into());
     }
-    #[test]
-    fn failure() {
-        assert!(false);
-    }
 }
