@@ -27,7 +27,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="dxgi1_2" -- -Z unstable-options --format json > result.json
@@ -38,7 +37,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="dxgi1_3" -- -Z unstable-options --format json > result.json
@@ -49,7 +47,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="dxgi1_4" -- -Z unstable-options --format json > result.json
@@ -71,7 +68,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="dxgi1_6" -- -Z unstable-options --format json > result.json
@@ -82,7 +78,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="d3d11_1" -- -Z unstable-options --format json > result.json
@@ -104,7 +99,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="d3d11_3" -- -Z unstable-options --format json > result.json
@@ -115,7 +109,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="d3d11_4" -- -Z unstable-options --format json > result.json
@@ -126,7 +119,6 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
 
     - script: |
         cargo test --features="d3dcompiler" -- -Z unstable-options --format json > result.json
@@ -137,4 +129,3 @@ steps:
         testResultsFormat: 'JUnit'
         testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
-      continueOnError: true
