@@ -19,7 +19,8 @@ steps:
       displayName: install cargo2junit
 
     - script: |
-        cargo test -- -Z unstable-options --format json | cargo2junit > result.xml
+        cargo test -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr
     - task: PublishTestResults@2
       inputs:
@@ -29,101 +30,111 @@ steps:
       continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_2" -- -Z unstable-options --format json | cargo2junit > result_dxgi1_2.xml
+        cargo test --features="dxgi1_2" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_2
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_dxgi1_2.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_3" -- -Z unstable-options --format json | cargo2junit > result_dxgi1_3.xml
+        cargo test --features="dxgi1_3" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_3
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_dxgi1_3.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_4" -- -Z unstable-options --format json | cargo2junit > result_dxgi1_4.xml
+        cargo test --features="dxgi1_4" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_4
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_dxgi1_4.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_5" -- -Z unstable-options --format json | cargo2junit > result_dxgi1_5.xml
+        cargo test --features="dxgi1_5" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_5
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_dxgi1_5.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="dxgi1_6" -- -Z unstable-options --format json | cargo2junit > result_dxgi1_6.xml
+        cargo test --features="dxgi1_6" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_6
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_dxgi1_6.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_1" -- -Z unstable-options --format json | cargo2junit > result_d3d11_1.xml
+        cargo test --features="d3d11_1" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_1
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_d3d11_1.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_2" -- -Z unstable-options --format json | cargo2junit > result_d3d11_2.xml
+        cargo test --features="d3d11_2" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_2
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_d3d11_2.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_3" -- -Z unstable-options --format json | cargo2junit > result_d3d11_3.xml
+        cargo test --features="d3d11_3" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_3
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_d3d11_3.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="d3d11_4" -- -Z unstable-options --format json | cargo2junit > result_d3d11_4.xml
+        cargo test --features="d3d11_4" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_4
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_d3d11_4.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
 
     - script: |
-        cargo test --features="d3dcompiler" -- -Z unstable-options --format json | cargo2junit > result_d3dcompiler.xml
+        cargo test --features="d3dcompiler" -- -Z unstable-options --format json > result.json
+        cargo2junit result.json > result.xml
       displayName: test dxplr d3dcompiler
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
-        testResultsFiles: 'result_d3dcompiler.xml'
+        testResultsFiles: 'result.xml'
       condition: succeededOrFailed()
       continueOnError: true
