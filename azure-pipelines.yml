@@ -20,8 +20,10 @@ steps:
 
     - script: |
         cargo test -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -30,8 +32,10 @@ steps:
 
     - script: |
         cargo test --features="dxgi1_2" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_2
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -40,8 +44,10 @@ steps:
 
     - script: |
         cargo test --features="dxgi1_3" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_3
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -50,8 +56,10 @@ steps:
 
     - script: |
         cargo test --features="dxgi1_4" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_4
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -61,8 +69,10 @@ steps:
 
     - script: |
         cargo test --features="dxgi1_5" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_5
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -71,8 +81,10 @@ steps:
 
     - script: |
         cargo test --features="dxgi1_6" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr dxgi1_6
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -81,8 +93,10 @@ steps:
 
     - script: |
         cargo test --features="d3d11_1" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_1
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -92,8 +106,10 @@ steps:
 
     - script: |
         cargo test --features="d3d11_2" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_2
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -102,8 +118,10 @@ steps:
 
     - script: |
         cargo test --features="d3d11_3" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_3
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -112,8 +130,10 @@ steps:
 
     - script: |
         cargo test --features="d3d11_4" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr d3d11_4
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -122,8 +142,10 @@ steps:
 
     - script: |
         cargo test --features="d3dcompiler" -- -Z unstable-options --format json > result.json
-        cargo2junit result.json > result.xml
       displayName: test dxplr d3dcompiler
+    - script: |
+        cargo2junit result.json > result.xml
+      displayName: cargo2junit
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
