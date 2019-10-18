@@ -2,7 +2,7 @@
 
 (Experimental) A thin Rust wrapper around D3D11, D3D12 and DXGI.
 
-[![Build Status](https://dev.azure.com/eab119/dxplr/_apis/build/status/LNSEAB.dxplr?branchName=master)](https://dev.azure.com/eab119/dxplr/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/nclr/dxplr/_apis/build/status/LNSEAB.dxplr?branchName=master)](https://dev.azure.com/nclr/dxplr/_build/latest?definitionId=2&branchName=master)
 
 ## Features
 
