@@ -8,7 +8,7 @@ environment:
       target: x86_64-pc-windows-msvc
 
 install:
-  - ps: Start-FileDownload 'https://win.rustup.rs/x86_64 -FileName rustup-init.exe'
+  - ps: Start-FileDownload 'https://win.rustup.rs/x86_64' -FileName rustup-init.exe
   - rustup-init -yv --default-toolchain %channel% --default-host %target%
   - set PATH=%PATH%;%USERPROFILE%\.cargo\bin
   - rustc -vV
