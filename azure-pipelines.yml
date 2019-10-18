@@ -25,6 +25,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -38,6 +39,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -51,6 +53,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -78,6 +81,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -91,6 +95,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -104,6 +109,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -117,6 +123,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -130,6 +137,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -143,6 +151,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
@@ -156,6 +165,7 @@ steps:
     - script: |
         cargo2junit result.json > result.xml
       displayName: cargo2junit
+      continueOnError: true
     - task: PublishTestResults@2
       inputs:
         testResultsFormat: 'JUnit'
