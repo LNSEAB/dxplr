@@ -921,7 +921,7 @@ pub struct Box3D {
 }
 impl Box3D {
     pub fn as_c_ptr(&self) -> *const D3D11_BOX {
-        (self as *const Box3D).cast::<D3D11_BOX>()
+        self as *const Box3D as *const D3D11_BOX
     }
 }
 
