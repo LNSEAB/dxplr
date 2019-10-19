@@ -5002,6 +5002,7 @@ pub trait IDeviceContext: IDeviceChild {
     fn vs_set_shader(&self, shader: &VertexShader, instances: Option<&[&ClassInstance]>);
     fn vs_set_shader_resources(&self, start_slot: u32, views: &[&ShaderResourceView]);
 }
+#[derive(Clone, Debug)]
 pub struct DeviceContext(ComPtr<ID3D11DeviceContext>);
 macro_rules! impl_devicecontext {
     ($s: ident, $interface: ident) => {
