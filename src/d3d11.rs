@@ -1326,7 +1326,7 @@ impl From<D3D11_DEPTH_STENCIL_VIEW_DESC> for DepthStencilViewDesc {
                     } else {
                         Some(DSVFlags(src.Flags))
                     },
-                    mip_slice: src.u.Texture1D().MipSlice,
+                    mip_slice: src.u.Texture2D().MipSlice,
                 },
                 D3D11_DSV_DIMENSION_TEXTURE2DARRAY => DepthStencilViewDesc::Texture2DArray {
                     format: std::mem::transmute(src.Format),
@@ -4306,11 +4306,11 @@ macro_rules! impl_device {
             ) -> Result<DepthStencilView, HResult> {
                 Ok(DepthStencilView(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
-                    let c_desc = desc.as_ref().map(|d| d.to_c_struct());
+                    let c_desc = desc.map(|d| d.to_c_struct());
                     let res = unsafe {
                         self.0.CreateDepthStencilView(
                             resource.as_ptr() as *mut _,
-                            c_desc.map_or(std::ptr::null(), |d| &d),
+                            c_desc.as_ref().map_or(std::ptr::null(), |d| d),
                             &mut obj,
                         )
                     };
@@ -4480,7 +4480,7 @@ macro_rules! impl_device {
                     let res = unsafe {
                         self.0.CreateRenderTargetView(
                             resource.as_ptr() as *mut _,
-                            c_desc.map_or(std::ptr::null(), |d| &d),
+                            c_desc.as_ref().map_or(std::ptr::null(), |d| d),
                             &mut obj,
                         )
                     };
@@ -4508,7 +4508,7 @@ macro_rules! impl_device {
                     let res = unsafe {
                         self.0.CreateShaderResourceView(
                             resource.as_ptr() as *mut _,
-                            c_desc.map_or(std::ptr::null(), |d| &d),
+                            c_desc.as_ref().map_or(std::ptr::null(), |d| d),
                             &mut obj,
                         )
                     };
