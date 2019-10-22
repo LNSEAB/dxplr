@@ -74,11 +74,9 @@ impl Triangle {
                     .byte_width((std::mem::size_of::<Vertex>() * 3) as u32)
                     .usage(d3d11::Usage::Default)
                     .bind_flags(d3d11::BindFlags::VertexBuffer),
-                Some(&d3d11::SubresourceData {
-                    sys_mem: VERTICES.as_ptr() as *const std::ffi::c_void,
-                    sys_mem_pitch: 0,
-                    sys_mem_slice_pitch: 0,
-                }),
+                Some(&d3d11::SubresourceData::new()
+                    .sys_mem(VERTICES.as_ptr())
+                ),
             )
             .unwrap();
         let (input_layout, vs, ps) = {

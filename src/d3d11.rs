@@ -2011,9 +2011,9 @@ macro_rules! d3d11_input_element_descs {
 
 #[derive(Clone, Debug)]
 pub struct MappedSubresource {
-    data: *mut c_void,
-    row_pitch: u32,
-    depth_pitch: u32,
+    pub data: *mut c_void,
+    pub row_pitch: u32,
+    pub depth_pitch: u32,
 }
 impl From<D3D11_MAPPED_SUBRESOURCE> for MappedSubresource {
     fn from(src: D3D11_MAPPED_SUBRESOURCE) -> MappedSubresource {
@@ -2890,12 +2890,62 @@ impl<'a> SODeclarationEntry<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct SubresourceData {
-    pub sys_mem: *const c_void,
-    pub sys_mem_pitch: u32,
-    pub sys_mem_slice_pitch: u32,
+pub struct SubresourceData<M, P, S> {
+    pub sys_mem: M,
+    pub sys_mem_pitch: P,
+    pub sys_mem_slice_pitch: S,
 }
-impl SubresourceData {
+impl SubresourceData<(), (), ()> {
+    pub fn new() -> Self {
+        Self {
+            sys_mem: (),
+            sys_mem_pitch: (),
+            sys_mem_slice_pitch: (),
+        }
+    }
+}
+impl<M, P, S> SubresourceData<M, P, S> {
+    pub fn sys_mem<T>(self, sys_mem: *const T) -> SubresourceData<*const c_void, P, S> {
+        SubresourceData {
+            sys_mem: sys_mem as *const c_void,
+            sys_mem_pitch: self.sys_mem_pitch,
+            sys_mem_slice_pitch: self.sys_mem_slice_pitch,
+        }
+    }
+    pub fn sys_mem_pitch(self, sys_mem_pitch: u32) -> SubresourceData<M, u32, S> {
+        SubresourceData {
+            sys_mem: self.sys_mem,
+            sys_mem_pitch,
+            sys_mem_slice_pitch: self.sys_mem_slice_pitch,
+        }
+    }
+    pub fn sys_mem_slice_pitch(self, sys_mem_slice_pitch: u32) -> SubresourceData<M, P, u32> {
+        SubresourceData {
+            sys_mem: self.sys_mem,
+            sys_mem_pitch: self.sys_mem_pitch,
+            sys_mem_slice_pitch,
+        }
+    }
+}
+impl SubresourceData<*const c_void, (), ()> {
+    fn to_c_struct(&self) -> D3D11_SUBRESOURCE_DATA {
+        D3D11_SUBRESOURCE_DATA {
+            pSysMem: self.sys_mem,
+            SysMemPitch: 0,
+            SysMemSlicePitch: 0,
+        }
+    }
+}
+impl SubresourceData<*const c_void, u32, ()> {
+    fn to_c_struct(&self) -> D3D11_SUBRESOURCE_DATA {
+        D3D11_SUBRESOURCE_DATA {
+            pSysMem: self.sys_mem,
+            SysMemPitch: self.sys_mem_pitch,
+            SysMemSlicePitch: 0,
+        }
+    }
+}
+impl SubresourceData<*const c_void, u32, u32> {
     fn to_c_struct(&self) -> D3D11_SUBRESOURCE_DATA {
         D3D11_SUBRESOURCE_DATA {
             pSysMem: self.sys_mem,
@@ -4038,7 +4088,7 @@ pub trait IDevice: Interface {
     fn create_buffer(
         &self,
         desc: &BufferDesc<u32, Usage, BindFlags>,
-        initial_data: Option<&SubresourceData>,
+        initial_data: Option<&SubresourceData<*const c_void, (), ()>>,
     ) -> Result<Buffer, HResult>;
     fn create_class_linkage(&self) -> Result<ClassLinkage, HResult>;
     fn create_compute_shader(
@@ -4107,17 +4157,17 @@ pub trait IDevice: Interface {
     fn create_texture1d(
         &self,
         desc: &Texture1DDesc<u32, dxgi::Format, Usage>,
-        initial_data: Option<&SubresourceData>,
+        initial_data: Option<&SubresourceData<*const c_void, (), ()>>,
     ) -> Result<Texture1D, HResult>;
     fn create_texture2d(
         &self,
         desc: &Texture2DDesc<u32, u32, dxgi::Format, Usage>,
-        initial_data: Option<&SubresourceData>,
+        initial_data: Option<&SubresourceData<*const c_void, u32, ()>>,
     ) -> Result<Texture2D, HResult>;
     fn create_texture3d(
         &self,
         desc: &Texture3DDesc<u32, u32, u32, dxgi::Format, Usage>,
-        initial_data: Option<&SubresourceData>,
+        initial_data: Option<&SubresourceData<*const c_void, u32, u32>>,
     ) -> Result<Texture3D, HResult>;
     fn create_unordered_access_view(
         &self,
@@ -4232,7 +4282,7 @@ macro_rules! impl_device {
             fn create_buffer(
                 &self,
                 desc: &BufferDesc<u32, Usage, BindFlags>,
-                initial_data: Option<&SubresourceData>,
+                initial_data: Option<&SubresourceData<*const c_void, (), ()>>,
             ) -> Result<Buffer, HResult> {
                 Ok(Buffer(ComPtr::new(|| {
                     let mut obj = std::ptr::null_mut();
@@ -4518,7 +4568,7 @@ macro_rules! impl_device {
             fn create_texture1d(
                 &self,
                 desc: &Texture1DDesc<u32, dxgi::Format, Usage>,
-                initial_data: Option<&SubresourceData>,
+                initial_data: Option<&SubresourceData<*const c_void, (), ()>>,
             ) -> Result<Texture1D, HResult> {
                 let c_data = initial_data
                     .as_ref()
@@ -4538,7 +4588,7 @@ macro_rules! impl_device {
             fn create_texture2d(
                 &self,
                 desc: &Texture2DDesc<u32, u32, dxgi::Format, Usage>,
-                initial_data: Option<&SubresourceData>,
+                initial_data: Option<&SubresourceData<*const c_void, u32, ()>>,
             ) -> Result<Texture2D, HResult> {
                 let c_data = initial_data
                     .as_ref()
@@ -4558,7 +4608,7 @@ macro_rules! impl_device {
             fn create_texture3d(
                 &self,
                 desc: &Texture3DDesc<u32, u32, u32, dxgi::Format, Usage>,
-                initial_data: Option<&SubresourceData>,
+                initial_data: Option<&SubresourceData<*const c_void, u32, u32>>,
             ) -> Result<Texture3D, HResult> {
                 let c_data = initial_data
                     .as_ref()
