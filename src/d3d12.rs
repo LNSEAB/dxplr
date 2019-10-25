@@ -3385,7 +3385,7 @@ impl<'a> InputLayoutDesc<'a> {
 ///
 #[macro_export]
 macro_rules! d3d12_input_layout_descs {
-    ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr},)*) => {
+    ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr}),* $(,)?) => {
         $crate::d3d12::InputLayoutDesc(vec![
             $(
                 $crate::d3d12::InputElementDesc {

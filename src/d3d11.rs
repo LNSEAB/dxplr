@@ -1992,7 +1992,7 @@ impl<'a> InputElementDesc<'a> {
 
 #[macro_export]
 macro_rules! d3d11_input_element_descs {
-    ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr},)*) => {
+    ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr}),* $(,)?) => {
         vec![
             $(
                 $crate::d3d11::InputElementDesc {
