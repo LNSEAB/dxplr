@@ -1026,7 +1026,7 @@ pub enum ResourceHeapTier {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Default, Debug)]
-pub struct ResourceStates(u32);
+pub struct ResourceStates(pub(crate) u32);
 #[allow(non_upper_case_globals)]
 impl ResourceStates {
     pub const Common: Self = Self(D3D12_RESOURCE_STATE_COMMON);

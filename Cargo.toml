@@ -25,6 +25,7 @@ dxgi1_4 = ["dxgi1_3", "winapi/dxgi1_4"]
 dxgi1_5 = ["dxgi1_4", "winapi/dxgi1_5"]
 dxgi1_6 = ["dxgi1_5", "winapi/dxgi1_6"]
 d3dcompiler = ["winapi/d3dcompiler"]
+d3d11on12 = ["winapi/d3d11on12"]
 
 [dependencies]
 com_ptr = "0.1.2"

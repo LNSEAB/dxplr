@@ -42,7 +42,7 @@ pub enum AuthenticatedProcessIdentifierType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct BindFlags(u32);
+pub struct BindFlags(pub(crate) u32);
 #[allow(non_upper_case_globals)]
 impl BindFlags {
     pub const VertexBuffer: Self = Self(D3D11_BIND_VERTEX_BUFFER);
@@ -208,7 +208,7 @@ pub enum CounterType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct CPUAccessFlags(u32);
+pub struct CPUAccessFlags(pub(crate) u32);
 #[allow(non_upper_case_globals)]
 impl CPUAccessFlags {
     pub const Write: Self = Self(D3D11_CPU_ACCESS_WRITE);
@@ -217,7 +217,7 @@ impl CPUAccessFlags {
 impl_bitflag_operators!(CPUAccessFlags);
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct CreateDeviceFlags(u32);
+pub struct CreateDeviceFlags(pub(crate) u32);
 #[allow(non_upper_case_globals)]
 impl CreateDeviceFlags {
     pub const SingleThreaded: Self = Self(D3D11_CREATE_DEVICE_SINGLETHREADED);
@@ -478,7 +478,7 @@ pub enum ResourceDimension {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct ResourceMiscFlags(u32);
+pub struct ResourceMiscFlags(pub(crate) u32);
 #[allow(non_upper_case_globals)]
 impl ResourceMiscFlags {
     pub const GenerateMips: Self = Self(D3D11_RESOURCE_MISC_GENERATE_MIPS);
@@ -6420,14 +6420,14 @@ pub fn create_device(
             &mut level,
             &mut device_context,
         );
-        hresult(
-            (
-                Device(ComPtr::from_raw(device)),
-                level.into(),
-                DeviceContext(ComPtr::from_raw(device_context)),
-            ),
-            res,
-        )
+        if res < 0 {
+            return Err(res.into());
+        }
+        Ok((
+            Device(ComPtr::from_raw(device)),
+            level.into(),
+            DeviceContext(ComPtr::from_raw(device_context)),
+        ))
     }
 }
 
@@ -6466,14 +6466,14 @@ pub fn create_device_and_swap_chain(
             &mut level,
             &mut device_context,
         );
-        hresult(
-            (
-                dxgi::SwapChain(ComPtr::from_raw(swap_chain)),
-                Device(ComPtr::from_raw(device)),
-                level.into(),
-                DeviceContext(ComPtr::from_raw(device_context)),
-            ),
-            res,
-        )
+        if res < 0 {
+            return Err(res.into());
+        }
+        Ok((
+            dxgi::SwapChain(ComPtr::from_raw(swap_chain)),
+            Device(ComPtr::from_raw(device)),
+            level.into(),
+            DeviceContext(ComPtr::from_raw(device_context)),
+        ))
     }
 }

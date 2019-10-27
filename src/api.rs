@@ -134,6 +134,8 @@ impl From<Rect> for RECT {
     }
 }
 
+/// Wrapped around HANDLE.
+/// This struct close a HANDLE automatically when dropped.
 pub struct Handle(HANDLE);
 impl Handle {
     pub fn new(p: HANDLE) -> Self {
