@@ -27,6 +27,13 @@ pub enum DriverType {
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u32)]
+pub enum IncludeType {
+    Local = D3D_INCLUDE_LOCAL,
+    System = D3D_INCLUDE_SYSTEM,
+}
+
+#[derive(Clone, Copy, Debug)]
+#[repr(u32)]
 pub enum Primitive {
     Undefined = D3D_PRIMITIVE_UNDEFINED,
     Point = D3D_PRIMITIVE_POINT,
@@ -235,6 +242,10 @@ impl IBlob for Blob {
     fn as_cstr(&self) -> Result<&std::ffi::CStr, std::ffi::FromBytesWithNulError> {
         std::ffi::CStr::from_bytes_with_nul(self.as_slice())
     }
+}
+
+pub trait IInclude {
+    fn open(&self, include_type: IncludeType, filename: &str, parent_data: Option<*const std::ffi::c_void>, data: &mut Vec<u8>) -> std::io::Result<()>;
 }
 
 #[cfg(test)]

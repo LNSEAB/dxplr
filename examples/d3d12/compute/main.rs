@@ -61,6 +61,7 @@ fn main() {
             &data,
             Some("compute.hlsl"),
             None,
+            None,
             "cs_main",
             "cs_5_0",
             Some(d3d::CompileFlags::Debug),

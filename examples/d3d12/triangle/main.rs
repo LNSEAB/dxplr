@@ -165,6 +165,7 @@ impl Triangle {
                 &data,
                 Some("simple.hlsl"),
                 None,
+                None,
                 "vs_main",
                 "vs_5_0",
                 Some(d3d::CompileFlags::Debug),
@@ -174,6 +175,7 @@ impl Triangle {
             let ps_bin = d3d::compile(
                 &data,
                 Some("simple.hlsl"),
+                None,
                 None,
                 "ps_main",
                 "ps_5_0",

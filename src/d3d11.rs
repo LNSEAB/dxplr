@@ -6441,7 +6441,7 @@ pub fn create_device_and_swap_chain(
         dxgi::ModeDesc<u32, u32, dxgi::Rational, dxgi::Format>,
         dxgi::Usage,
         u32,
-        *const c_void,
+        *const std::ffi::c_void,
         bool,
         dxgi::SwapEffect,
     >,

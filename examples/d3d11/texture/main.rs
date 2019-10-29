@@ -143,6 +143,7 @@ impl Renderer {
                 &data,
                 Some("tex.hlsl"),
                 None,
+                None,
                 "vs_main",
                 "vs_5_0",
                 Some(d3d::CompileFlags::Debug),
@@ -152,6 +153,7 @@ impl Renderer {
             let ps_bin = d3d::compile(
                 &data,
                 Some("tex.hlsl"),
+                None,
                 None,
                 "ps_main",
                 "ps_5_0",
