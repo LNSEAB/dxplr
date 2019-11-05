@@ -1,6 +1,10 @@
+#[cfg(feature = "d3dcompiler")]
 use dxplr::d3d;
+#[cfg(feature = "d3dcompiler")]
 use std::path::Path;
+#[cfg(feature = "d3dcompiler")]
 use std::fs::File;
+#[cfg(feature = "d3dcompiler")]
 use std::io::{Read, BufReader};
 
 #[cfg(feature = "d3dcompiler")]
