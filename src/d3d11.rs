@@ -1,20 +1,20 @@
 use crate::api::Rect;
 use crate::api::*;
 use crate::d3d;
+pub use crate::d3d11sdklayers::*;
 use crate::dxgi;
 use crate::result::{hresult, HResult};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
-pub use crate::d3d11sdklayers::*;
 use com_ptr::ComPtr;
+use std::ffi::OsString;
+use std::os::windows::ffi::OsStringExt;
 use winapi::ctypes::c_void;
 use winapi::shared::windef::RECT;
 use winapi::um::d3d11::*;
 use winapi::um::d3dcommon::*;
 use winapi::Interface as _;
-use std::ffi::OsString;
-use std::os::windows::ffi::OsStringExt;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct AsyncGetDataFlag(u32);
@@ -3657,14 +3657,15 @@ macro_rules! impl_devicechild {
                     let res = self.0.GetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         &mut sz,
-                        std::ptr::null_mut()
+                        std::ptr::null_mut(),
                     );
                     let mut sz = hresult(sz, res)?;
-                    let mut buf = Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
+                    let mut buf =
+                        Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
                     let res = self.0.GetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         &mut sz,
-                        buf.as_mut_ptr() as *mut c_void
+                        buf.as_mut_ptr() as *mut c_void,
                     );
                     let buf = hresult(buf, res)?;
                     Ok(OsString::from_wide(&buf).to_string_lossy().to_string())
@@ -3676,7 +3677,7 @@ macro_rules! impl_devicechild {
                     let res = self.0.SetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         (std::mem::size_of::<u16>() * wname.len()) as u32,
-                        wname.as_ptr() as *const c_void
+                        wname.as_ptr() as *const c_void,
                     );
                     hresult((), res)
                 }
@@ -4714,14 +4715,15 @@ macro_rules! impl_device {
                     let res = self.0.GetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         &mut sz,
-                        std::ptr::null_mut()
+                        std::ptr::null_mut(),
                     );
                     let mut sz = hresult(sz, res)?;
-                    let mut buf = Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
+                    let mut buf =
+                        Vec::<u16>::with_capacity(sz as usize / std::mem::size_of::<u16>());
                     let res = self.0.GetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         &mut sz,
-                        buf.as_mut_ptr() as *mut c_void
+                        buf.as_mut_ptr() as *mut c_void,
                     );
                     let buf = hresult(buf, res)?;
                     Ok(OsString::from_wide(&buf).to_string_lossy().to_string())
@@ -4733,7 +4735,7 @@ macro_rules! impl_device {
                     let res = self.0.SetPrivateData(
                         &WKPDID_D3DDebugObjectNameW,
                         (std::mem::size_of::<u16>() * wname.len()) as u32,
-                        wname.as_ptr() as *const c_void
+                        wname.as_ptr() as *const c_void,
                     );
                     hresult((), res)
                 }

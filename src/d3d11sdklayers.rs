@@ -1,12 +1,12 @@
+use crate::d3d11::IDeviceContext;
+use crate::dxgi::{ISwapChain, SwapChain};
+use crate::result::{hresult, HResult};
+use crate::{impl_bitflag_operators, impl_interface, Interface};
+use com_ptr::ComPtr;
 use winapi::shared::dxgi::*;
 use winapi::um::d3d11::*;
 use winapi::um::d3d11sdklayers::*;
-use com_ptr::ComPtr;
 use winapi::Interface as _;
-use crate::{Interface, impl_bitflag_operators, impl_interface};
-use crate::dxgi::{ISwapChain, SwapChain};
-use crate::d3d11::IDeviceContext;
-use crate::result::{HResult, hresult};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DebugFeature(u32);
@@ -15,10 +15,14 @@ impl DebugFeature {
     pub const FlushPerRenderOp: Self = Self(D3D11_DEBUG_FEATURE_FLUSH_PER_RENDER_OP);
     pub const FinishPerRenderOp: Self = Self(D3D11_DEBUG_FEATURE_FINISH_PER_RENDER_OP);
     pub const PresentPerRenderOp: Self = Self(D3D11_DEBUG_FEATURE_PRESENT_PER_RENDER_OP);
-    pub const AlwaysDiscardOfferedResource: Self = Self(D3D11_DEBUG_FEATURE_ALWAYS_DISCARD_OFFERED_RESOURCE);
-    pub const NeverDiscardOfferedResource: Self = Self(D3D11_DEBUG_FEATURE_NEVER_DISCARD_OFFERED_RESOURCE);
-    pub const AvoidBehaviorChangingDebugAids: Self = Self(D3D11_DEBUG_FEATURE_AVOID_BEHAVIOR_CHANGING_DEBUG_AIDS);
-    pub const DisableTiledResourceMappingTrackingAndValidation: Self = Self(D3D11_DEBUG_FEATURE_DISABLE_TILED_RESOURCE_MAPPING_TRACKING_AND_VALIDATION);
+    pub const AlwaysDiscardOfferedResource: Self =
+        Self(D3D11_DEBUG_FEATURE_ALWAYS_DISCARD_OFFERED_RESOURCE);
+    pub const NeverDiscardOfferedResource: Self =
+        Self(D3D11_DEBUG_FEATURE_NEVER_DISCARD_OFFERED_RESOURCE);
+    pub const AvoidBehaviorChangingDebugAids: Self =
+        Self(D3D11_DEBUG_FEATURE_AVOID_BEHAVIOR_CHANGING_DEBUG_AIDS);
+    pub const DisableTiledResourceMappingTrackingAndValidation: Self =
+        Self(D3D11_DEBUG_FEATURE_DISABLE_TILED_RESOURCE_MAPPING_TRACKING_AND_VALIDATION);
 }
 impl_bitflag_operators!(DebugFeature);
 
@@ -73,14 +77,20 @@ impl ShaderTrackingOptions {
     pub const TrackWAR: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAR);
     pub const TrackWAW: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAW);
     pub const AllowSame: Self = Self(D3D11_SHADER_TRACKING_OPTION_ALLOW_SAME);
-    pub const TrackAtomicConsistency: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_ATOMIC_CONSISTENCY);
-    pub const TrackRAWAcrossThreadGroups: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_RAW_ACROSS_THREADGROUPS);
-    pub const TrackWARAcrossThreadGroups: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAR_ACROSS_THREADGROUPS);
-    pub const TrackWAWAcrossThreadGroups: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAW_ACROSS_THREADGROUPS);
-    pub const TrackAtomicConsistencyAcrossThreadGroups: Self = Self(D3D11_SHADER_TRACKING_OPTION_TRACK_ATOMIC_CONSISTENCY_ACROSS_THREADGROUPS);
+    pub const TrackAtomicConsistency: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_TRACK_ATOMIC_CONSISTENCY);
+    pub const TrackRAWAcrossThreadGroups: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_TRACK_RAW_ACROSS_THREADGROUPS);
+    pub const TrackWARAcrossThreadGroups: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAR_ACROSS_THREADGROUPS);
+    pub const TrackWAWAcrossThreadGroups: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_TRACK_WAW_ACROSS_THREADGROUPS);
+    pub const TrackAtomicConsistencyAcrossThreadGroups: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_TRACK_ATOMIC_CONSISTENCY_ACROSS_THREADGROUPS);
     pub const UAVSpecificFlags: Self = Self(D3D11_SHADER_TRACKING_OPTION_UAV_SPECIFIC_FLAGS);
     pub const AllHazards: Self = Self(D3D11_SHADER_TRACKING_OPTION_ALL_HAZARDS);
-    pub const AllHazardsAllowingSame: Self = Self(D3D11_SHADER_TRACKING_OPTION_ALL_HAZARDS_ALLOWING_SAME);
+    pub const AllHazardsAllowingSame: Self =
+        Self(D3D11_SHADER_TRACKING_OPTION_ALL_HAZARDS_ALLOWING_SAME);
     pub const AllOptions: Self = Self(D3D11_SHADER_TRACKING_OPTION_ALL_OPTIONS);
 }
 impl_bitflag_operators!(ShaderTrackingOptions);
@@ -178,19 +188,28 @@ macro_rules! impl_debug {
             }
             fn set_swap_chain(&self, swap_chain: &impl ISwapChain) -> Result<(), HResult> {
                 unsafe {
-                    let res = self.0.SetSwapChain(swap_chain.as_ptr() as *mut IDXGISwapChain);
+                    let res = self
+                        .0
+                        .SetSwapChain(swap_chain.as_ptr() as *mut IDXGISwapChain);
                     hresult((), res)
                 }
             }
             fn validate_context(&self, context: &impl IDeviceContext) -> Result<(), HResult> {
                 unsafe {
-                    let res = self.0.ValidateContext(context.as_ptr() as *mut ID3D11DeviceContext);
+                    let res = self
+                        .0
+                        .ValidateContext(context.as_ptr() as *mut ID3D11DeviceContext);
                     hresult((), res)
                 }
             }
-            fn validate_context_for_dispatch(&self, context: &impl IDeviceContext) -> Result<(), HResult> {
+            fn validate_context_for_dispatch(
+                &self,
+                context: &impl IDeviceContext,
+            ) -> Result<(), HResult> {
                 unsafe {
-                    let res = self.0.ValidateContextForDispatch(context.as_ptr() as *mut ID3D11DeviceContext);
+                    let res = self
+                        .0
+                        .ValidateContextForDispatch(context.as_ptr() as *mut ID3D11DeviceContext);
                     hresult((), res)
                 }
             }

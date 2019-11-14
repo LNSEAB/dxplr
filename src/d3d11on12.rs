@@ -1,16 +1,16 @@
 #![cfg(feature = "d3d11on12")]
 
-use winapi::um::d3d11on12::*;
-use crate::impl_interface;
-use crate::Interface;
 use crate::d3d;
 use crate::d3d11;
 use crate::d3d12;
-use crate::result::{HResult, hresult};
-use winapi::Interface as _;
+use crate::impl_interface;
+use crate::result::{hresult, HResult};
+use crate::Interface;
 use com_ptr::ComPtr;
 use winapi::um::d3d11::*;
+use winapi::um::d3d11on12::*;
 use winapi::um::unknwnbase::IUnknown;
+use winapi::Interface as _;
 
 pub struct D3D11ResourceFlags {
     pub bind_flags: d3d11::BindFlags,
@@ -36,7 +36,7 @@ pub trait IDevice: Interface {
         resource12: &impl d3d12::IResource,
         flags11: D3D11ResourceFlags,
         in_state: d3d12::ResourceStates,
-        out_state: d3d12::ResourceStates
+        out_state: d3d12::ResourceStates,
     ) -> Result<d3d11::Resource, HResult>;
     fn release_wrapped_resources(&self, resources: &[&impl d3d11::IResource]);
 }
@@ -56,7 +56,10 @@ macro_rules! impl_device {
             fn acquire_wrapped_resources(&self, resources: &[&impl d3d11::IResource]) {
                 unsafe {
                     let mut c_resources = resources.iter().map(|r| r.as_ptr()).collect::<Vec<_>>();
-                    self.0.AcquireWrappedResources(c_resources.as_mut_ptr() as *mut *mut ID3D11Resource, c_resources.len() as u32);
+                    self.0.AcquireWrappedResources(
+                        c_resources.as_mut_ptr() as *mut *mut ID3D11Resource,
+                        c_resources.len() as u32,
+                    );
                 }
             }
             fn create_wrapped_resource(
@@ -75,7 +78,7 @@ macro_rules! impl_device {
                             in_state.0,
                             out_state.0,
                             &d3d11::Resource::uuidof().into(),
-                            &mut p
+                            &mut p,
                         )
                     };
                     hresult(p as *mut ID3D11Resource, res)
@@ -84,7 +87,10 @@ macro_rules! impl_device {
             fn release_wrapped_resources(&self, resources: &[&impl d3d11::IResource]) {
                 unsafe {
                     let mut c_resources = resources.iter().map(|r| r.as_ptr()).collect::<Vec<_>>();
-                    self.0.ReleaseWrappedResources(c_resources.as_mut_ptr() as *mut *mut ID3D11Resource, c_resources.len() as u32);
+                    self.0.ReleaseWrappedResources(
+                        c_resources.as_mut_ptr() as *mut *mut ID3D11Resource,
+                        c_resources.len() as u32,
+                    );
                 }
             }
         }
@@ -95,12 +101,7 @@ macro_rules! impl_device {
             fn get_d3d12_device<T: d3d12::IDevice>(&self) -> Result<T, HResult> {
                 Ok(T::new(ComPtr::new(|| {
                     let mut p = std::ptr::null_mut();
-                    let res = unsafe {
-                        self.0.GetD3D12Device(
-                            &T::uuidof().into(),
-                            &mut p
-                        )
-                    };
+                    let res = unsafe { self.0.GetD3D12Device(&T::uuidof().into(), &mut p) };
                     hresult(p as *mut <T as Interface>::APIType, res)
                 })?))
             }
@@ -114,14 +115,17 @@ pub fn create_device(
     flags: Option<d3d11::CreateDeviceFlags>,
     feature_levels: &[d3d::FeatureLevel],
     command_queues: &[&impl d3d12::ICommandQueue],
-    node_mask: u32
+    node_mask: u32,
 ) -> Result<(d3d11::Device, d3d11::DeviceContext, d3d::FeatureLevel), HResult> {
     unsafe {
         let mut device = std::ptr::null_mut();
         let mut device_context = std::ptr::null_mut();
         let mut feature_level = 0;
         let c_feature_levels = feature_levels.iter().map(|&l| l.into()).collect::<Vec<_>>();
-        let mut c_command_queues = command_queues.iter().map(|c| c.as_ptr() as *mut IUnknown).collect::<Vec<_>>();
+        let mut c_command_queues = command_queues
+            .iter()
+            .map(|c| c.as_ptr() as *mut IUnknown)
+            .collect::<Vec<_>>();
         let res = D3D11On12CreateDevice(
             device12.as_ptr() as *mut IUnknown,
             flags.map_or(0, |f| f.0),

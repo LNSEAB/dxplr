@@ -245,7 +245,13 @@ impl IBlob for Blob {
 }
 
 pub trait IInclude {
-    fn open(&self, include_type: IncludeType, filename: &str, parent_data: Option<*const std::ffi::c_void>, data: &mut Vec<u8>) -> std::io::Result<()>;
+    fn open(
+        &self,
+        include_type: IncludeType,
+        filename: &str,
+        parent_data: Option<*const std::ffi::c_void>,
+        data: &mut Vec<u8>,
+    ) -> std::io::Result<()>;
 }
 
 #[cfg(test)]

@@ -1,17 +1,17 @@
 #![cfg(feature = "d3dcompiler")]
 
-use crate::d3d::{Blob, ShaderMacro, IncludeType, IInclude};
+use crate::d3d::{Blob, IInclude, IncludeType, ShaderMacro};
 use crate::impl_bitflag_operators;
 use crate::result::{ErrorMessage, ErrorMessageObject};
 use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
-use winapi::um::d3dcommon::{ID3DInclude, ID3DIncludeVtbl, D3D_INCLUDE_LOCAL, D3D_INCLUDE_SYSTEM};
-use winapi::um::d3dcompiler::*;
-use winapi::um::winnt::{HRESULT, LPCSTR};
 use winapi::shared::minwindef::LPCVOID;
 use winapi::shared::winerror::*;
-use winapi::um::winnls::CP_OEMCP;
+use winapi::um::d3dcommon::{ID3DInclude, ID3DIncludeVtbl, D3D_INCLUDE_LOCAL, D3D_INCLUDE_SYSTEM};
+use winapi::um::d3dcompiler::*;
 use winapi::um::stringapiset::MultiByteToWideChar;
+use winapi::um::winnls::CP_OEMCP;
+use winapi::um::winnt::{HRESULT, LPCSTR};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct CompileFlags(u32);
@@ -68,16 +68,31 @@ impl IncludeObject {
             data: Vec::new(),
         }
     }
-    unsafe extern "system" fn open(this: *mut ID3DInclude, include_type: u32, filename: LPCSTR, parent_data: LPCVOID, pp_data: *mut LPCVOID, bytes: *mut u32) -> HRESULT {
+    unsafe extern "system" fn open(
+        this: *mut ID3DInclude,
+        include_type: u32,
+        filename: LPCSTR,
+        parent_data: LPCVOID,
+        pp_data: *mut LPCVOID,
+        bytes: *mut u32,
+    ) -> HRESULT {
         let p = this as *mut Self;
         let filename = {
-            let sz = MultiByteToWideChar(CP_OEMCP, 0, filename, -1, std::ptr::null_mut(), 0) as usize;
+            let sz =
+                MultiByteToWideChar(CP_OEMCP, 0, filename, -1, std::ptr::null_mut(), 0) as usize;
             if sz == 0 {
                 return E_FAIL;
             }
             let mut buf = Vec::with_capacity(sz);
             buf.set_len(sz);
-            MultiByteToWideChar(CP_OEMCP, 0, filename, -1, buf.as_mut_ptr(), buf.len() as i32);
+            MultiByteToWideChar(
+                CP_OEMCP,
+                0,
+                filename,
+                -1,
+                buf.as_mut_ptr(),
+                buf.len() as i32,
+            );
             buf.pop();
 
             match String::from_utf16(&buf) {
@@ -99,7 +114,7 @@ impl IncludeObject {
             },
             &filename,
             parent_data,
-            &mut data
+            &mut data,
         );
         match res {
             Ok(_) => {
@@ -107,7 +122,7 @@ impl IncludeObject {
                 (*bytes) = data.len() as u32;
                 (*p).data = data;
                 S_OK
-            },
+            }
             Err(_) => E_FAIL,
         }
     }
@@ -117,7 +132,9 @@ impl IncludeObject {
 }
 impl Drop for IncludeObject {
     fn drop(&mut self) {
-        unsafe { Box::from_raw(self.vtbl); }
+        unsafe {
+            Box::from_raw(self.vtbl);
+        }
     }
 }
 
@@ -151,7 +168,11 @@ pub fn compile(
             } else {
                 std::ptr::null()
             },
-            include_obj.as_mut().map_or(D3D_COMPILE_STANDARD_FILE_INCLUDE, |i| i as *mut IncludeObject as *mut ID3DInclude),
+            include_obj
+                .as_mut()
+                .map_or(D3D_COMPILE_STANDARD_FILE_INCLUDE, |i| {
+                    i as *mut IncludeObject as *mut ID3DInclude
+                }),
             c_entry_point.as_ptr(),
             c_target.as_ptr(),
             flags1.map_or(0, |f| f.0),

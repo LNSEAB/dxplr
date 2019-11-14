@@ -2,7 +2,6 @@ use crate::api::EventHandle;
 use crate::api::Rect;
 use crate::api::*;
 use crate::d3d;
-use crate::d3d::IBlob;
 pub use crate::d3d12sdklayers::*;
 use crate::dxgi;
 use crate::result::{hresult, ErrorMessage, ErrorMessageObject, HResult};
@@ -1622,14 +1621,14 @@ pub struct CommandSignatureDesc<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct ComputePipelineStateDesc {
+pub struct ComputePipelineStateDesc<'a> {
     pub root_signature: Option<RootSignature>,
-    pub cs: Option<ShaderBytecode>,
+    pub cs: Option<ShaderBytecode<'a>>,
     pub node_mask: u32,
     pub cached_pso: Option<CachedPipelineState>,
     pub flags: Option<PipelineStateFlags>,
 }
-impl ComputePipelineStateDesc {
+impl<'a> ComputePipelineStateDesc<'a> {
     pub fn new() -> Self {
         Self {
             root_signature: None,
@@ -1643,7 +1642,7 @@ impl ComputePipelineStateDesc {
         self.root_signature = Some(root_signature.clone());
         self
     }
-    pub fn cs(mut self, code: ShaderBytecode) -> Self {
+    pub fn cs(mut self, code: ShaderBytecode<'a>) -> Self {
         self.cs = Some(code);
         self
     }
@@ -2866,14 +2865,14 @@ impl From<GPUVirtualAddressRange> for D3D12_GPU_VIRTUAL_ADDRESS_RANGE {
 // pub struct GPUVirtualAddressRangeAndStride;
 
 #[derive(Clone, Debug)]
-pub struct GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
+pub struct GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf, Df> {
     pub root_signature: Option<RootSignature>,
-    pub vs: Option<ShaderBytecode>,
-    pub ps: Option<ShaderBytecode>,
-    pub ds: Option<ShaderBytecode>,
-    pub hs: Option<ShaderBytecode>,
-    pub gs: Option<ShaderBytecode>,
-    pub stream_output: Option<StreamOutputDesc<'a>>,
+    pub vs: Option<ShaderBytecode<'a>>,
+    pub ps: Option<ShaderBytecode<'b>>,
+    pub ds: Option<ShaderBytecode<'c>>,
+    pub hs: Option<ShaderBytecode<'d>>,
+    pub gs: Option<ShaderBytecode<'e>>,
+    pub stream_output: Option<StreamOutputDesc<'f>>,
     pub blend_state: BlendDesc,
     pub sample_mask: u32,
     pub rasterizer_state: RasterizerDesc,
@@ -2888,7 +2887,7 @@ pub struct GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
     pub cached_pso: Option<CachedPipelineState>,
     pub flags: Option<PipelineStateFlags>,
 }
-impl<'a> GraphicsPipelineStateDesc<'a, (), (), ()> {
+impl<'a, 'b, 'c, 'd, 'e, 'f> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, (), (), ()> {
     pub fn new() -> Self {
         Self {
             root_signature: None,
@@ -2914,32 +2913,34 @@ impl<'a> GraphicsPipelineStateDesc<'a, (), (), ()> {
         }
     }
 }
-impl<'a, Il, Rf, Df> GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
+impl<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf, Df>
+    GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf, Df>
+{
     pub fn root_signature(mut self, root_signature: &RootSignature) -> Self {
         self.root_signature = Some(root_signature.clone());
         self
     }
-    pub fn vs(mut self, code: ShaderBytecode) -> Self {
+    pub fn vs(mut self, code: ShaderBytecode<'a>) -> Self {
         self.vs = Some(code);
         self
     }
-    pub fn ps(mut self, code: ShaderBytecode) -> Self {
+    pub fn ps(mut self, code: ShaderBytecode<'b>) -> Self {
         self.ps = Some(code);
         self
     }
-    pub fn ds(mut self, code: ShaderBytecode) -> Self {
+    pub fn ds(mut self, code: ShaderBytecode<'c>) -> Self {
         self.ds = Some(code);
         self
     }
-    pub fn hs(mut self, code: ShaderBytecode) -> Self {
+    pub fn hs(mut self, code: ShaderBytecode<'d>) -> Self {
         self.hs = Some(code);
         self
     }
-    pub fn gs(mut self, code: ShaderBytecode) -> Self {
+    pub fn gs(mut self, code: ShaderBytecode<'e>) -> Self {
         self.gs = Some(code);
         self
     }
-    pub fn stream_output(mut self, so: StreamOutputDesc<'a>) -> Self {
+    pub fn stream_output(mut self, so: StreamOutputDesc<'f>) -> Self {
         self.stream_output = Some(so);
         self
     }
@@ -2984,11 +2985,11 @@ impl<'a, Il, Rf, Df> GraphicsPipelineStateDesc<'a, Il, Rf, Df> {
         self
     }
 }
-impl<'a, Rf, Df> GraphicsPipelineStateDesc<'a, (), Rf, Df> {
-    pub fn input_layout<'b>(
+impl<'a, 'b, 'c, 'd, 'e, 'f, Rf, Df> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, (), Rf, Df> {
+    pub fn input_layout<'g>(
         self,
-        input_layout: InputLayoutDesc<'b>,
-    ) -> GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, Rf, Df> {
+        input_layout: InputLayoutDesc<'g>,
+    ) -> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, InputLayoutDesc<'g>, Rf, Df> {
         GraphicsPipelineStateDesc {
             root_signature: self.root_signature,
             vs: self.vs,
@@ -3013,11 +3014,11 @@ impl<'a, Rf, Df> GraphicsPipelineStateDesc<'a, (), Rf, Df> {
         }
     }
 }
-impl<'a, Il, Df> GraphicsPipelineStateDesc<'a, Il, (), Df> {
-    pub fn rtv_formats<'b>(
+impl<'a, 'b, 'c, 'd, 'e, 'f, Il, Df> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, (), Df> {
+    pub fn rtv_formats<'g>(
         self,
-        rtv_formats: &'b [dxgi::Format],
-    ) -> GraphicsPipelineStateDesc<'a, Il, &'b [dxgi::Format], Df> {
+        rtv_formats: &'g [dxgi::Format],
+    ) -> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, &'g [dxgi::Format], Df> {
         GraphicsPipelineStateDesc {
             root_signature: self.root_signature,
             vs: self.vs,
@@ -3042,11 +3043,11 @@ impl<'a, Il, Df> GraphicsPipelineStateDesc<'a, Il, (), Df> {
         }
     }
 }
-impl<'a, Il, Rf> GraphicsPipelineStateDesc<'a, Il, Rf, ()> {
+impl<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf, ()> {
     pub fn dsv_format(
         self,
         dsv_format: dxgi::Format,
-    ) -> GraphicsPipelineStateDesc<'a, Il, Rf, dxgi::Format> {
+    ) -> GraphicsPipelineStateDesc<'a, 'b, 'c, 'd, 'e, 'f, Il, Rf, dxgi::Format> {
         GraphicsPipelineStateDesc {
             root_signature: self.root_signature,
             vs: self.vs,
@@ -3071,8 +3072,18 @@ impl<'a, Il, Rf> GraphicsPipelineStateDesc<'a, Il, Rf, ()> {
         }
     }
 }
-impl<'a, 'b, 'c>
-    GraphicsPipelineStateDesc<'a, InputLayoutDesc<'b>, &'c [dxgi::Format], dxgi::Format>
+impl<'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h>
+    GraphicsPipelineStateDesc<
+        'a,
+        'b,
+        'c,
+        'd,
+        'e,
+        'f,
+        InputLayoutDesc<'g>,
+        &'h [dxgi::Format],
+        dxgi::Format,
+    >
 {
     fn to_c_struct(
         &self,
@@ -4548,30 +4559,41 @@ impl SamplerDesc<Filter> {
 // pub struct SerializedRaytracingAccelerationStrucutreHeader;
 
 #[derive(Clone, Debug)]
-pub struct ShaderBytecode(Vec<u8>);
-impl ShaderBytecode {
+pub struct ShaderBytecode<'a>(Option<&'a [u8]>);
+impl<'a> ShaderBytecode<'a> {
+    pub fn from_blob(src: &'a impl d3d::IBlob) -> Self {
+        Self(Some(src.as_slice()))
+    }
+    pub fn from_slice(src: &'a [u8]) -> Self {
+        Self(Some(src))
+    }
     fn to_c_struct(&self) -> D3D12_SHADER_BYTECODE {
-        if self.0.is_empty() {
+        if self.0.is_none() {
             D3D12_SHADER_BYTECODE {
                 pShaderBytecode: std::ptr::null(),
                 BytecodeLength: 0,
             }
         } else {
             D3D12_SHADER_BYTECODE {
-                pShaderBytecode: self.0.as_ptr() as *const c_void,
-                BytecodeLength: self.0.len(),
+                pShaderBytecode: self.0.unwrap().as_ptr() as *const c_void,
+                BytecodeLength: self.0.unwrap().len(),
             }
         }
     }
 }
-impl Default for ShaderBytecode {
+impl<'a> Default for ShaderBytecode<'a> {
     fn default() -> Self {
-        Self(Vec::new())
+        Self(None)
     }
 }
-impl From<d3d::Blob> for ShaderBytecode {
-    fn from(src: d3d::Blob) -> ShaderBytecode {
-        ShaderBytecode(src.to_vec())
+impl<'a> From<&'a d3d::Blob> for ShaderBytecode<'a> {
+    fn from(src: &'a d3d::Blob) -> ShaderBytecode {
+        ShaderBytecode::from_blob(src)
+    }
+}
+impl<'a> From<&'a [u8]> for ShaderBytecode<'a> {
+    fn from(src: &'a [u8]) -> ShaderBytecode {
+        ShaderBytecode::from_slice(src)
     }
 }
 

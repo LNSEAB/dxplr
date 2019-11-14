@@ -54,9 +54,7 @@ impl Mesh {
                         .byte_width((std::mem::size_of::<Vertex>() * vertices.len()) as u32)
                         .usage(d3d11::Usage::Default)
                         .bind_flags(d3d11::BindFlags::VertexBuffer),
-                    Some(&d3d11::SubresourceData::new()
-                        .sys_mem(vertices.as_ptr())
-                    ),
+                    Some(&d3d11::SubresourceData::new().sys_mem(vertices.as_ptr())),
                 )
                 .unwrap()
         };
@@ -68,9 +66,7 @@ impl Mesh {
                         .byte_width((std::mem::size_of::<u32>() * indices.len()) as u32)
                         .usage(d3d11::Usage::Default)
                         .bind_flags(d3d11::BindFlags::IndexBuffer),
-                    Some(&d3d11::SubresourceData::new()
-                        .sys_mem(indices.as_ptr())
-                    ),
+                    Some(&d3d11::SubresourceData::new().sys_mem(indices.as_ptr())),
                 )
                 .unwrap()
         };
@@ -81,9 +77,10 @@ impl Mesh {
                     .height(img.height())
                     .format(dxgi::Format::R8G8B8A8Unorm)
                     .usage(d3d11::Usage::Default),
-                Some(&d3d11::SubresourceData::new()
-                    .sys_mem(img.as_ptr())
-                    .sys_mem_pitch(4 * img.width())
+                Some(
+                    &d3d11::SubresourceData::new()
+                        .sys_mem(img.as_ptr())
+                        .sys_mem_pitch(4 * img.width()),
                 ),
             )
             .unwrap();

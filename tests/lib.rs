@@ -1,11 +1,11 @@
 #[cfg(feature = "d3dcompiler")]
 use dxplr::d3d;
 #[cfg(feature = "d3dcompiler")]
-use std::path::Path;
-#[cfg(feature = "d3dcompiler")]
 use std::fs::File;
 #[cfg(feature = "d3dcompiler")]
-use std::io::{Read, BufReader};
+use std::io::{BufReader, Read};
+#[cfg(feature = "d3dcompiler")]
+use std::path::Path;
 
 #[cfg(feature = "d3dcompiler")]
 struct Include<'a> {
@@ -14,22 +14,24 @@ struct Include<'a> {
 #[cfg(feature = "d3dcompiler")]
 impl<'a> Include<'a> {
     fn new(current_dir: &'a Path) -> Self {
-        Self {
-            current_dir,
-        }
+        Self { current_dir }
     }
 }
 #[cfg(feature = "d3dcompiler")]
 impl<'a> d3d::IInclude for Include<'a> {
-    fn open(&self, include_type: d3d::IncludeType, filename: &str, _parent_data: Option<*const std::ffi::c_void>, data: &mut Vec<u8>) -> std::io::Result<()> {
+    fn open(
+        &self,
+        include_type: d3d::IncludeType,
+        filename: &str,
+        _parent_data: Option<*const std::ffi::c_void>,
+        data: &mut Vec<u8>,
+    ) -> std::io::Result<()> {
         let file = match include_type {
-            d3d::IncludeType::Local => {
-                File::open(self.current_dir.join(filename)).unwrap()
-            },
+            d3d::IncludeType::Local => File::open(self.current_dir.join(filename)).unwrap(),
             d3d::IncludeType::System => {
                 let dir = Path::new("tests/hlsl");
                 File::open(dir.join(filename)).unwrap()
-            },
+            }
         };
         let mut reader = BufReader::new(file);
         reader.read_to_end(data).unwrap();
@@ -53,7 +55,7 @@ fn d3dcompile_custom_include() {
         "vs_main",
         "vs_5_0",
         Some(d3d::CompileFlags::Debug),
-        None
+        None,
     );
     if let Err(e) = res {
         panic!("d3d::compile error = {}", e);

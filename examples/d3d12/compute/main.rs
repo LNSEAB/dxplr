@@ -72,7 +72,7 @@ fn main() {
             .create_compute_pipeline_state(
                 &d3d12::ComputePipelineStateDesc::new()
                     .root_signature(&root_signature)
-                    .cs(cs_bin.into()),
+                    .cs((&cs_bin).into()),
             )
             .unwrap()
     };

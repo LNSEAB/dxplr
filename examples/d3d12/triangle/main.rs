@@ -185,8 +185,8 @@ impl Triangle {
             .unwrap();
             let desc = d3d12::GraphicsPipelineStateDesc::new()
                 .root_signature(&root_signature)
-                .vs(vs_bin.into())
-                .ps(ps_bin.into())
+                .vs((&vs_bin).into())
+                .ps((&ps_bin).into())
                 .depth_stencil_state(d3d12::DepthStencilDesc::new()
                     .depth_enable(false)
                 )
