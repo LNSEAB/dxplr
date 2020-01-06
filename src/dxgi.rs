@@ -1549,10 +1549,24 @@ impl From<(f32, f32, f32, f32)> for RGBA {
 
 #[derive(Clone, Debug)]
 pub struct SampleDesc {
-    count: u32,
-    quality: u32,
+    pub count: u32,
+    pub quality: u32,
 }
 impl SampleDesc {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn count(mut self, count: u32) -> Self {
+        self.count = count;
+        self
+    }
+
+    pub fn quality(mut self, quality: u32) -> Self {
+        self.quality = quality;
+        self
+    }
+
     pub(crate) fn to_c_struct(&self) -> DXGI_SAMPLE_DESC {
         DXGI_SAMPLE_DESC {
             Count: self.count,
