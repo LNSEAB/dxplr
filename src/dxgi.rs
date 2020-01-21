@@ -2995,7 +2995,7 @@ macro_rules! impl_factory {
                         let res = unsafe {
                             self.0.CheckFeatureSupport(
                                 feature as u32,
-                                &mut value as *mut i32 as *mut c_void,
+                                &mut value as *mut i32 as *mut winapi::ctypes::c_void,
                                 std::mem::size_of::<BOOL>() as u32,
                             )
                         };
@@ -4039,7 +4039,7 @@ impl IOutputDuplication for OutputDuplication {
             let res = unsafe {
                 self.0.GetFramePointerShape(
                     buffer.len() as u32,
-                    buffer.as_mut_ptr() as *mut c_void,
+                    buffer.as_mut_ptr() as *mut winapi::ctypes::c_void,
                     &mut required_size,
                     &mut info,
                 )
@@ -4614,7 +4614,7 @@ macro_rules! impl_swapchain {
                     self.0.SetHDRMetaData(
                         ty as u32,
                         data.len() as u32,
-                        data.as_mut_ptr() as *mut c_void,
+                        data.as_mut_ptr() as *mut winapi::ctypes::c_void,
                     )
                 };
                 hresult((), res)
