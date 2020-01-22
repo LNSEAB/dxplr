@@ -12,7 +12,7 @@ use std::cell::Cell;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use winit;
-use winit::os::windows::WindowExt;
+use winit::platform::windows::WindowExtWindows;
 
 #[repr(C)]
 struct Vertex {
@@ -48,7 +48,7 @@ struct Triangle {
     pipeline: d3d12::PipelineState,
 }
 impl Triangle {
-    fn new(device: &d3d12::Device, wnd: &winit::Window) -> Self {
+    fn new(device: &d3d12::Device, wnd: &winit::window::Window) -> Self {
         let cmd_allocator = device
             .create_command_allocator::<d3d12::CommandAllocator>(d3d12::CommandListType::Direct)
             .unwrap();
@@ -67,14 +67,11 @@ impl Triangle {
             .unwrap();
         cmd_list.close();
         let dxgi_factory = dxgi::create_dxgi_factory1::<dxgi::Factory2>().unwrap();
-        let wnd_size = wnd
-            .get_inner_size()
-            .unwrap()
-            .to_physical(wnd.get_hidpi_factor());
+        let wnd_size = wnd.inner_size();
         let swap_chain = dxgi_factory
             .create_swap_chain_for_hwnd(
                 &cmd_queue,
-                &wnd.get_hwnd(),
+                &wnd.hwnd(),
                 &dxgi::SwapChainDesc1::new()
                     .width(wnd_size.width as u32)
                     .height(wnd_size.height as u32)
@@ -299,26 +296,19 @@ fn main() {
         debug
     };
     let device = d3d12::create_device::<d3d12::Device>(None, d3d::FeatureLevel(12, 0)).unwrap();
-    let mut events_loop = winit::EventsLoop::new();
-    let wnd = winit::WindowBuilder::new()
-        .with_title("dxplr triangle")
-        .build(&events_loop)
+    let event_loop = winit::event_loop::EventLoop::new();
+    let wnd = winit::window::WindowBuilder::new()
+        .with_title("dxplr d3d12 triangle")
+        .build(&event_loop)
         .unwrap();
 
     let triangle = Triangle::new(&device, &wnd);
 
-    let mut exit_flag = false;
-    loop {
-        events_loop.poll_events(|event| match event {
-            winit::Event::WindowEvent {
-                event: winit::WindowEvent::CloseRequested,
-                ..
-            } => exit_flag = true,
-            _ => (),
-        });
-        if exit_flag {
-            break;
-        }
-        triangle.render();
-    }
+    event_loop.run(move |event, _, control_flow| match event {
+        winit::event::Event::WindowEvent {
+            event: winit::event::WindowEvent::CloseRequested,
+            ..
+        } => *control_flow = winit::event_loop::ControlFlow::Exit,
+        _ => triangle.render(),
+    });
 }

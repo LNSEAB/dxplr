@@ -28,7 +28,7 @@ d3dcompiler = ["winapi/d3dcompiler", "winapi/stringapiset"]
 d3d11on12 = ["winapi/d3d11on12"]
 
 [dependencies]
-com_ptr = "0.1.2"
+com_ptr = "0.1.3"
 winapi = { version = "0.3.8", features = [
 	"impl-default",
 	"winbase",
@@ -44,11 +44,11 @@ winapi = { version = "0.3.8", features = [
 	"d3d12",
 	"d3d12sdklayers",
 ] }
-failure = "0.1.5"
+failure = "0.1.6"
 
 [dev-dependencies]
-winit = "0.19.3"
-image = "0.22.1"
+winit = "0.20.0"
+image = "0.22.4"
 
 [[example]]
 name = "d3d11_triangle"

@@ -9,7 +9,7 @@ use dxplr::dxgi::ISwapChain;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use winit;
-use winit::os::windows::WindowExt;
+use winit::platform::windows::WindowExtWindows;
 
 #[repr(C)]
 struct Vertex {
@@ -38,11 +38,8 @@ struct Triangle {
     ps: d3d11::PixelShader,
 }
 impl Triangle {
-    fn new(wnd: &winit::Window) -> Self {
-        let wnd_size = wnd
-            .get_inner_size()
-            .unwrap()
-            .to_physical(wnd.get_hidpi_factor());
+    fn new(wnd: &winit::window::Window) -> Self {
+        let wnd_size = wnd.inner_size();
         let (swap_chain, device, _, device_context) = d3d11::create_device_and_swap_chain(
             None,
             d3d::DriverType::Hardware,
@@ -59,7 +56,7 @@ impl Triangle {
                 )
                 .buffer_usage(dxgi::Usage::RenderTargetOutput)
                 .buffer_count(2)
-                .output_window(&wnd.get_hwnd())
+                .output_window(&wnd.hwnd())
                 .windowed(true)
                 .swap_effect(dxgi::SwapEffect::FlipDiscard),
         )
@@ -157,24 +154,17 @@ impl Triangle {
 }
 
 fn main() {
-    let mut events_loop = winit::EventsLoop::new();
-    let wnd = winit::WindowBuilder::new()
+    let event_loop = winit::event_loop::EventLoop::new();
+    let wnd = winit::window::WindowBuilder::new()
         .with_title("dxplr d3d11 triangle")
-        .build(&events_loop)
+        .build(&event_loop)
         .unwrap();
     let triangle = Triangle::new(&wnd);
-    let mut exit_flag = false;
-    loop {
-        events_loop.poll_events(|event| match event {
-            winit::Event::WindowEvent {
-                event: winit::WindowEvent::CloseRequested,
-                ..
-            } => exit_flag = true,
-            _ => (),
-        });
-        if exit_flag {
-            break;
-        }
-        triangle.render();
-    }
+    event_loop.run(move |event, _, control_flow| match event {
+        winit::event::Event::WindowEvent {
+            event: winit::event::WindowEvent::CloseRequested,
+            ..
+        } => *control_flow = winit::event_loop::ControlFlow::Exit,
+        _ => triangle.render(),
+    });
 }

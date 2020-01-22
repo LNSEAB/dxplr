@@ -11,7 +11,7 @@ use image;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use winit;
-use winit::os::windows::WindowExt;
+use winit::platform::windows::WindowExtWindows;
 
 #[repr(C)]
 struct Vertex {
@@ -31,11 +31,8 @@ struct Mesh {
     srv_tex: d3d11::ShaderResourceView,
 }
 impl Mesh {
-    fn new(wnd: &winit::Window, device: &d3d11::Device) -> Self {
-        let wnd_size = wnd
-            .get_inner_size()
-            .unwrap()
-            .to_physical(wnd.get_hidpi_factor());
+    fn new(wnd: &winit::window::Window, device: &d3d11::Device) -> Self {
+        let wnd_size = wnd.inner_size();
         let img = image::open("examples/d3d11/texture/sample.png")
             .unwrap()
             .to_rgba();
@@ -104,16 +101,13 @@ struct Renderer {
     sampler: d3d11::SamplerState,
 }
 impl Renderer {
-    fn new(wnd: &winit::Window, device: &d3d11::Device) -> Self {
-        let wnd_size = wnd
-            .get_inner_size()
-            .unwrap()
-            .to_physical(wnd.get_hidpi_factor());
+    fn new(wnd: &winit::window::Window, device: &d3d11::Device) -> Self {
+        let wnd_size = wnd.inner_size();
         let dxgi_factory = dxgi::create_dxgi_factory1::<dxgi::Factory2>().unwrap();
         let swap_chain = dxgi_factory
             .create_swap_chain_for_hwnd(
                 device,
-                &wnd.get_hwnd(),
+                &wnd.hwnd(),
                 &dxgi::SwapChainDesc1::new()
                     .width(wnd_size.width as u32)
                     .height(wnd_size.height as u32)
@@ -219,10 +213,10 @@ impl Renderer {
 }
 
 fn main() {
-    let mut events_loop = winit::EventsLoop::new();
-    let wnd = winit::WindowBuilder::new()
+    let event_loop = winit::event_loop::EventLoop::new();
+    let wnd = winit::window::WindowBuilder::new()
         .with_title("dxplr d3d11 texture")
-        .build(&events_loop)
+        .build(&event_loop)
         .unwrap();
     let (device, _, _) = d3d11::create_device(
         None,
@@ -234,18 +228,11 @@ fn main() {
     .unwrap();
     let renderer = Renderer::new(&wnd, &device);
     let mesh = Mesh::new(&wnd, &device);
-    let mut exit_flag = false;
-    loop {
-        events_loop.poll_events(|event| match event {
-            winit::Event::WindowEvent {
-                event: winit::WindowEvent::CloseRequested,
-                ..
-            } => exit_flag = true,
-            _ => (),
-        });
-        if exit_flag {
-            break;
-        }
-        renderer.render(&mesh);
-    }
+    event_loop.run(move |event, _, control_flow| match event {
+        winit::event::Event::WindowEvent {
+            event: winit::event::WindowEvent::CloseRequested,
+            ..
+        } => *control_flow = winit::event_loop::ControlFlow::Exit,
+        _ => renderer.render(&mesh),
+    });
 }
