@@ -1990,6 +1990,20 @@ impl<'a> InputElementDesc<'a> {
     }
 }
 
+/// Helper macro for a d3d11::InputElementDesc
+///
+/// ## Examples
+///
+/// ```
+/// use dxplr;
+/// use dxplr::d3d121_input_element_descs;
+///
+/// let descs = d3d11_input_element_descs [
+///     {"POSITION", 0, dxgi::Format::R32G32B32Float, 0, 0, d3d11::InputClassification::PerVertexData, 0},
+///     {"COLOR", 0, dxgi::Format::R32G32B32A32Float, 0, d3d11::APPEND_ALIGNED_ELEMENT, d3d11::InputClassification::PerVertexData, 0}
+/// ];
+/// ```
+///
 #[macro_export]
 macro_rules! d3d11_input_element_descs {
     ($({$name: expr, $index: expr, $format: expr, $slot: expr, $offset: expr, $class: expr, $rate: expr}),* $(,)?) => {
