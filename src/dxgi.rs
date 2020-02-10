@@ -24,6 +24,7 @@ use winapi::shared::guiddef::GUID;
 use winapi::shared::minwindef::*;
 use winapi::shared::windef::*;
 use winapi::shared::winerror::*;
+#[cfg(feature = "dxgidebug")]
 use winapi::um::dxgidebug::*;
 #[cfg(feature = "dxgi1_2")]
 use winapi::um::minwinbase::SECURITY_ATTRIBUTES;
@@ -31,7 +32,6 @@ use winapi::um::unknwnbase::IUnknown;
 use winapi::um::winnt::HANDLE;
 #[cfg(feature = "dxgi1_6")]
 use winapi::um::winnt::HRESULT;
-use winapi::Interface as _;
 
 #[derive(Clone, Copy, Debug)]
 pub struct DebugID(Guid);
@@ -235,6 +235,7 @@ pub enum ComputePreemptionGranularity {
     InstructionBoundary = DXGI_COMPUTE_PREEMPTION_INSTRUCTION_BOUNDARY,
 }
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum DebugRLOFlags {
@@ -431,6 +432,7 @@ pub enum HDRMetadataType {
     HDR10Plus = 2,
 }
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum InfoQueueMessageCategory {
@@ -447,6 +449,7 @@ pub enum InfoQueueMessageCategory {
     Shader = DXGI_INFO_QUEUE_MESSAGE_CATEGORY_SHADER,
 }
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum InfoQueueMessageSeverity {
@@ -972,13 +975,16 @@ impl From<HDRMetadataHDR10> for DXGI_HDR_METADATA_HDR10 {
     }
 }
 
+#[cfg(feature = "dxgidebug")]
 pub type InfoQueueMessageID = DXGI_INFO_QUEUE_MESSAGE_ID;
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Debug)]
 pub struct InfoQueueFilter {
     pub allow_list: InfoQueueFilterDesc,
     pub deny_list: InfoQueueFilterDesc,
 }
+#[cfg(feature = "dxgidebug")]
 impl From<DXGI_INFO_QUEUE_FILTER> for InfoQueueFilter {
     fn from(src: DXGI_INFO_QUEUE_FILTER) -> InfoQueueFilter {
         InfoQueueFilter {
@@ -987,6 +993,7 @@ impl From<DXGI_INFO_QUEUE_FILTER> for InfoQueueFilter {
         }
     }
 }
+#[cfg(feature = "dxgidebug")]
 impl From<InfoQueueFilter> for DXGI_INFO_QUEUE_FILTER {
     fn from(src: InfoQueueFilter) -> DXGI_INFO_QUEUE_FILTER {
         DXGI_INFO_QUEUE_FILTER {
@@ -996,12 +1003,14 @@ impl From<InfoQueueFilter> for DXGI_INFO_QUEUE_FILTER {
     }
 }
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Debug)]
 pub struct InfoQueueFilterDesc {
     pub category_list: Vec<InfoQueueMessageCategory>,
     pub severity_list: Vec<InfoQueueMessageSeverity>,
     pub id_list: Vec<InfoQueueMessageID>,
 }
+#[cfg(feature = "dxgidebug")]
 impl From<DXGI_INFO_QUEUE_FILTER_DESC> for InfoQueueFilterDesc {
     fn from(src: DXGI_INFO_QUEUE_FILTER_DESC) -> InfoQueueFilterDesc {
         InfoQueueFilterDesc {
@@ -1026,6 +1035,7 @@ impl From<DXGI_INFO_QUEUE_FILTER_DESC> for InfoQueueFilterDesc {
         }
     }
 }
+#[cfg(feature = "dxgidebug")]
 impl From<InfoQueueFilterDesc> for DXGI_INFO_QUEUE_FILTER_DESC {
     fn from(src: InfoQueueFilterDesc) -> DXGI_INFO_QUEUE_FILTER_DESC {
         let mut category_list = src
@@ -1050,6 +1060,7 @@ impl From<InfoQueueFilterDesc> for DXGI_INFO_QUEUE_FILTER_DESC {
     }
 }
 
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, Debug)]
 pub struct InfoQueueMessage {
     pub producer: DebugID,
@@ -1058,6 +1069,7 @@ pub struct InfoQueueMessage {
     pub id: InfoQueueMessageID,
     pub description: String,
 }
+#[cfg(feature = "dxgidebug")]
 impl From<DXGI_INFO_QUEUE_MESSAGE> for InfoQueueMessage {
     fn from(src: DXGI_INFO_QUEUE_MESSAGE) -> InfoQueueMessage {
         InfoQueueMessage {
@@ -1251,7 +1263,7 @@ impl ModeDesc1 {
 #[derive(Clone, Debug)]
 pub struct OutputDesc {
     pub device_name: String,
-    pub desktop_coordinates: Rect,
+    pub desktop_coordinates: Rect<i32>,
     pub attached_to_desktop: bool,
     pub rotation: ModeRotation,
     pub monitor: HMONITOR,
@@ -1272,7 +1284,7 @@ impl From<DXGI_OUTPUT_DESC> for OutputDesc {
 #[derive(Clone, Debug)]
 pub struct OutputDesc1 {
     pub device_name: String,
-    pub desktop_coordinates: Rect,
+    pub desktop_coordinates: Rect<i32>,
     pub attached_to_desktop: bool,
     pub rotation: ModeRotation,
     pub monitor: HMONITOR,
@@ -1356,8 +1368,8 @@ impl From<DXGI_OUTDUPL_FRAME_INFO> for OutduplFrameInfo {
 #[derive(Clone, Default, Debug)]
 #[repr(C)]
 pub struct OutduplMoveRect {
-    pub source_point: Point,
-    pub destination_rect: Rect,
+    pub source_point: Point<i32>,
+    pub destination_rect: Rect<i32>,
 }
 #[cfg(feature = "dxgi1_2")]
 impl From<DXGI_OUTDUPL_MOVE_RECT> for OutduplMoveRect {
@@ -1372,7 +1384,7 @@ impl From<DXGI_OUTDUPL_MOVE_RECT> for OutduplMoveRect {
 #[cfg(feature = "dxgi1_2")]
 #[derive(Clone, Debug)]
 pub struct OutduplPointerPosition {
-    position: Point,
+    position: Point<i32>,
     visible: bool,
 }
 #[cfg(feature = "dxgi1_2")]
@@ -1392,7 +1404,7 @@ pub struct OutduplPointerShapeInfo {
     pub width: u32,
     pub height: u32,
     pub pitch: u32,
-    pub hot_spot: Point,
+    pub hot_spot: Point<i32>,
 }
 #[cfg(feature = "dxgi1_2")]
 impl From<DXGI_OUTDUPL_POINTER_SHAPE_INFO> for OutduplPointerShapeInfo {
@@ -1410,9 +1422,9 @@ impl From<DXGI_OUTDUPL_POINTER_SHAPE_INFO> for OutduplPointerShapeInfo {
 #[cfg(feature = "dxgi1_2")]
 #[derive(Clone, Default, Debug)]
 pub struct PresentParameters<'a> {
-    pub dirty_rects: Option<&'a [Rect]>,
-    pub scroll_rect: Option<Rect>,
-    pub scroll_offset: Option<Point>,
+    pub dirty_rects: Option<&'a [Rect<i32>]>,
+    pub scroll_rect: Option<Rect<i32>>,
+    pub scroll_offset: Option<Point<i32>>,
 }
 
 #[cfg(feature = "dxgi1_4")]
@@ -1509,43 +1521,7 @@ impl From<(f32, f32, f32)> for RGB {
     }
 }
 
-#[derive(Clone, Copy, Default, Debug, PartialEq)]
-pub struct RGBA {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
-}
-impl From<DXGI_RGBA> for RGBA {
-    fn from(src: DXGI_RGBA) -> RGBA {
-        RGBA {
-            r: src.r,
-            g: src.g,
-            b: src.b,
-            a: src.a,
-        }
-    }
-}
-impl From<RGBA> for DXGI_RGBA {
-    fn from(src: RGBA) -> DXGI_RGBA {
-        DXGI_RGBA {
-            r: src.r,
-            g: src.g,
-            b: src.b,
-            a: src.a,
-        }
-    }
-}
-impl From<(f32, f32, f32, f32)> for RGBA {
-    fn from(src: (f32, f32, f32, f32)) -> RGBA {
-        RGBA {
-            r: src.0,
-            g: src.1,
-            b: src.2,
-            a: src.3,
-        }
-    }
-}
+pub type RGBA = crate::dxgitype::RGBA;
 
 #[derive(Clone, Debug)]
 pub struct SampleDesc {
@@ -2226,14 +2202,17 @@ impl_adapter!(Adapter3, IDXGIAdapter3, Adapter3);
 #[cfg(feature = "dxgi1_6")]
 impl_adapter!(Adapter4, IDXGIAdapter4, Adapter4);
 
+#[cfg(feature = "dxgidebug")]
 pub trait IDebug: Interface {
     fn report_live_objects(&self, apiid: DebugID, flags: DebugRLOFlags) -> Result<(), HResult>;
 }
+#[cfg(feature = "dxgidebug")]
 pub trait IDebug1: IDebug {
     fn disable_leak_tracking_for_thread(&self);
     fn enable_leak_tracking_for_thread(&self);
     fn is_leak_tracking_enabled_for_thread(&self) -> bool;
 }
+#[cfg(feature = "dxgidebug")]
 macro_rules! impl_debug {
     ($s: ident, $interface: ident, Debug) => {
         impl_interface!($s, $interface);
@@ -2268,11 +2247,15 @@ macro_rules! impl_debug {
         }
     };
 }
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Debug(ComPtr<IDXGIDebug>);
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Debug1(ComPtr<IDXGIDebug1>);
+#[cfg(feature = "dxgidebug")]
 impl_debug!(Debug, IDXGIDebug, Debug);
+#[cfg(feature = "dxgidebug")]
 impl_debug!(Debug1, IDXGIDebug1, Debug1);
 
 #[cfg(feature = "dxgi1_3")]
@@ -2285,8 +2268,8 @@ pub struct DestSize {
 pub trait IDecodeSwapChain: Interface {
     fn get_color_space(&self) -> MultiplaneOverlayYCbCrFlags;
     fn get_dest_size(&self) -> Result<DestSize, HResult>;
-    fn get_source_rect(&self) -> Result<Rect, HResult>;
-    fn get_target_rect(&self) -> Result<Rect, HResult>;
+    fn get_source_rect(&self) -> Result<Rect<i32>, HResult>;
+    fn get_target_rect(&self) -> Result<Rect<i32>, HResult>;
     fn present_buffer(
         &self,
         buffe_to_present: u32,
@@ -2295,8 +2278,8 @@ pub trait IDecodeSwapChain: Interface {
     ) -> Result<(), HResult>;
     fn set_color_space(&self, color_space: MultiplaneOverlayYCbCrFlags) -> Result<(), HResult>;
     fn set_dest_size(&self, dest_size: DestSize) -> Result<(), HResult>;
-    fn set_source_rect(&self, rect: Rect) -> Result<(), HResult>;
-    fn set_target_rect(&self, rect: Rect) -> Result<(), HResult>;
+    fn set_source_rect(&self, rect: impl Into<Rect<i32>>) -> Result<(), HResult>;
+    fn set_target_rect(&self, rect: impl Into<Rect<i32>>) -> Result<(), HResult>;
 }
 #[cfg(feature = "dxgi1_3")]
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -2313,12 +2296,12 @@ impl IDecodeSwapChain for DecodeSwapChain {
         let res = unsafe { self.0.GetDestSize(&mut sz.width, &mut sz.height) };
         hresult(sz, res.into())
     }
-    fn get_source_rect(&self) -> Result<Rect, HResult> {
+    fn get_source_rect(&self) -> Result<Rect<i32>, HResult> {
         let mut rc = Default::default();
         let res = unsafe { self.0.GetSourceRect(&mut rc) };
         hresult(rc.into(), res.into())
     }
-    fn get_target_rect(&self) -> Result<Rect, HResult> {
+    fn get_target_rect(&self) -> Result<Rect<i32>, HResult> {
         let mut rc = Default::default();
         let res = unsafe { self.0.GetTargetRect(&mut rc) };
         hresult(rc.into(), res.into())
@@ -2343,15 +2326,13 @@ impl IDecodeSwapChain for DecodeSwapChain {
         let res = unsafe { self.0.SetDestSize(dest_size.width, dest_size.height) };
         hresult((), res.into())
     }
-    fn set_source_rect(&self, rect: Rect) -> Result<(), HResult> {
-        let rc = rect.into();
-        let res = unsafe { self.0.SetSourceRect(&rc) };
-        hresult((), res.into())
+    fn set_source_rect(&self, rect: impl Into<Rect<i32>>) -> Result<(), HResult> {
+        let res = unsafe { self.0.SetSourceRect(rect.into().as_ref()) };
+        hresult((), res)
     }
-    fn set_target_rect(&self, rect: Rect) -> Result<(), HResult> {
-        let rc = rect.into();
-        let res = unsafe { self.0.SetTargetRect(&rc) };
-        hresult((), res.into())
+    fn set_target_rect(&self, rect: impl Into<Rect<i32>>) -> Result<(), HResult> {
+        let res = unsafe { self.0.SetTargetRect(rect.into().as_ref()) };
+        hresult((), res)
     }
 }
 
@@ -3140,6 +3121,7 @@ impl IFactoryMedia for FactoryMedia {
     }
 }
 
+#[cfg(feature = "dxgidebug")]
 pub trait IInfoQueue {
     fn add_application_message<T: AsRef<str>>(
         &self,
@@ -3229,8 +3211,10 @@ pub trait IInfoQueue {
     ) -> Result<(), HResult>;
     fn set_mute_debug_output(&self, producer: DebugID, mute: bool);
 }
+#[cfg(feature = "dxgidebug")]
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct InfoQueue(ComPtr<IDXGIInfoQueue>);
+#[cfg(feature = "dxgidebug")]
 impl IInfoQueue for InfoQueue {
     fn add_application_message<T: AsRef<str>>(
         &self,
@@ -3947,7 +3931,7 @@ pub trait IOutputDuplication {
         timeout_in_ms: u32,
     ) -> Result<(OutduplFrameInfo, Resource), HResult>;
     fn get_desc(&self) -> OutduplDesc;
-    fn get_frame_dirty_rects(&self, buffer: &mut Vec<Rect>) -> Result<(), HResult>;
+    fn get_frame_dirty_rects(&self, buffer: &mut Vec<Rect<i32>>) -> Result<(), HResult>;
     fn get_frame_move_rects(&self, buffer: &mut Vec<OutduplMoveRect>) -> Result<(), HResult>;
     fn get_frame_pointer_shape(
         &self,
@@ -3980,7 +3964,7 @@ impl IOutputDuplication for OutputDuplication {
         unsafe { self.0.GetDesc(&mut desc) };
         desc.into()
     }
-    fn get_frame_dirty_rects(&self, buffer: &mut Vec<Rect>) -> Result<(), HResult> {
+    fn get_frame_dirty_rects(&self, buffer: &mut Vec<Rect<i32>>) -> Result<(), HResult> {
         if buffer.is_empty() {
             buffer.push(Default::default());
         }
@@ -4135,7 +4119,7 @@ pub trait ISurface: Interface {
 }
 pub trait ISurface1: ISurface {
     fn get_dc(&self, discard: bool) -> Result<HDC, HResult>;
-    fn release_dc(&self, dirty_rect: Option<Rect>) -> Result<(), HResult>;
+    fn release_dc(&self, dirty_rect: Option<Rect<i32>>) -> Result<(), HResult>;
 }
 #[cfg(feature = "dxgi1_2")]
 pub trait ISurface2: ISurface1 {
@@ -4174,7 +4158,7 @@ macro_rules! impl_surface {
                 let res = unsafe { self.0.GetDC(to_BOOL(discard), &mut dc) };
                 hresult(dc, res)
             }
-            fn release_dc(&self, dirty_rect: Option<Rect>) -> Result<(), HResult> {
+            fn release_dc(&self, dirty_rect: Option<Rect<i32>>) -> Result<(), HResult> {
                 let mut rc = dirty_rect.map(|rc| rc.into());
                 let res = unsafe {
                     self.0
@@ -4714,6 +4698,7 @@ pub fn declare_adapter_removal_support() -> Result<(), HResult> {
     unsafe { hresult((), DXGIDeclareAdapterRemovalSupport().into()) }
 }
 
+#[cfg(feature = "dxgidebug")]
 pub fn get_debug_interface<T: Interface>() -> Result<T, HResult> {
     Ok(T::from_com_ptr(ComPtr::new(|| {
         let mut obj = std::ptr::null_mut();

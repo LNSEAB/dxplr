@@ -2,12 +2,12 @@ use crate::impl_interface;
 use crate::Interface;
 use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
+#[cfg(feature = "d3d12")]
 use winapi::um::d3d12::{
     D3D_ROOT_SIGNATURE_VERSION, D3D_ROOT_SIGNATURE_VERSION_1_0, D3D_ROOT_SIGNATURE_VERSION_1_1,
     D3D_SHADER_MODEL,
 };
 use winapi::um::d3dcommon::*;
-use winapi::Interface as _;
 
 #[cfg(feature = "d3dcompiler")]
 #[doc(inline)]
@@ -138,8 +138,10 @@ impl From<D3D_FEATURE_LEVEL> for FeatureLevel {
 }
 
 /// Represents a root signature version.
+#[cfg(feature = "d3d12")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct RootSignatureVersion(pub u32, pub u32);
+#[cfg(feature = "d3d12")]
 impl From<RootSignatureVersion> for D3D_ROOT_SIGNATURE_VERSION {
     fn from(src: RootSignatureVersion) -> D3D_ROOT_SIGNATURE_VERSION {
         match src {
@@ -149,6 +151,7 @@ impl From<RootSignatureVersion> for D3D_ROOT_SIGNATURE_VERSION {
         }
     }
 }
+#[cfg(feature = "d3d12")]
 impl From<D3D_ROOT_SIGNATURE_VERSION> for RootSignatureVersion {
     fn from(src: D3D_ROOT_SIGNATURE_VERSION) -> RootSignatureVersion {
         match src {
@@ -160,13 +163,16 @@ impl From<D3D_ROOT_SIGNATURE_VERSION> for RootSignatureVersion {
 }
 
 /// Indicates a shader model.
+#[cfg(feature = "d3d12")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct ShaderModel(pub u32, pub u32);
+#[cfg(feature = "d3d12")]
 impl From<ShaderModel> for D3D_SHADER_MODEL {
     fn from(src: ShaderModel) -> D3D_SHADER_MODEL {
         (src.0 << 4) | src.1
     }
 }
+#[cfg(feature = "d3d12")]
 impl From<D3D_SHADER_MODEL> for ShaderModel {
     fn from(src: D3D_SHADER_MODEL) -> ShaderModel {
         ShaderModel((src >> 4) & 0xf, src & 0xf)
@@ -257,6 +263,7 @@ pub trait IInclude {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "d3d12")]
     use winapi::um::d3d12::D3D_SHADER_MODEL_5_1;
 
     #[test]
@@ -267,6 +274,7 @@ mod tests {
         );
         assert_eq!(FeatureLevel(12, 1), D3D_FEATURE_LEVEL_12_1.into());
     }
+    #[cfg(feature = "d3d12")]
     #[test]
     fn root_signature_version_test() {
         assert_eq!(
@@ -278,6 +286,7 @@ mod tests {
             D3D_ROOT_SIGNATURE_VERSION_1_1.into()
         );
     }
+    #[cfg(feature = "d3d12")]
     #[test]
     fn shader_model_test() {
         assert_eq!(

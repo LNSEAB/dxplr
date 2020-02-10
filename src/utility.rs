@@ -1,7 +1,7 @@
 use winapi::ctypes::c_void;
 use winapi::shared::minwindef::{BOOL, FALSE, TRUE, UINT};
 
-#[allow(non_snake_case)]
+#[allow(non_snake_case, dead_code)]
 pub(crate) fn to_BOOL(b: bool) -> BOOL {
     match b {
         true => TRUE,
@@ -9,6 +9,7 @@ pub(crate) fn to_BOOL(b: bool) -> BOOL {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn enum_function<F, R, E>(exit_code: E, f: F) -> Result<Vec<R>, E>
 where
     F: Fn(UINT) -> Result<R, E>,
@@ -39,20 +40,21 @@ macro_rules! impl_interface {
 
         impl Interface for $s {
             type APIType = $api_type;
-            fn new(p: ComPtr<Self::APIType>) -> Self {
+            fn new(p: com_ptr::ComPtr<Self::APIType>) -> Self {
                 $s(p)
             }
             fn uuidof() -> $crate::api::Guid {
+                use winapi::Interface as _;
                 Self::APIType::uuidof().into()
             }
             fn as_ptr(&self) -> *mut Self::APIType {
                 self.0.as_ptr()
             }
-            fn as_com_ptr(&self) -> &ComPtr<Self::APIType> {
+            fn as_com_ptr(&self) -> &com_ptr::ComPtr<Self::APIType> {
                 &self.0
             }
             fn as_unknown(&self) -> *mut winapi::um::unknwnbase::IUnknown {
-                self.as_ptr() as *mut winapi::um::unknwnbase::IUnknown
+                Interface::as_ptr(self) as *mut winapi::um::unknwnbase::IUnknown
             }
             fn from_com_ptr(p: com_ptr::ComPtr<Self::APIType>) -> Self {
                 $s(p)
@@ -108,6 +110,20 @@ macro_rules! impl_bitflag_operators {
     };
 }
 
+#[allow(dead_code)]
 pub(crate) fn as_c_void_mut<T>(obj: &mut T) -> *mut c_void {
     obj as *mut T as *mut c_void
+}
+
+#[allow(dead_code)]
+pub(crate) fn to_wstring(src: impl AsRef<str>) -> Vec<u16> {
+    src.as_ref()
+        .encode_utf16()
+        .chain(Some(0))
+        .collect::<Vec<_>>()
+}
+
+#[allow(dead_code)]
+pub(crate) fn to_string(src: &[u16]) -> String {
+    String::from_utf16_lossy(src)
 }

@@ -1,5 +1,3 @@
-#![cfg(feature = "d3d11on12")]
-
 use crate::d3d;
 use crate::d3d11;
 use crate::d3d12;
@@ -10,7 +8,6 @@ use com_ptr::ComPtr;
 use winapi::um::d3d11::*;
 use winapi::um::d3d11on12::*;
 use winapi::um::unknwnbase::IUnknown;
-use winapi::Interface as _;
 
 pub struct D3D11ResourceFlags {
     pub bind_flags: d3d11::BindFlags,

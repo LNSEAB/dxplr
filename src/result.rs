@@ -142,6 +142,7 @@ pub struct ErrorMessageObject {
     message: Option<String>,
 }
 impl ErrorMessageObject {
+    #[allow(dead_code)]
     pub(crate) fn new(hresult: HResult, message: *mut ID3DBlob) -> Self {
         let msg = if message != std::ptr::null_mut() {
             unsafe { Some(Blob(ComPtr::from_raw(message))) }

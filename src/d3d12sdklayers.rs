@@ -2,7 +2,6 @@ use crate::impl_interface;
 use crate::Interface;
 use com_ptr::ComPtr;
 use winapi::um::d3d12sdklayers::*;
-use winapi::Interface as _;
 
 pub trait IDebug: Interface {
     fn enable_debug_layer(&self);

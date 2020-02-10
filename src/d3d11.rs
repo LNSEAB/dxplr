@@ -1,7 +1,9 @@
 use crate::api::Rect;
 use crate::api::*;
 use crate::d3d;
+#[cfg(feature = "d3d11sdklayers")]
 pub use crate::d3d11sdklayers::*;
+#[cfg(feature = "dxgi")]
 use crate::dxgi;
 use crate::result::{hresult, HResult};
 use crate::utility::*;
@@ -14,7 +16,6 @@ use winapi::ctypes::c_void;
 use winapi::shared::windef::RECT;
 use winapi::um::d3d11::*;
 use winapi::um::d3dcommon::*;
-use winapi::Interface as _;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct AsyncGetDataFlag(u32);
@@ -1995,12 +1996,11 @@ impl<'a> InputElementDesc<'a> {
 /// ## Examples
 ///
 /// ```
-/// use dxplr;
-/// use dxplr::d3d121_input_element_descs;
+/// use dxplr::d3d11_input_element_descs;
 ///
-/// let descs = d3d11_input_element_descs [
-///     {"POSITION", 0, dxgi::Format::R32G32B32Float, 0, 0, d3d11::InputClassification::PerVertexData, 0},
-///     {"COLOR", 0, dxgi::Format::R32G32B32A32Float, 0, d3d11::APPEND_ALIGNED_ELEMENT, d3d11::InputClassification::PerVertexData, 0}
+/// let descs = d3d11_input_element_descs![
+///     {"POSITION", 0, dxplr::dxgi::Format::R32G32B32Float, 0, 0, dxplr::d3d11::InputClassification::PerVertexData, 0},
+///     {"COLOR", 0, dxplr::dxgi::Format::R32G32B32A32Float, 0, dxplr::d3d11::APPEND_ALIGNED_ELEMENT, dxplr::d3d11::InputClassification::PerVertexData, 0}
 /// ];
 /// ```
 ///
@@ -5035,10 +5035,10 @@ pub trait IDeviceContext: IDeviceChild {
         src_subresource: u32,
         format: dxgi::Format,
     );
-    fn rs_get_scissor_rects(&self) -> Vec<Rect>;
+    fn rs_get_scissor_rects(&self) -> Vec<Rect<i32>>;
     fn rs_get_state(&self) -> Option<RasterizerState>;
     fn rs_get_viewports(&self) -> Vec<Viewport>;
-    fn rs_set_scissor_rects(&self, rects: &[Rect]);
+    fn rs_set_scissor_rects(&self, rects: &[Rect<i32>]);
     fn rs_set_state(&self, rasterizer_state: &RasterizerState);
     fn rs_set_viewports(&self, viewports: &[Viewport]);
     fn set_predication(&self, predicate: Option<&Predicate>, value: bool);
@@ -5967,7 +5967,7 @@ macro_rules! impl_devicecontext {
                     );
                 }
             }
-            fn rs_get_scissor_rects(&self) -> Vec<Rect> {
+            fn rs_get_scissor_rects(&self) -> Vec<Rect<i32>> {
                 unsafe {
                     let mut sz = 0;
                     self.0.RSGetScissorRects(&mut sz, std::ptr::null_mut());
@@ -6004,7 +6004,7 @@ macro_rules! impl_devicecontext {
                     vps.into_iter().map(|vp| vp.into()).collect::<Vec<_>>()
                 }
             }
-            fn rs_set_scissor_rects(&self, rects: &[Rect]) {
+            fn rs_set_scissor_rects(&self, rects: &[Rect<i32>]) {
                 unsafe {
                     self.0
                         .RSSetScissorRects(rects.len() as u32, rects.as_ptr() as *const RECT);

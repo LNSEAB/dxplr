@@ -21,6 +21,11 @@ steps:
       continueOnError: true
 
     - script: |
+        cargo test --features="dxgi"
+      displayName: test dxplr dxgi
+      continueOnError: true
+
+    - script: |
         cargo test --features="dxgi1_2"
       displayName: test dxplr dxgi1_2
       continueOnError: true
@@ -46,6 +51,11 @@ steps:
       continueOnError: true
 
     - script: |
+        cargo test --features="d3d11"
+      displayName: test dxplr d3d11
+      continueOnError: true
+
+    - script: |
         cargo test --features="d3d11_1"
       displayName: test dxplr d3d11_1
       continueOnError: true
@@ -65,7 +75,17 @@ steps:
       displayName: test dxplr d3d11_4
       continueOnError: true
 
+     - script: |
+        cargo test --features="d3d12"
+      displayName: test dxplr d3d12
+      continueOnError: true
+
     - script: |
         cargo test --features="d3dcompiler"
       displayName: test dxplr d3dcompiler
       continueOnError: true
+
+    - script: |
+        cargo test --features="d3d11on12"
+      displayName: test dxplr d3d11on12
+      continueOnError: tru

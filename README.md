@@ -8,17 +8,31 @@
 
 The following cargo features can be specified.
 
+* `d3d11`
 * `d3d11_1`
 * `d3d11_2`
 * `d3d11_3`
 * `d3d11_4`
+* `d3d11sdklayers`
+* `d3d12`
+* `d3d12sdklayers`
+* `dxgi`
 * `dxgi1_2`
 * `dxgi1_3`
 * `dxgi1_4`
 * `dxgi1_5`
 * `dxgi1_6`
+* `dxgidebug`
 * `d3dcompiler`
 * `d3d11on12`
+* `d2d1`
+* `d2d1_1`
+* `d2d1_2`
+* `d2d1_3`
+* `dwrite`
+* `dwrite_1`
+* `dwrite_2`
+* `dwrite_3`
 
 ## License
 

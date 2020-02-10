@@ -2,6 +2,7 @@ use crate::api::EventHandle;
 use crate::api::Rect;
 use crate::api::*;
 use crate::d3d;
+#[cfg(feature = "d3d12sdklayers")]
 pub use crate::d3d12sdklayers::*;
 use crate::dxgi;
 use crate::result::{hresult, ErrorMessage, ErrorMessageObject, HResult};
@@ -15,7 +16,6 @@ use winapi::shared::windef::RECT;
 use winapi::um::d3d12::*;
 use winapi::um::minwinbase::SECURITY_ATTRIBUTES;
 use winapi::um::winnt::HANDLE;
-use winapi::Interface as _;
 
 /*
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -2166,7 +2166,7 @@ impl From<D3D12_DESCRIPTOR_RANGE1> for DescriptorRange1 {
 
 #[derive(Clone, Debug)]
 pub struct DiscardRegion<'a> {
-    pub rects: &'a [Rect],
+    pub rects: &'a [Rect<i32>],
     pub first_subresource: u32,
     pub num_subresources: u32,
 }
@@ -3385,7 +3385,6 @@ impl<'a> InputLayoutDesc<'a> {
 /// ## Examples
 ///
 /// ```
-/// use dxplr;
 /// use dxplr::d3d12_input_layout_descs;
 ///
 /// let descs = d3d12_input_layout_descs![
@@ -6700,13 +6699,13 @@ pub trait IGraphicsCommandList: ICommandList {
         clear_flags: ClearFlags,
         depth: f32,
         stencil: u8,
-        rects: Option<&[Rect]>,
+        rects: Option<&[Rect<i32>]>,
     );
     fn clear_render_target_view(
         &self,
         rtv: CPUDescriptorHandle,
         clear_rgba: dxgi::RGBA,
-        rects: Option<&[Rect]>,
+        rects: Option<&[Rect<i32>]>,
     );
     fn clear_state(&self, pipeline_state: &PipelineState);
     fn clear_unordered_access_view_float(
@@ -6715,7 +6714,7 @@ pub trait IGraphicsCommandList: ICommandList {
         view_cpu_handle: CPUDescriptorHandle,
         resource: &Resource,
         values: [f32; 4],
-        rects: &[Rect],
+        rects: &[Rect<i32>],
     );
     fn clear_unordered_access_view_uint(
         &self,
@@ -6723,7 +6722,7 @@ pub trait IGraphicsCommandList: ICommandList {
         view_cpu_handle: CPUDescriptorHandle,
         resource: &Resource,
         values: [u32; 4],
-        rects: &[Rect],
+        rects: &[Rect<i32>],
     );
     fn close(&self) -> HResult;
     fn copy_buffer_region(
@@ -6821,7 +6820,7 @@ pub trait IGraphicsCommandList: ICommandList {
         format: dxgi::Format,
     );
     fn resource_barrier(&self, barriers: &[ResourceBarrier<impl IResource>]);
-    fn rs_set_scissor_rects(&self, rects: &[Rect]);
+    fn rs_set_scissor_rects(&self, rects: &[Rect<i32>]);
     fn rs_set_viewports(&self, viewports: &[Viewport]);
     fn set_compute_root_32bit_constant(
         &self,
@@ -6925,7 +6924,7 @@ macro_rules! impl_graphics_command_list {
                 clear_flags: ClearFlags,
                 depth: f32,
                 stencil: u8,
-                rects: Option<&[Rect]>,
+                rects: Option<&[Rect<i32>]>,
             ) {
                 unsafe {
                     self.0.ClearDepthStencilView(
@@ -6942,7 +6941,7 @@ macro_rules! impl_graphics_command_list {
                 &self,
                 rtv: CPUDescriptorHandle,
                 clear_rgba: dxgi::RGBA,
-                rects: Option<&[Rect]>,
+                rects: Option<&[Rect<i32>]>,
             ) {
                 unsafe {
                     self.0.ClearRenderTargetView(
@@ -6962,7 +6961,7 @@ macro_rules! impl_graphics_command_list {
                 view_cpu_handle: CPUDescriptorHandle,
                 resource: &Resource,
                 values: [f32; 4],
-                rects: &[Rect],
+                rects: &[Rect<i32>],
             ) {
                 unsafe {
                     self.0.ClearUnorderedAccessViewFloat(
@@ -6981,7 +6980,7 @@ macro_rules! impl_graphics_command_list {
                 view_cpu_handle: CPUDescriptorHandle,
                 resource: &Resource,
                 values: [u32; 4],
-                rects: &[Rect],
+                rects: &[Rect<i32>],
             ) {
                 unsafe {
                     self.0.ClearUnorderedAccessViewUint(
@@ -7262,7 +7261,7 @@ macro_rules! impl_graphics_command_list {
                     )
                 }
             }
-            fn rs_set_scissor_rects(&self, rects: &[Rect]) {
+            fn rs_set_scissor_rects(&self, rects: &[Rect<i32>]) {
                 unsafe {
                     self.0
                         .RSSetScissorRects(rects.len() as u32, rects.as_ptr() as *const RECT)
@@ -7777,6 +7776,7 @@ pub fn serialize_versioned_root_signature(
     }
 }
 
+#[cfg(feature = "d3d12sdklayers")]
 pub fn get_debug_interface<T: IDebug>() -> Result<T, HResult> {
     Ok(T::new(ComPtr::new(|| {
         let mut obj = std::ptr::null_mut();
