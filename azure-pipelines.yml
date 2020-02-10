@@ -75,7 +75,7 @@ steps:
       displayName: test dxplr d3d11_4
       continueOnError: true
 
-     - script: |
+    - script: |
         cargo test --features="d3d12"
       displayName: test dxplr d3d12
       continueOnError: true
