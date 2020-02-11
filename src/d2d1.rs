@@ -1,4 +1,5 @@
-#[cfg(feature = "dxgi")]
+#![allow(dead_code)]
+
 use crate::dxgi;
 use crate::result::{hresult, HResult};
 use crate::utility::*;
@@ -1732,7 +1733,7 @@ pub enum YCbCrProp {
     InterpolationMode = D2D1_YCBCR_PROP_INTERPOLATION_MODE,
 }
 
-pub type ColorF = crate::dxgitype::RGBA;
+pub type ColorF = crate::dxgi::RGBA;
 
 macro_rules! impl_matrix {
     ($name: ident, $r: expr, $c: expr) => {

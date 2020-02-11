@@ -18,9 +18,7 @@ mod d3d12sdklayers;
 pub mod d3dcompiler;
 #[cfg(feature = "dwrite")]
 pub mod dwrite;
-#[cfg(feature = "dxgi")]
 pub mod dxgi;
-mod dxgitype;
 pub mod result;
 mod utility;
 

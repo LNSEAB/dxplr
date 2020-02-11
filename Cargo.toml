@@ -60,12 +60,12 @@ image = "0.23.0"
 [[example]]
 name = "d3d11_triangle"
 path = "./examples/d3d11/triangle/main.rs"
-required-features = ["d3d11", "dxgi1_4", "d3dcompiler"]
+required-features = ["d3d11", "dxgi", "d3dcompiler"]
 
 [[example]]
 name = "d3d11_texture"
 path = "./examples/d3d11/texture/main.rs"
-required-features = ["d3d11", "dxgi1_4", "d3dcompiler"]
+required-features = ["d3d11", "dxgi1_2", "d3dcompiler"]
 
 [[example]]
 name = "d3d12_triangle"
@@ -85,4 +85,4 @@ required-features = ["d3d12", "d3d12sdklayers", "dxgi1_4", "d3dcompiler"]
 [[example]]
 name = "d2d1_hello"
 path = "./examples/d2d1/hello/hello.rs"
-required-features = ["d2d1", "dxgi", "dwrite"]
+required-features = ["d2d1", "dwrite"]

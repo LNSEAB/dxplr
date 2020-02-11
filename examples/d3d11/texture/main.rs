@@ -6,7 +6,6 @@ use dxplr::d3d11::{IDevice, IDeviceContext};
 use dxplr::d3d11_input_element_descs;
 use dxplr::dxgi;
 use dxplr::dxgi::{IFactory2, ISwapChain, ISwapChain1};
-use dxplr::Interface;
 use image;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -93,7 +92,7 @@ impl Mesh {
 
 struct Renderer {
     device_context: d3d11::DeviceContext,
-    swap_chain: dxgi::SwapChain3,
+    swap_chain: dxgi::SwapChain1,
     rtv: d3d11::RenderTargetView,
     input_layout: d3d11::InputLayout,
     vs: d3d11::VertexShader,
@@ -118,8 +117,6 @@ impl Renderer {
                 None,
                 None,
             )
-            .unwrap()
-            .query_interface::<dxgi::SwapChain3>()
             .unwrap();
         let rtv = {
             let buffer = swap_chain.get_buffer::<d3d11::Texture2D>(0).unwrap();

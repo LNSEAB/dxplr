@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::api::*;
 use crate::result::*;
 use crate::utility::*;
@@ -1089,7 +1091,7 @@ impl From<DWRITE_CLUSTER_METRICS> for ClusterMetrics {
     }
 }
 
-pub type ColorF = crate::dxgitype::RGBA;
+pub type ColorF = crate::dxgi::RGBA;
 
 /*
 #[derive(Clone, Debug)]
