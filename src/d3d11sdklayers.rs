@@ -6,7 +6,6 @@ use com_ptr::ComPtr;
 use winapi::shared::dxgi::*;
 use winapi::um::d3d11::*;
 use winapi::um::d3d11sdklayers::*;
-use winapi::Interface as _;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DebugFeature(u32);

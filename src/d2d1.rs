@@ -280,6 +280,7 @@ pub enum BrightnessProp {
     BlackPoint = D2D1_BRIGHTNESS_PROP_BLACK_POINT,
 }
 
+#[cfg(feature = "d2d1_1")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum BufferPrecision {
@@ -774,6 +775,7 @@ pub enum Gamma {
     _1_0 = D2D1_GAMMA_1_0,
 }
 
+#[cfg(feature = "d2d1_3")]
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum Gamma1 {
@@ -2566,12 +2568,27 @@ impl From<D2D1_GRADIENT_STOP> for GradientStop {
 }
 
 #[derive(Clone, Debug)]
-pub struct HwndRenderTargetPropertices {
+pub struct HwndRenderTargetProperties {
     pub hwnd: HWND,
     pub pixel_size: SizeU,
     pub present_options: Option<PresentOptions>,
 }
-impl HwndRenderTargetPropertices {
+impl HwndRenderTargetProperties {
+    pub fn new(hwnd: &impl crate::api::WindowHandle) -> Self {
+        Self {
+            hwnd: hwnd.as_hwnd(),
+            pixel_size: SizeU::new(0, 0),
+            present_options: None,
+        }
+    }
+    pub fn pixel_size(mut self, pixel_size: impl Into<SizeU>) -> Self {
+        self.pixel_size = pixel_size.into();
+        self
+    }
+    pub fn present_options(mut self, options: PresentOptions) -> Self {
+        self.present_options = Some(options);
+        self
+    }
     fn to_c_struct(&self) -> D2D1_HWND_RENDER_TARGET_PROPERTIES {
         D2D1_HWND_RENDER_TARGET_PROPERTIES {
             hwnd: self.hwnd,
@@ -2608,6 +2625,7 @@ pub struct ImageBrushProperties {
     pub extend_mode_y: ExtendMode,
     pub interpolation_mode: InterpolationMode,
 }
+#[cfg(feature = "d2d1_1")]
 impl ImageBrushProperties {
     fn to_c_struct(&self) -> D2D1_IMAGE_BRUSH_PROPERTIES {
         D2D1_IMAGE_BRUSH_PROPERTIES {
@@ -2761,6 +2779,7 @@ pub struct MappedRect {
     pub pitch: u32,
     pub bits: *mut u8,
 }
+#[cfg(feature = "d2d1_1")]
 impl From<D2D1_MAPPED_RECT> for MappedRect {
     fn from(src: D2D1_MAPPED_RECT) -> MappedRect {
         MappedRect {
@@ -2776,10 +2795,21 @@ pub struct PixelFormat {
     pub alpha_mode: AlphaMode,
 }
 impl PixelFormat {
+    pub fn new() -> Self {
+        Default::default()
+    }
     fn to_c_struct(&self) -> D2D1_PIXEL_FORMAT {
         D2D1_PIXEL_FORMAT {
             format: self.format as u32,
             alphaMode: self.alpha_mode as u32,
+        }
+    }
+}
+impl Default for PixelFormat {
+    fn default() -> Self {
+        Self {
+            format: dxgi::Format::Unknown,
+            alpha_mode: AlphaMode::Unknown,
         }
     }
 }
@@ -2875,6 +2905,7 @@ impl RadialGradientBrushProperties {
     }
 }
 
+#[cfg(feature = "d2d1_1")]
 #[derive(Clone, Debug)]
 pub struct ResourceTextureProperties<'a> {
     pub extents: &'a [u32],
@@ -2883,6 +2914,7 @@ pub struct ResourceTextureProperties<'a> {
     pub filter: Filter,
     pub extend_modes: &'a [ExtendMode],
 }
+#[cfg(feature = "d2d1_1")]
 impl<'a> ResourceTextureProperties<'a> {
     fn to_c_struct(&self) -> (D2D1_RESOURCE_TEXTURE_PROPERTIES, Vec<u32>) {
         assert!(self.extents.len() >= 1 && self.extents.len() <= 3);
@@ -2935,6 +2967,30 @@ pub struct RenderTargetProperties {
     pub min_level: FeatureLevel,
 }
 impl RenderTargetProperties {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn render_target_type(mut self, ty: RenderTargetType) -> Self {
+        self.ty = ty;
+        self
+    }
+    pub fn pixel_format(mut self, format: PixelFormat) -> Self {
+        self.pixel_format = format;
+        self
+    }
+    pub fn dpi(mut self, x: f32, y: f32) -> Self {
+        self.dpi_x = x;
+        self.dpi_y = y;
+        self
+    }
+    pub fn usage(mut self, usage: RenderTargetUsage) -> Self {
+        self.usage = usage;
+        self
+    }
+    pub fn min_level(mut self, min_level: FeatureLevel) -> Self {
+        self.min_level = min_level;
+        self
+    }
     fn to_c_struct(&self) -> D2D1_RENDER_TARGET_PROPERTIES {
         D2D1_RENDER_TARGET_PROPERTIES {
             _type: self.ty as u32,
@@ -2943,6 +2999,18 @@ impl RenderTargetProperties {
             dpiY: self.dpi_y,
             usage: self.usage as u32,
             minLevel: self.min_level as u32,
+        }
+    }
+}
+impl Default for RenderTargetProperties {
+    fn default() -> Self {
+        Self {
+            ty: RenderTargetType::Default,
+            pixel_format: Default::default(),
+            dpi_x: 0.0,
+            dpi_y: 0.0,
+            usage: RenderTargetUsage::None,
+            min_level: FeatureLevel::Default,
         }
     }
 }
@@ -3484,7 +3552,7 @@ macro_rules! impl_factory {
             fn create_hwnd_render_target(
                 &self,
                 props: &RenderTargetProperties,
-                hwnd_props: &HwndRenderTargetPropertices,
+                hwnd_props: &HwndRenderTargetProperties,
             ) -> Result<HwndRenderTarget, HResult> {
                 Ok(HwndRenderTarget(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
@@ -4404,8 +4472,7 @@ macro_rules! impl_render_target {
             fn set_tags(&self, tag1: Tag, tag2: Tag) {
                 unsafe { self.0.SetTags(tag1.0, tag2.0); }
             }
-            #[cfg(feature = "dwrite")]
-            fn set_text_antialias_mode(&self, mode: crate::dwrite::TextAntialiasMode) {
+            fn set_text_antialias_mode(&self, mode: TextAntialiasMode) {
                 unsafe { self.0.SetTextAntialiasMode(mode as u32); }
             }
             #[cfg(feature = "dwrite")]
@@ -4708,7 +4775,7 @@ pub trait IFactory: Interface {
     fn create_hwnd_render_target(
         &self,
         props: &RenderTargetProperties,
-        hwnd_props: &HwndRenderTargetPropertices,
+        hwnd_props: &HwndRenderTargetProperties,
     ) -> Result<HwndRenderTarget, HResult>;
     fn craete_path_geometry(&self) -> Result<PathGeometry, HResult>;
     fn create_rectangle_geometry(&self, rc: impl Into<RectF>)
@@ -4735,6 +4802,15 @@ pub trait IFactory: Interface {
 #[derive(Clone, Debug)]
 pub struct Factory(ComPtr<ID2D1Factory>);
 impl_factory!(Factory, ID2D1Factory);
+
+pub fn create_factory<T: IFactory>(factory_type: FactoryType, options: Option<&FactoryOptions>) -> Result<T, HResult> {
+    let options = options.map(|o| o.to_c_struct());
+    Ok(T::new(ComPtr::new(|| unsafe {
+        let mut p = std::ptr::null_mut();
+        let ret = D2D1CreateFactory(factory_type as u32, &T::uuidof().into(), options.as_ref().map_or(std::ptr::null(), |o| o as *const _), &mut p);
+        hresult(p as *mut T::APIType, ret)
+    })?))
+}
 
 pub trait IGdiInteropRenderTarget: Interface {
     fn get_dc(&self, mode: DCInitializeMode) -> Result<HDC, HResult>;
@@ -5095,8 +5171,7 @@ pub trait IRenderTarget: IResource {
     fn set_antialias_mode(&self, mode: AntialiasMode);
     fn set_dpi(&self, x: f32, y: f32);
     fn set_tags(&self, tag1: Tag, tag2: Tag);
-    #[cfg(feature = "dwrite")]
-    fn set_text_antialias_mode(&self, mode: crate::dwrite::TextAntialiasMode);
+    fn set_text_antialias_mode(&self, mode: TextAntialiasMode);
     #[cfg(feature = "dwrite")]
     fn set_text_rendering_params(&self, params: Option<&crate::dwrite::RenderingParams>);
     fn set_transform(&self, m: &Matrix3x2F);

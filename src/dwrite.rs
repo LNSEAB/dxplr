@@ -778,6 +778,7 @@ pub enum PanoseSerifStyle {
     Rounded = DWRITE_PANOSE_SERIF_STYLE_ROUNDED,
     Script = DWRITE_PANOSE_SERIF_STYLE_SCRIPT,
 }
+#[cfg(feature = "dwrite_1")]
 #[allow(non_upper_case_globals)]
 impl PanoseSerifStyle {
     pub const PerpSans: Self = Self::PerpendicularSans;
@@ -879,6 +880,7 @@ pub enum PanoseWeight {
     Black = DWRITE_PANOSE_WEIGHT_BLACK,
     ExtraBlack = DWRITE_PANOSE_WEIGHT_EXTRA_BLACK,
 }
+#[cfg(feature = "dwrite_1")]
 #[allow(non_upper_case_globals)]
 impl PanoseWeight {
     pub const WeightNord: Self = Self::ExtraBlack;
@@ -2535,7 +2537,7 @@ macro_rules! impl_factory {
             fn create_text_format(
                 &self,
                 family_name: impl AsRef<str>,
-                collection: &impl IFontCollection,
+                collection: Option<&FontCollection>,
                 weight: FontWeight,
                 style: FontStyle,
                 stretch: FontStretch,
@@ -2548,7 +2550,7 @@ macro_rules! impl_factory {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateTextFormat(
                         family_name.as_ptr(),
-                        collection.as_ptr() as *mut _,
+                        collection.map_or(std::ptr::null_mut(), |p| p.as_ptr() as *mut _),
                         weight as u32,
                         style as u32,
                         stretch as u32,
@@ -4465,7 +4467,7 @@ pub trait IFactory: Interface {
     fn create_text_format(
         &self,
         family_name: impl AsRef<str>,
-        collection: &impl IFontCollection,
+        collection: Option<&FontCollection>,
         weight: FontWeight,
         style: FontStyle,
         stretch: FontStretch,

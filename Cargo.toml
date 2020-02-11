@@ -54,8 +54,8 @@ winapi = { version = "0.3.8", features = [
 failure = "0.1.6"
 
 [dev-dependencies]
-winit = "0.20.0"
-image = "0.22.4"
+winit = "0.21.0"
+image = "0.23.0"
 
 [[example]]
 name = "d3d11_triangle"
@@ -81,3 +81,8 @@ required-features = ["d3d12", "d3d12sdklayers", "dxgi1_4", "d3dcompiler"]
 name = "d3d12_compute"
 path = "./examples/d3d12/compute/main.rs"
 required-features = ["d3d12", "d3d12sdklayers", "dxgi1_4", "d3dcompiler"]
+
+[[example]]
+name = "d2d1_hello"
+path = "./examples/d2d1/hello/hello.rs"
+required-features = ["d2d1", "dxgi", "dwrite"]
