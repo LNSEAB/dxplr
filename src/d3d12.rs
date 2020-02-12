@@ -5,7 +5,7 @@ use crate::d3d;
 #[cfg(feature = "d3d12sdklayers")]
 pub use crate::d3d12sdklayers::*;
 use crate::dxgi;
-use crate::result::{hresult, ErrorMessage, ErrorMessageObject, HResult};
+use crate::result::{hresult, ErrorMessage, HResult};
 use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
@@ -7753,7 +7753,7 @@ pub fn serialize_root_signature(
     unsafe {
         let res = D3D12SerializeRootSignature(&c_desc, version.into(), &mut obj, &mut err);
         if res < 0 {
-            Err(ErrorMessageObject::new(res.into(), err).into())
+            Err(ErrorMessage::new(res.into(), err).into())
         } else {
             Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
         }
@@ -7769,7 +7769,7 @@ pub fn serialize_versioned_root_signature(
     unsafe {
         let res = D3D12SerializeVersionedRootSignature(&c_desc, &mut obj, &mut err);
         if res < 0 {
-            Err(ErrorMessageObject::new(res.into(), err).into())
+            Err(ErrorMessage::new(res.into(), err).into())
         } else {
             Ok(d3d::Blob::new(ComPtr::from_raw(obj)))
         }

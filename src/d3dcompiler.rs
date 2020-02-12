@@ -2,7 +2,7 @@
 
 use crate::d3d::{Blob, IInclude, IncludeType, ShaderMacro};
 use crate::impl_bitflag_operators;
-use crate::result::{ErrorMessage, ErrorMessageObject};
+use crate::result::ErrorMessage;
 use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
 use winapi::shared::minwindef::LPCVOID;
@@ -181,7 +181,7 @@ pub fn compile(
             &mut err_blob,
         );
         if res < 0 {
-            Err(ErrorMessageObject::new(res.into(), err_blob).into())
+            Err(ErrorMessage::new(res.into(), err_blob).into())
         } else {
             Ok(Blob(ComPtr::from_raw(blob)))
         }

@@ -51,7 +51,7 @@ winapi = { version = "0.3.8", features = [
 	"handleapi",
 	"synchapi",
 ] }
-failure = "0.1.6"
+thiserror = "1.0.10"
 
 [dev-dependencies]
 winit = "0.21.0"
