@@ -3563,7 +3563,7 @@ macro_rules! impl_factory {
                     hresult(p, ret)
                 })?))
             }
-            fn craete_path_geometry(&self) -> Result<PathGeometry, HResult> {
+            fn create_path_geometry(&self) -> Result<PathGeometry, HResult> {
                 Ok(PathGeometry(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreatePathGeometry(&mut p);
@@ -4778,7 +4778,7 @@ pub trait IFactory: Interface {
         props: &RenderTargetProperties,
         hwnd_props: &HwndRenderTargetProperties,
     ) -> Result<HwndRenderTarget, HResult>;
-    fn craete_path_geometry(&self) -> Result<PathGeometry, HResult>;
+    fn create_path_geometry(&self) -> Result<PathGeometry, HResult>;
     fn create_rectangle_geometry(&self, rc: impl Into<RectF>)
         -> Result<RectangleGeometry, HResult>;
     fn create_rounded_rectangle_geometry(
