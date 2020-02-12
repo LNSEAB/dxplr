@@ -2832,6 +2832,7 @@ macro_rules! impl_font_face {
                     hresult(indices, ret)
                 }
             }
+            #[cfg(feature = "d2d1")]
             fn get_glyph_run_outline(
                 &self,
                 em_size: f32,

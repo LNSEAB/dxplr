@@ -96,8 +96,8 @@ steps:
       continueOnError: true
 
     - script: |
-        cargo test --features="d2d1,dwrite,dxgi"
-      displayName: test dxplr d2d1 dwrite dxgi
+        cargo test --features="d2d1,dwrite"
+      displayName: test dxplr d2d1 dwrite
       continueOnError: true
 
     - script: |

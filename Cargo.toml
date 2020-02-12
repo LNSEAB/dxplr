@@ -84,5 +84,5 @@ required-features = ["d3d12", "d3d12sdklayers", "dxgi1_4", "d3dcompiler"]
 
 [[example]]
 name = "d2d1_hello"
-path = "./examples/d2d1/hello/hello.rs"
+path = "./examples/d2d1/hello/main.rs"
 required-features = ["d2d1", "dwrite"]

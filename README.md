@@ -26,13 +26,13 @@ The following cargo features can be specified.
 * `d3dcompiler`
 * `d3d11on12`
 * `d2d1`
-* `d2d1_1`
-* `d2d1_2`
-* `d2d1_3`
+* `d2d1_1` (unimplemented)
+* `d2d1_2` (unimplemented)
+* `d2d1_3` (unimplemented)
 * `dwrite`
-* `dwrite_1`
-* `dwrite_2`
-* `dwrite_3`
+* `dwrite_1` (unimplemented)
+* `dwrite_2` (unimplemented)
+* `dwrite_3` (unimplemented)
 
 ## License
 
