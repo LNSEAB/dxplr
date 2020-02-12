@@ -29,7 +29,7 @@ fn main() {
         dwrite::FontWeight::Normal,
         dwrite::FontStyle::Normal,
         dwrite::FontStretch::Normal,
-        32.0,
+        128.0,
         ""
     ).unwrap();
     text_format.set_text_alignment(dwrite::TextAlignment::Center).unwrap();
