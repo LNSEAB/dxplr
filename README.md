@@ -1,6 +1,6 @@
 # dxplr
 
-(unstable) A thin Rust wrapper around D3D11, D3D12 and DXGI.
+(unstable) A thin Rust wrapper around D3D11, D3D12, DXGI, D2D1 and DWrite.
 
 [![Build Status](https://dev.azure.com/nclr/dxplr/_apis/build/status/LNSEAB.dxplr?branchName=master)](https://dev.azure.com/nclr/dxplr/_build/latest?definitionId=2&branchName=master)
 
