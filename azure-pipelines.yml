@@ -126,11 +126,6 @@ steps:
       continueOnError: true
 
     - script: |
-        cargo test --features="d2d1_4"
-      displayName: test dxplr d2d1_4
-      continueOnError: true
-
-    - script: |
         cargo test --features="dwrite"
       displayName: test dxplr dwrite
       continueOnError: true
