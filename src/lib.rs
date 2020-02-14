@@ -1,7 +1,6 @@
 //! (unstable) A thin Rust wrapper around D3D1, D3D12 and DXGI.
 
 pub mod api;
-#[cfg(feature = "d2d1")]
 pub mod d2d1;
 pub mod d3d;
 #[cfg(feature = "d3d11")]

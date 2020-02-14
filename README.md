@@ -9,10 +9,10 @@
 The following cargo features can be specified.
 
 * `d3d11`
-* `d3d11_1`
-* `d3d11_2`
-* `d3d11_3`
-* `d3d11_4`
+* `d3d11_1` (unimplemented)
+* `d3d11_2` (unimplemented)
+* `d3d11_3` (unimplemented)
+* `d3d11_4` (unimplemented)
 * `d3d11sdklayers`
 * `d3d12`
 * `d3d12sdklayers`

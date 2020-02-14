@@ -6,9 +6,9 @@ use thiserror::Error;
 
 #[derive(Clone, PartialEq, Eq, Debug, Error)]
 pub enum HResult {
-    #[error("0x{0:x}")]
+    #[error("Success(0x{0:x})")]
     Successed(HRESULT),
-    #[error("0x{0:x}")]
+    #[error("Failed(0x{0:x})")]
     Failed(HRESULT),
 }
 impl HResult {

@@ -51,6 +51,11 @@ steps:
       continueOnError: true
 
     - script: |
+        cargo test --features="dxgidebug"
+      displayName: test dxplr dxgidebug
+      continueOnError: true
+
+    - script: |
         cargo test --features="d3d11"
       displayName: test dxplr d3d11
       continueOnError: true
@@ -76,8 +81,18 @@ steps:
       continueOnError: true
 
     - script: |
+        cargo test --features="d3d11sdklayers"
+      displayName: test dxplr d3d11sdklayers
+      continueOnError: true
+
+    - script: |
         cargo test --features="d3d12"
       displayName: test dxplr d3d12
+      continueOnError: true
+
+    - script: |
+        cargo test --features="d3d12sdklayers"
+      displayName: test dxplr d3d12sdklayers
       continueOnError: true
 
     - script: |
@@ -96,11 +111,46 @@ steps:
       continueOnError: true
 
     - script: |
-        cargo test --features="d2d1,dwrite"
-      displayName: test dxplr d2d1 dwrite
+        cargo test --features="d2d1_1"
+      displayName: test dxplr d2d1_1
+      continueOnError: true
+
+    - script: |
+        cargo test --features="d2d1_2"
+      displayName: test dxplr d2d1_2
+      continueOnError: true
+
+    - script: |
+        cargo test --features="d2d1_3"
+      displayName: test dxplr d2d1_3
+      continueOnError: true
+
+    - script: |
+        cargo test --features="d2d1_4"
+      displayName: test dxplr d2d1_4
       continueOnError: true
 
     - script: |
         cargo test --features="dwrite"
       displayName: test dxplr dwrite
+      continueOnError: true
+
+    - script: |
+        cargo test --features="dwrite_1"
+      displayName: test dxplr dwrite_1
+      continueOnError: true
+
+    - script: |
+        cargo test --features="dwrite_2"
+      displayName: test dxplr dwrite_2
+      continueOnError: true
+
+    - script: |
+        cargo test --features="dwrite_3"
+      displayName: test dxplr dwrite_3
+      continueOnError: true
+
+    - script: |
+        cargo test --features="d2d1,dwrite"
+      displayName: test dxplr d2d1 dwrite
       continueOnError: true

@@ -13,39 +13,6 @@ use winapi::shared::windef::{RECT, SIZE};
 use winapi::shared::winerror::*;
 use winapi::um::dcommon::*;
 use winapi::um::dwrite::*;
-#[cfg(feature = "dwrite_1")]
-use winapi::um::dwrite_1;
-#[cfg(feature = "dwrite_1")]
-use winapi::um::dwrite_1::*;
-#[cfg(feature = "dwrite_2")]
-use winapi::um::dwrite_2::*;
-#[cfg(feature = "dwrite_3")]
-use winapi::um::dwrite_3::*;
-
-/*
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum AutomaticFontAxes {
-    None = DWRITE_AUTOMATIC_FONT_AXES_NONE,
-    OpticalSize = DWRITE_AUTOMATIC_FONT_AXES_OPTICAL_SIZE,
-}
-*/
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum BaseLine {
-    Default = DWRITE_BASELINE_DEFAULT,
-    Roman = DWRITE_BASELINE_ROMAN,
-    Central = DWRITE_BASELINE_CENTRAL,
-    Math = DWRITE_BASELINE_MATH,
-    Hanging = DWRITE_BASELINE_HANGING,
-    Bottom = DWRITE_BASELINE_IDEOGRAPHIC_BOTTOM,
-    Top = DWRITE_BASELINE_IDEOGRAPHIC_TOP,
-    Minimum = DWRITE_BASELINE_MINIMUM,
-    Maximum = DWRITE_BASELINE_MAXIMUM,
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -55,17 +22,6 @@ pub enum BreakCondition {
     MayNotBreak = DWRITE_BREAK_CONDITION_MAY_NOT_BREAK,
     MustBreak = DWRITE_BREAK_CONDITION_MUST_BREAK,
 }
-
-/*
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ContainerType {
-    Unknown = DWRITE_CONTAINER_TYPE_UNKNOWN,
-    Woff = DWRITE_CONTAINER_TYPE_WOFF,
-    Woff2 = DWRITE_CONTAINER_TYPE_WOFF2
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -83,25 +39,6 @@ pub enum FlowDirection {
     RightToLeft = DWRITE_FLOW_DIRECTION_RIGHT_TO_LEFT,
 }
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum FontAxisAttributes {
-    None = DWRITE_FONT_AXIS_ATTRIBUTES_NONE,
-    Variable = DWRITE_FONT_AXIS_ATTRIBUTES_VARIABLE,
-    Hiden = DWRITE_FONT_AXIS_ATTRIBUTES_HIDDEN,
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum FontAxisTag {
-    Weight = DWRITE_FONT_AXIS_TAG_WEIGHT,
-    Width = DWRITE_FONT_AXIS_TAG_WIDTH,
-    Slant = DWRITE_FONT_AXIS_TAG_SLANT,
-    OpticalSize = DWRITE_FONT_AXIS_TAG_OPTICAL_SIZE,
-    Italic = DWRITE_FONT_AXIS_TAG_ITALIC,
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -119,16 +56,6 @@ pub enum FontFaceType {
 impl FontFaceType {
     pub const TrueTypeCollection: Self = Self::OpenTypeCollection;
 }
-
-/*
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum FontFamilyModel {
-    Typographics = DWRITE_FONT_FAMILY_MODEL_TYPOGRAPHIC,
-    WeightStretchStyle = DWRITE_FONT_FAMILY_MODEL_WEIGHT_STRETCH_STYLE
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -233,48 +160,7 @@ impl FontFileType {
     pub const TrueTypeCollection: Self = Self::OpenTypeCollection;
 }
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum FontLineGapUsage {
-    Default = DWRITE_FONT_LINE_GAP_USAGE_DEFAULT,
-    Disabled = DWRITE_FONT_LINE_GAP_USAGE_DISABLED,
-    Enabled = DWRITE_FONT_LINE_GAP_USAGE_ENABLED,
-}
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum FontPropertyID {
-    None = DWRITE_FONT_PROPERTY_ID_NONE,
-    // WeightStretchStyleFamilyName = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FAMILY_NAME,
-    // TypographicsFamilyName = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FAMILY_NAME,
-    // WeightStretchStyleFaceName = DWRITE_FONT_PROPERTY_ID_WEIGHT_STRETCH_STYLE_FACE_NAME,
-    FullName = DWRITE_FONT_PROPERTY_ID_FULL_NAME,
-    Win32FamilyName = DWRITE_FONT_PROPERTY_ID_WIN32_FAMILY_NAME,
-    PostScriptName = DWRITE_FONT_PROPERTY_ID_POSTSCRIPT_NAME,
-    DesignScriptLanguageTag = DWRITE_FONT_PROPERTY_ID_DESIGN_SCRIPT_LANGUAGE_TAG,
-    SupportedScriptLanguageTag = DWRITE_FONT_PROPERTY_ID_SUPPORTED_SCRIPT_LANGUAGE_TAG,
-    SemanticTag = DWRITE_FONT_PROPERTY_ID_SEMANTIC_TAG,
-    Weight = DWRITE_FONT_PROPERTY_ID_WEIGHT,
-    Stretch = DWRITE_FONT_PROPERTY_ID_STRETCH,
-    Style = DWRITE_FONT_PROPERTY_ID_STYLE,
-    // TypographicsFaceName = DWRITE_FONT_PROPERTY_ID_TYPOGRAPHIC_FACE_NAME,
-    Total = DWRITE_FONT_PROPERTY_ID_TOTAL,
-    // TotalRS3 = DWRITE_FONT_PROPERTY_ID_TOTAL_RS3,
-    PreferredFamilyName = DWRITE_FONT_PROPERTY_ID_PREFERRED_FAMILY_NAME,
-    FamilyName = DWRITE_FONT_PROPERTY_ID_FAMILY_NAME,
-    FaceName = DWRITE_FONT_PROPERTY_ID_FACE_NAME,
-}
-#[cfg(feature = "dwrite_3")]
-impl From<Option<FontPropertyID>> for FontPropertyID {
-    fn from(src: Option<FontPropertyID>) -> FontPropertyID {
-        match src {
-            Some(id) => id,
-            None => FontPropertyID::None,
-        }
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct FontSimulations(u32);
@@ -351,40 +237,6 @@ impl FontWeight {
     pub const UltraBlack: Self = Self::ExtraBlack;
 }
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum GlyphImageFormats {
-    None = DWRITE_GLYPH_IMAGE_FORMATS_NONE,
-    TrueType = DWRITE_GLYPH_IMAGE_FORMATS_TRUETYPE,
-    CFF = DWRITE_GLYPH_IMAGE_FORMATS_CFF,
-    COLR = DWRITE_GLYPH_IMAGE_FORMATS_COLR,
-    SVG = DWRITE_GLYPH_IMAGE_FORMATS_SVG,
-    PNG = DWRITE_GLYPH_IMAGE_FORMATS_PNG,
-    JPEG = DWRITE_GLYPH_IMAGE_FORMATS_JPEG,
-    TIFF = DWRITE_GLYPH_IMAGE_FORMATS_TIFF,
-    PremultipliedB8G8R8A8 = DWRITE_GLYPH_IMAGE_FORMATS_PREMULTIPLIED_B8G8R8A8,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum OrientationAngle {
-    _0Degrees = DWRITE_GLYPH_ORIENTATION_ANGLE_0_DEGREES,
-    _90Degrees = DWRITE_GLYPH_ORIENTATION_ANGLE_90_DEGREES,
-    _180Degrees = DWRITE_GLYPH_ORIENTATION_ANGLE_180_DEGREES,
-    _270Degrees = DWRITE_GLYPH_ORIENTATION_ANGLE_270_DEGREES,
-}
-
-#[cfg(feature = "dwrite_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum GridFitMode {
-    Default = DWRITE_GRID_FIT_MODE_DEFAULT,
-    Disabled = DWRITE_GRID_FIT_MODE_DISABLED,
-    Enabled = DWRITE_GRID_FIT_MODE_ENABLED,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum InformationStringID {
@@ -423,15 +275,6 @@ pub enum LineSpacingMethod {
     Proportional = DWRITE_LINE_SPACING_METHOD_PROPORTIONAL,
 }
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum Locality {
-    Remote = DWRITE_LOCALITY_REMOTE,
-    Partial = DWRITE_LOCALITY_PARTIAL,
-    Local = DWRITE_LOCALITY_LOCAL,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum MeasuringMode {
@@ -448,477 +291,6 @@ pub enum NumberSubstitutionMethod {
     None = DWRITE_NUMBER_SUBSTITUTION_METHOD_NONE,
     National = DWRITE_NUMBER_SUBSTITUTION_METHOD_NATIONAL,
     Traditional = DWRITE_NUMBER_SUBSTITUTION_METHOD_TRADITIONAL,
-}
-
-#[cfg(feature = "dwrite_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum OpticalAlignment {
-    None = DWRITE_OPTICAL_ALIGNMENT_NONE,
-    NoSideBearings = DWRITE_OPTICAL_ALIGNMENT_NO_SIDE_BEARINGS,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum OutlineThreshold {
-    Antialiased = winapi::um::dwrite_1::DWRITE_OUTLINE_THRESHOLD_ANTIALIASED,
-    Aliased = winapi::um::dwrite_1::DWRITE_OUTLINE_THRESHOLD_ALIASED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseArmStyle {
-    Any = DWRITE_PANOSE_ARM_STYLE_ANY,
-    NoFit = DWRITE_PANOSE_ARM_STYLE_NO_FIT,
-    StraightArmsHorizontal = DWRITE_PANOSE_ARM_STYLE_STRAIGHT_ARMS_HORIZONTAL,
-    StraightArmsWedge = DWRITE_PANOSE_ARM_STYLE_STRAIGHT_ARMS_WEDGE,
-    StraightArmsVertical = DWRITE_PANOSE_ARM_STYLE_STRAIGHT_ARMS_VERTICAL,
-    StraightArmsSingleSerif = DWRITE_PANOSE_ARM_STYLE_STRAIGHT_ARMS_SINGLE_SERIF,
-    StraightArmsDoubleSerif = DWRITE_PANOSE_ARM_STYLE_STRAIGHT_ARMS_DOUBLE_SERIF,
-    NonStraightArmsHorizontal = DWRITE_PANOSE_ARM_STYLE_NONSTRAIGHT_ARMS_HORIZONTAL,
-    NonStraightArmsWedge = DWRITE_PANOSE_ARM_STYLE_NONSTRAIGHT_ARMS_WEDGE,
-    NonStraightArmsVertical = DWRITE_PANOSE_ARM_STYLE_NONSTRAIGHT_ARMS_VERTICAL,
-    NonStraightArmsSingleSerif = DWRITE_PANOSE_ARM_STYLE_NONSTRAIGHT_ARMS_SINGLE_SERIF,
-    NonStraightArmsDoubleSerif = DWRITE_PANOSE_ARM_STYLE_NONSTRAIGHT_ARMS_DOUBLE_SERIF,
-}
-#[cfg(feature = "dwrite_1")]
-#[allow(non_upper_case_globals)]
-impl PanoseArmStyle {
-    pub const StraightArmsHorz: Self = Self::StraightArmsHorizontal;
-    pub const StraightArmsVert: Self = Self::StraightArmsVertical;
-    pub const BentArmsHorz: Self = Self::NonStraightArmsHorizontal;
-    pub const BentArmsWedge: Self = Self::NonStraightArmsWedge;
-    pub const BentArmsVert: Self = Self::NonStraightArmsVertical;
-    pub const BentArmsSingleSerif: Self = Self::NonStraightArmsSingleSerif;
-    pub const BentArmsDoubleSerif: Self = Self::NonStraightArmsDoubleSerif;
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseAspect {
-    Any = DWRITE_PANOSE_ASPECT_ANY,
-    NoFit = DWRITE_PANOSE_ASPECT_NO_FIT,
-    SuperCondensed = DWRITE_PANOSE_ASPECT_SUPER_CONDENSED,
-    VeryCondensed = DWRITE_PANOSE_ASPECT_VERY_CONDENSED,
-    Condensed = DWRITE_PANOSE_ASPECT_CONDENSED,
-    Normal = DWRITE_PANOSE_ASPECT_NORMAL,
-    Extended = DWRITE_PANOSE_ASPECT_EXTENDED,
-    VeryExtended = DWRITE_PANOSE_ASPECT_VERY_EXTENDED,
-    SuperExtended = DWRITE_PANOSE_ASPECT_SUPER_EXTENDED,
-    Monospaced = DWRITE_PANOSE_ASPECT_MONOSPACED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseAspectRatio {
-    Any = DWRITE_PANOSE_ASPECT_RATIO_ANY,
-    NoFit = DWRITE_PANOSE_ASPECT_RATIO_NO_FIT,
-    VeryCondensed = DWRITE_PANOSE_ASPECT_RATIO_VERY_CONDENSED,
-    Condensed = DWRITE_PANOSE_ASPECT_RATIO_CONDENSED,
-    Normal = DWRITE_PANOSE_ASPECT_RATIO_NORMAL,
-    Expanded = DWRITE_PANOSE_ASPECT_RATIO_EXPANDED,
-    VeryExpanded = DWRITE_PANOSE_ASPECT_RATIO_VERY_EXPANDED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseCharacterRanges {
-    Any = DWRITE_PANOSE_CHARACTER_RANGES_ANY,
-    NoFit = DWRITE_PANOSE_CHARACTER_RANGES_NO_FIT,
-    ExtendedCollection = DWRITE_PANOSE_CHARACTER_RANGES_EXTENDED_COLLECTION,
-    Literals = DWRITE_PANOSE_CHARACTER_RANGES_LITERALS,
-    NoLowerCase = DWRITE_PANOSE_CHARACTER_RANGES_NO_LOWER_CASE,
-    SmallCaps = DWRITE_PANOSE_CHARACTER_RANGES_SMALL_CAPS,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseContrast {
-    Any = DWRITE_PANOSE_CONTRAST_ANY,
-    NoFit = DWRITE_PANOSE_CONTRAST_NO_FIT,
-    None = DWRITE_PANOSE_CONTRAST_NONE,
-    VeryLow = DWRITE_PANOSE_CONTRAST_VERY_LOW,
-    Low = DWRITE_PANOSE_CONTRAST_LOW,
-    MediumLow = DWRITE_PANOSE_CONTRAST_MEDIUM_LOW,
-    Medium = DWRITE_PANOSE_CONTRAST_MEDIUM,
-    MediumHigh = DWRITE_PANOSE_CONTRAST_MEDIUM_HIGH,
-    High = DWRITE_PANOSE_CONTRAST_HIGH,
-    VeryHigh = DWRITE_PANOSE_CONTRAST_VERY_HIGH,
-    HorizontalLow = DWRITE_PANOSE_CONTRAST_HORIZONTAL_LOW,
-    HorizontalMedium = DWRITE_PANOSE_CONTRAST_HORIZONTAL_MEDIUM,
-    HorizontalHigh = DWRITE_PANOSE_CONTRAST_HORIZONTAL_HIGH,
-    Broken = DWRITE_PANOSE_CONTRAST_BROKEN,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseDecorativeClass {
-    Any = DWRITE_PANOSE_DECORATIVE_CLASS_ANY,
-    NoFit = DWRITE_PANOSE_DECORATIVE_CLASS_NO_FIT,
-    Derivative = DWRITE_PANOSE_DECORATIVE_CLASS_DERIVATIVE,
-    NonStandardTopology = DWRITE_PANOSE_DECORATIVE_CLASS_NONSTANDARD_TOPOLOGY,
-    NonStandardElements = DWRITE_PANOSE_DECORATIVE_CLASS_NONSTANDARD_ELEMENTS,
-    NonStandardAspect = DWRITE_PANOSE_DECORATIVE_CLASS_NONSTANDARD_ASPECT,
-    Initials = DWRITE_PANOSE_DECORATIVE_CLASS_INITIALS,
-    Cartoon = DWRITE_PANOSE_DECORATIVE_CLASS_CARTOON,
-    PictureStems = DWRITE_PANOSE_DECORATIVE_CLASS_PICTURE_STEMS,
-    Ornamented = DWRITE_PANOSE_DECORATIVE_CLASS_ORNAMENTED,
-    TextAndBackground = DWRITE_PANOSE_DECORATIVE_CLASS_TEXT_AND_BACKGROUND,
-    Collage = DWRITE_PANOSE_DECORATIVE_CLASS_COLLAGE,
-    Montage = DWRITE_PANOSE_DECORATIVE_CLASS_MONTAGE,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseDecorativeTopology {
-    Any = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_ANY,
-    NoFit = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_NO_FIT,
-    Standard = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_STANDARD,
-    Square = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_SQUARE,
-    MultipleSegment = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_MULTIPLE_SEGMENT,
-    ArtDeco = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_ART_DECO,
-    UnevenWeighting = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_UNEVEN_WEIGHTING,
-    DiverseArms = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_DIVERSE_ARMS,
-    DiverseForms = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_DIVERSE_FORMS,
-    LombardicForms = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_LOMBARDIC_FORMS,
-    UpperCaseInLowerCase = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_UPPER_CASE_IN_LOWER_CASE,
-    ImpliedTopology = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_IMPLIED_TOPOLOGY,
-    HorseshoeEAndA = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_HORSESHOE_E_AND_A,
-    Cursive = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_CURSIVE,
-    Blackletter = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_BLACKLETTER,
-    SwashVariance = DWRITE_PANOSE_DECORATIVE_TOPOLOGY_SWASH_VARIANCE,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseFamily {
-    Any = DWRITE_PANOSE_FAMILY_ANY,
-    NoFit = DWRITE_PANOSE_FAMILY_NO_FIT,
-    TextDisplay = DWRITE_PANOSE_FAMILY_TEXT_DISPLAY,
-    Script = DWRITE_PANOSE_FAMILY_SCRIPT,
-    Decorative = DWRITE_PANOSE_FAMILY_DECORATIVE,
-    Symbol = DWRITE_PANOSE_FAMILY_SYMBOL,
-}
-#[cfg(feature = "dwrite_1")]
-#[allow(non_upper_case_globals)]
-impl PanoseFamily {
-    pub const Pictorial: Self = Self::Symbol;
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseFill {
-    Any = DWRITE_PANOSE_FILL_ANY,
-    NoFit = DWRITE_PANOSE_FILL_NO_FIT,
-    StandardSolidFill = DWRITE_PANOSE_FILL_STANDARD_SOLID_FILL,
-    NoFill = DWRITE_PANOSE_FILL_NO_FILL,
-    PatternedFill = DWRITE_PANOSE_FILL_PATTERNED_FILL,
-    ComplexFill = DWRITE_PANOSE_FILL_COMPLEX_FILL,
-    ShapedFill = DWRITE_PANOSE_FILL_SHAPED_FILL,
-    DrawnDistressed = DWRITE_PANOSE_FILL_DRAWN_DISTRESSED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseFinials {
-    Any = DWRITE_PANOSE_FINIALS_ANY,
-    NoFit = DWRITE_PANOSE_FINIALS_NO_FIT,
-    NoLoops = DWRITE_PANOSE_FINIALS_NONE_NO_LOOPS,
-    NoneClosedLoops = DWRITE_PANOSE_FINIALS_NONE_CLOSED_LOOPS,
-    NoneOpenLoops = DWRITE_PANOSE_FINIALS_NONE_OPEN_LOOPS,
-    SharpNoLoops = DWRITE_PANOSE_FINIALS_SHARP_NO_LOOPS,
-    SharpClosedLoops = DWRITE_PANOSE_FINIALS_SHARP_CLOSED_LOOPS,
-    SharpOpenLoops = DWRITE_PANOSE_FINIALS_SHARP_OPEN_LOOPS,
-    TaperedNoLoops = DWRITE_PANOSE_FINIALS_TAPERED_NO_LOOPS,
-    TaperedClosedLoops = DWRITE_PANOSE_FINIALS_TAPERED_CLOSED_LOOPS,
-    TaperedOpenLoops = DWRITE_PANOSE_FINIALS_TAPERED_OPEN_LOOPS,
-    RoundNoLoops = DWRITE_PANOSE_FINIALS_ROUND_NO_LOOPS,
-    RoundClosedLoops = DWRITE_PANOSE_FINIALS_ROUND_CLOSED_LOOPS,
-    RoundOpenLoops = DWRITE_PANOSE_FINIALS_ROUND_OPEN_LOOPS,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseLetterForm {
-    Any = DWRITE_PANOSE_LETTERFORM_ANY,
-    NoFit = DWRITE_PANOSE_LETTERFORM_NO_FIT,
-    NormalContact = DWRITE_PANOSE_LETTERFORM_NORMAL_CONTACT,
-    NormalWeighted = DWRITE_PANOSE_LETTERFORM_NORMAL_WEIGHTED,
-    NormalBoxed = DWRITE_PANOSE_LETTERFORM_NORMAL_BOXED,
-    NormalFlattened = DWRITE_PANOSE_LETTERFORM_NORMAL_FLATTENED,
-    NormalRounded = DWRITE_PANOSE_LETTERFORM_NORMAL_ROUNDED,
-    NormalOffCenter = DWRITE_PANOSE_LETTERFORM_NORMAL_OFF_CENTER,
-    NormalSquare = DWRITE_PANOSE_LETTERFORM_NORMAL_SQUARE,
-    ObliqueContact = DWRITE_PANOSE_LETTERFORM_OBLIQUE_CONTACT,
-    ObliqueWeighted = DWRITE_PANOSE_LETTERFORM_OBLIQUE_WEIGHTED,
-    ObliqueBoxed = DWRITE_PANOSE_LETTERFORM_OBLIQUE_BOXED,
-    ObliqueFlattened = DWRITE_PANOSE_LETTERFORM_OBLIQUE_FLATTENED,
-    ObliqueRounded = DWRITE_PANOSE_LETTERFORM_OBLIQUE_ROUNDED,
-    ObliqueOffCenter = DWRITE_PANOSE_LETTERFORM_OBLIQUE_OFF_CENTER,
-    ObliqueSquare = DWRITE_PANOSE_LETTERFORM_OBLIQUE_SQUARE,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseLining {
-    Any = DWRITE_PANOSE_LINING_ANY,
-    NoFit = DWRITE_PANOSE_LINING_NO_FIT,
-    None = DWRITE_PANOSE_LINING_NONE,
-    Inline = DWRITE_PANOSE_LINING_INLINE,
-    Outline = DWRITE_PANOSE_LINING_OUTLINE,
-    Engraved = DWRITE_PANOSE_LINING_ENGRAVED,
-    Shadow = DWRITE_PANOSE_LINING_SHADOW,
-    Relief = DWRITE_PANOSE_LINING_RELIEF,
-    Backdrop = DWRITE_PANOSE_LINING_BACKDROP,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseMidline {
-    Any = DWRITE_PANOSE_MIDLINE_ANY,
-    NoFit = DWRITE_PANOSE_MIDLINE_NO_FIT,
-    StandardTrimmed = DWRITE_PANOSE_MIDLINE_STANDARD_TRIMMED,
-    StandardPointed = DWRITE_PANOSE_MIDLINE_STANDARD_POINTED,
-    StandardSerifed = DWRITE_PANOSE_MIDLINE_STANDARD_SERIFED,
-    HighTrimmed = DWRITE_PANOSE_MIDLINE_HIGH_TRIMMED,
-    HighPointed = DWRITE_PANOSE_MIDLINE_HIGH_POINTED,
-    HighSerifed = DWRITE_PANOSE_MIDLINE_HIGH_SERIFED,
-    ConstantTrimmed = DWRITE_PANOSE_MIDLINE_CONSTANT_TRIMMED,
-    ConstantPointed = DWRITE_PANOSE_MIDLINE_CONSTANT_POINTED,
-    ConstantSerifed = DWRITE_PANOSE_MIDLINE_CONSTANT_SERIFED,
-    LowTrimmed = DWRITE_PANOSE_MIDLINE_LOW_TRIMMED,
-    LowPointed = DWRITE_PANOSE_MIDLINE_LOW_POINTED,
-    LowSerifed = DWRITE_PANOSE_MIDLINE_LOW_SERIFED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseProportion {
-    Any = DWRITE_PANOSE_PROPORTION_ANY,
-    NoFit = DWRITE_PANOSE_PROPORTION_NO_FIT,
-    OldStyle = DWRITE_PANOSE_PROPORTION_OLD_STYLE,
-    Modern = DWRITE_PANOSE_PROPORTION_MODERN,
-    EvenWidth = DWRITE_PANOSE_PROPORTION_EVEN_WIDTH,
-    Expanded = DWRITE_PANOSE_PROPORTION_EXPANDED,
-    Condensed = DWRITE_PANOSE_PROPORTION_CONDENSED,
-    VeryExpanded = DWRITE_PANOSE_PROPORTION_VERY_EXPANDED,
-    VeryCondensed = DWRITE_PANOSE_PROPORTION_VERY_CONDENSED,
-    Monospaced = DWRITE_PANOSE_PROPORTION_MONOSPACED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseScriptForm {
-    Any = DWRITE_PANOSE_SCRIPT_FORM_ANY,
-    NoFit = DWRITE_PANOSE_SCRIPT_FORM_NO_FIT,
-    UprightNoWrapping = DWRITE_PANOSE_SCRIPT_FORM_UPRIGHT_NO_WRAPPING,
-    UprightSomeWrapping = DWRITE_PANOSE_SCRIPT_FORM_UPRIGHT_SOME_WRAPPING,
-    UprightMoreWrapping = DWRITE_PANOSE_SCRIPT_FORM_UPRIGHT_MORE_WRAPPING,
-    UprightExtremeWrapping = DWRITE_PANOSE_SCRIPT_FORM_UPRIGHT_EXTREME_WRAPPING,
-    ObliqueNoWrapping = DWRITE_PANOSE_SCRIPT_FORM_OBLIQUE_NO_WRAPPING,
-    ObliqueSomeWrapping = DWRITE_PANOSE_SCRIPT_FORM_OBLIQUE_SOME_WRAPPING,
-    ObliqueMoreWrapping = DWRITE_PANOSE_SCRIPT_FORM_OBLIQUE_MORE_WRAPPING,
-    ObliqueExtremeWrapping = DWRITE_PANOSE_SCRIPT_FORM_OBLIQUE_EXTREME_WRAPPING,
-    ExaggeratedNoWrapping = DWRITE_PANOSE_SCRIPT_FORM_EXAGGERATED_NO_WRAPPING,
-    ExaggeratedSomeWrapping = DWRITE_PANOSE_SCRIPT_FORM_EXAGGERATED_SOME_WRAPPING,
-    ExaggeratedMoreWrapping = DWRITE_PANOSE_SCRIPT_FORM_EXAGGERATED_MORE_WRAPPING,
-    ExaggeratedExtremeWrapping = DWRITE_PANOSE_SCRIPT_FORM_EXAGGERATED_EXTREME_WRAPPING,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseScriptTopology {
-    Any = DWRITE_PANOSE_SCRIPT_TOPOLOGY_ANY,
-    NoFit = DWRITE_PANOSE_SCRIPT_TOPOLOGY_NO_FIT,
-    RomanDisconnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_ROMAN_DISCONNECTED,
-    RomanTrailing = DWRITE_PANOSE_SCRIPT_TOPOLOGY_ROMAN_TRAILING,
-    RomanConnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_ROMAN_CONNECTED,
-    CursiveDisconnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_CURSIVE_DISCONNECTED,
-    CursiveTrailing = DWRITE_PANOSE_SCRIPT_TOPOLOGY_CURSIVE_TRAILING,
-    CursiveConnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_CURSIVE_CONNECTED,
-    BlackletterDisconnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_BLACKLETTER_DISCONNECTED,
-    BlackletterTrailing = DWRITE_PANOSE_SCRIPT_TOPOLOGY_BLACKLETTER_TRAILING,
-    BlackletterConnected = DWRITE_PANOSE_SCRIPT_TOPOLOGY_BLACKLETTER_CONNECTED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseSerifStyle {
-    Any = DWRITE_PANOSE_SERIF_STYLE_ANY,
-    NoFit = DWRITE_PANOSE_SERIF_STYLE_NO_FIT,
-    Cove = DWRITE_PANOSE_SERIF_STYLE_COVE,
-    ObtuseCove = DWRITE_PANOSE_SERIF_STYLE_OBTUSE_COVE,
-    SquareCove = DWRITE_PANOSE_SERIF_STYLE_SQUARE_COVE,
-    ObtuseSquareCove = DWRITE_PANOSE_SERIF_STYLE_OBTUSE_SQUARE_COVE,
-    Square = DWRITE_PANOSE_SERIF_STYLE_SQUARE,
-    Thin = DWRITE_PANOSE_SERIF_STYLE_THIN,
-    Oval = DWRITE_PANOSE_SERIF_STYLE_OVAL,
-    Exaggerated = DWRITE_PANOSE_SERIF_STYLE_EXAGGERATED,
-    Triangle = DWRITE_PANOSE_SERIF_STYLE_TRIANGLE,
-    NormalSans = DWRITE_PANOSE_SERIF_STYLE_NORMAL_SANS,
-    ObtuseSans = DWRITE_PANOSE_SERIF_STYLE_OBTUSE_SANS,
-    PerpendicularSans = DWRITE_PANOSE_SERIF_STYLE_PERPENDICULAR_SANS,
-    Flared = DWRITE_PANOSE_SERIF_STYLE_FLARED,
-    Rounded = DWRITE_PANOSE_SERIF_STYLE_ROUNDED,
-    Script = DWRITE_PANOSE_SERIF_STYLE_SCRIPT,
-}
-#[cfg(feature = "dwrite_1")]
-#[allow(non_upper_case_globals)]
-impl PanoseSerifStyle {
-    pub const PerpSans: Self = Self::PerpendicularSans;
-    pub const Bone: Self = Self::Oval;
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseSpacing {
-    Any = DWRITE_PANOSE_SPACING_ANY,
-    NoFit = DWRITE_PANOSE_SPACING_NO_FIT,
-    ProportionalSpaced = DWRITE_PANOSE_SPACING_PROPORTIONAL_SPACED,
-    Monospaced = DWRITE_PANOSE_SPACING_MONOSPACED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseStrokeVariation {
-    Any = DWRITE_PANOSE_STROKE_VARIATION_ANY,
-    NoFit = DWRITE_PANOSE_STROKE_VARIATION_NO_FIT,
-    NoVariation = DWRITE_PANOSE_STROKE_VARIATION_NO_VARIATION,
-    GradualDiagonal = DWRITE_PANOSE_STROKE_VARIATION_GRADUAL_DIAGONAL,
-    GradualTransitional = DWRITE_PANOSE_STROKE_VARIATION_GRADUAL_TRANSITIONAL,
-    GradualVertical = DWRITE_PANOSE_STROKE_VARIATION_GRADUAL_VERTICAL,
-    GradualHorizontal = DWRITE_PANOSE_STROKE_VARIATION_GRADUAL_HORIZONTAL,
-    RapidVertical = DWRITE_PANOSE_STROKE_VARIATION_RAPID_VERTICAL,
-    RapidHorizontal = DWRITE_PANOSE_STROKE_VARIATION_RAPID_HORIZONTAL,
-    InstantVertical = DWRITE_PANOSE_STROKE_VARIATION_INSTANT_VERTICAL,
-    InstantHorizontal = DWRITE_PANOSE_STROKE_VARIATION_INSTANT_HORIZONTAL,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseSymbolAspectRatio {
-    Any = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_ANY,
-    NoFit = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_NO_FIT,
-    NoWidth = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_NO_WIDTH,
-    ExceptionallyWide = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_EXCEPTIONALLY_WIDE,
-    SuperWide = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_SUPER_WIDE,
-    VeryWide = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_VERY_WIDE,
-    Wide = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_WIDE,
-    Normal = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_NORMAL,
-    Narrow = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_NARROW,
-    VeryNarrow = DWRITE_PANOSE_SYMBOL_ASPECT_RATIO_VERY_NARROW,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseSymbolKind {
-    Any = DWRITE_PANOSE_SYMBOL_KIND_ANY,
-    NoFit = DWRITE_PANOSE_SYMBOL_KIND_NO_FIT,
-    Montages = DWRITE_PANOSE_SYMBOL_KIND_MONTAGES,
-    Pictures = DWRITE_PANOSE_SYMBOL_KIND_PICTURES,
-    Shapes = DWRITE_PANOSE_SYMBOL_KIND_SHAPES,
-    Scientific = DWRITE_PANOSE_SYMBOL_KIND_SCIENTIFIC,
-    Music = DWRITE_PANOSE_SYMBOL_KIND_MUSIC,
-    Expert = DWRITE_PANOSE_SYMBOL_KIND_EXPERT,
-    Patterns = DWRITE_PANOSE_SYMBOL_KIND_PATTERNS,
-    Boarders = DWRITE_PANOSE_SYMBOL_KIND_BOARDERS,
-    Icons = DWRITE_PANOSE_SYMBOL_KIND_ICONS,
-    Logos = DWRITE_PANOSE_SYMBOL_KIND_LOGOS,
-    IndustrySpecific = DWRITE_PANOSE_SYMBOL_KIND_INDUSTRY_SPECIFIC,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PansoeToolKind {
-    Any = DWRITE_PANOSE_TOOL_KIND_ANY,
-    NoFit = DWRITE_PANOSE_TOOL_KIND_NO_FIT,
-    FlatNIB = DWRITE_PANOSE_TOOL_KIND_FLAT_NIB,
-    PressurePoint = DWRITE_PANOSE_TOOL_KIND_PRESSURE_POINT,
-    Engraved = DWRITE_PANOSE_TOOL_KIND_ENGRAVED,
-    Ball = DWRITE_PANOSE_TOOL_KIND_BALL,
-    Brush = DWRITE_PANOSE_TOOL_KIND_BRUSH,
-    Rough = DWRITE_PANOSE_TOOL_KIND_ROUGH,
-    FeltPenBrushTip = DWRITE_PANOSE_TOOL_KIND_FELT_PEN_BRUSH_TIP,
-    WildBrush = DWRITE_PANOSE_TOOL_KIND_WILD_BRUSH,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseWeight {
-    Any = DWRITE_PANOSE_WEIGHT_ANY,
-    NoFit = DWRITE_PANOSE_WEIGHT_NO_FIT,
-    VeryLight = DWRITE_PANOSE_WEIGHT_VERY_LIGHT,
-    Light = DWRITE_PANOSE_WEIGHT_LIGHT,
-    Thin = DWRITE_PANOSE_WEIGHT_THIN,
-    Book = DWRITE_PANOSE_WEIGHT_BOOK,
-    Medium = DWRITE_PANOSE_WEIGHT_MEDIUM,
-    Demi = DWRITE_PANOSE_WEIGHT_DEMI,
-    Bold = DWRITE_PANOSE_WEIGHT_BOLD,
-    Heavy = DWRITE_PANOSE_WEIGHT_HEAVY,
-    Black = DWRITE_PANOSE_WEIGHT_BLACK,
-    ExtraBlack = DWRITE_PANOSE_WEIGHT_EXTRA_BLACK,
-}
-#[cfg(feature = "dwrite_1")]
-#[allow(non_upper_case_globals)]
-impl PanoseWeight {
-    pub const WeightNord: Self = Self::ExtraBlack;
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseXAscent {
-    Any = DWRITE_PANOSE_XASCENT_ANY,
-    NoFit = DWRITE_PANOSE_XASCENT_NO_FIT,
-    VeryLow = DWRITE_PANOSE_XASCENT_VERY_LOW,
-    Low = DWRITE_PANOSE_XASCENT_LOW,
-    Medium = DWRITE_PANOSE_XASCENT_MEDIUM,
-    High = DWRITE_PANOSE_XASCENT_HIGH,
-    VeryHigh = DWRITE_PANOSE_XASCENT_VERY_HIGH,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PanoseXHeight {
-    Any = DWRITE_PANOSE_XHEIGHT_ANY,
-    NoFit = DWRITE_PANOSE_XHEIGHT_NO_FIT,
-    ConstantSmall = DWRITE_PANOSE_XHEIGHT_CONSTANT_SMALL,
-    ConstantStandard = DWRITE_PANOSE_XHEIGHT_CONSTANT_STANDARD,
-    ConstantLarge = DWRITE_PANOSE_XHEIGHT_CONSTANT_LARGE,
-    DuckingSmall = DWRITE_PANOSE_XHEIGHT_DUCKING_SMALL,
-    DuckingStandard = DWRITE_PANOSE_XHEIGHT_DUCKING_STANDARD,
-    DuckingLarge = DWRITE_PANOSE_XHEIGHT_DUCKING_LARGE,
-}
-#[cfg(feature = "dwrite_1")]
-#[allow(non_upper_case_globals)]
-impl PanoseXHeight {
-    pub const ConstantStd: Self = Self::ConstantStandard;
-    pub const DuckingStd: Self = Self::DuckingStandard;
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -965,20 +337,6 @@ impl RenderingMode {
     pub const ClearTypeNaturalSymmetric: Self = Self::NaturalSymmetric;
 }
 
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum RenderingMode1 {
-    Default = DWRITE_RENDERING_MODE1_DEFAULT,
-    Aliased = DWRITE_RENDERING_MODE1_ALIASED,
-    GDIClasssic = DWRITE_RENDERING_MODE1_GDI_CLASSIC,
-    GDINatural = DWRITE_RENDERING_MODE1_GDI_NATURAL,
-    Natural = DWRITE_RENDERING_MODE1_NATURAL,
-    NaturalSymmetric = DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC,
-    Outline = DWRITE_RENDERING_MODE1_OUTLINE,
-    NaturalSymmetricDownsampled = DWRITE_RENDERING_MODE1_NATURAL_SYMMETRIC_DOWNSAMPLED,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum ScriptShapes {
@@ -993,14 +351,6 @@ pub enum TextAlignment {
     Trailing = DWRITE_TEXT_ALIGNMENT_TRAILING,
     Center = DWRITE_TEXT_ALIGNMENT_CENTER,
     Justified = DWRITE_TEXT_ALIGNMENT_JUSTIFIED,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum TextAntialiasMode {
-    ClearType = DWRITE_TEXT_ANTIALIAS_MODE_CLEARTYPE,
-    GrayScale = DWRITE_TEXT_ANTIALIAS_MODE_GRAYSCALE,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -1018,13 +368,6 @@ pub enum TrimmingGranularity {
     Word = DWRITE_TRIMMING_GRANULARITY_WORD,
 }
 
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum VerticalGlyphOrientation {
-    Default = DWRITE_VERTICAL_GLYPH_ORIENTATION_DEFAULT,
-    Stacked = DWRITE_VERTICAL_GLYPH_ORIENTATION_STACKED,
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1034,24 +377,6 @@ pub enum WordWrapping {
     EmergencyBreak = DWRITE_WORD_WRAPPING_EMERGENCY_BREAK,
     WholeWord = DWRITE_WORD_WRAPPING_WHOLE_WORD,
     Character = DWRITE_WORD_WRAPPING_CHARACTER,
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub struct CaretMetrics {
-    pub slope_rise: i16,
-    pub slope_run: i16,
-    pub offset: i16,
-}
-#[cfg(feature = "dwrite_1")]
-impl CaretMetrics {
-    fn to_c_struct(&self) -> dwrite_1::DWRITE_CARET_METRICS {
-        dwrite_1::DWRITE_CARET_METRICS {
-            slopeRise: self.slope_rise,
-            slopeRun: self.slope_run,
-            offset: self.offset,
-        }
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -1092,123 +417,6 @@ impl From<DWRITE_CLUSTER_METRICS> for ClusterMetrics {
 }
 
 pub type ColorF = crate::dxgi::RGBA;
-
-/*
-#[derive(Clone, Debug)]
-pub struct ColorGlyphRun<'a, 'b, 'c, 'd> {
-    pub glyph_run: GlyphRun<'a, 'b, 'c>,
-    pub glyph_run_description: Option<GlyphRunDescription<'d>>,
-    pub baseline_origin_x: f32,
-    pub baseline_origin_y: f32,
-    pub run_color: ColorF,
-    pub palette_index: u16,
-}
-impl<'a, 'b, 'c, 'd> ColorGlyphRun<'a, 'b, 'c, 'd> {
-    fn to_c_struct(
-        &self,
-    ) -> (
-        DWRITE_COLOR_GLYPH_RUN,
-        Vec<DWRITE_GLYPH_OFFSET>,
-        Option<(DWRITE_GLYPH_RUN_DESCRIPTION, Vec<u16>, Vec<u16>)>,
-    ) {
-        let (glyph_run, a) = self.glyph_run.to_c_struct();
-        let glyph_run_description = self.glyph_run_description.as_ref().map(|obj| obj.to_c_struct());
-        (
-            DWRITE_COLOR_GLYPH_RUN {
-                glyphRun: glyph_run,
-                glyphRunDescription: glyph_run_description
-                    .as_mut()
-                    .map_or(std::ptr::null_mut(), |obj| &mut obj.0 as *mut _),
-                baselineOriginX: self.baseline_origin_x,
-                baselineOriginY: self.baseline_origin_y,
-                runColor: self.run_color.into(),
-                paletteIndex: self.palette_index,
-            },
-            a,
-            glyph_run_description,
-        )
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct ColorGlyphRun1 {
-    pub glyph_run: GlphyRun,
-    pub glyph_run_description: Option<GlyphRunDescription>,
-    pub baseline_origin_x: f32,
-    pub baseline_origin_y: f32,
-    pub run_color: ColorF,
-    pub palette_index: u16,
-    pub glyph_image_format: GlyphImageFormats,
-    pub mesuring_mode: MeasuringMode,
-}
-#[cfg(feature = "dwrite_3")]
-impl ColorGlyphRun1 {
-    fn to_c_struct(&self) -> DWRITE_COLOR_GLYPH_RUN1 {
-        let glyph_run_description = self.glyph_run_description.map(|obj| obj.to_c_struct());
-        DWRITE_COLOR_GLYPH_RUN1 {
-            glyphRun: self.glyph_run.to_c_truct(),
-            glyphRunDescription: glyph_run_description.map_or(std::ptr::null(), |obj| &obj as *mut _),
-            baselineOriginX: self.baseline_origin_x,
-            baselineOriginY: self.baseline_origin_y,
-            runColor: self.run_color.into(),
-            paletteIndex: self.palette_index,
-            glyphImageFormat: self.glyph_image_format as u32,
-            mesuringMode: self.mesuring_mode as u32,
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct FileFragment {
-    pub file_offset: u64,
-    pub fragment_size: u64,
-}
-#[cfg(feature = "dwrite_3")]
-impl FileFragment {
-    fn to_c_struct(&self) -> DWRITE_FILE_FRAGMENT {
-        DWRITE_FILE_FRAGMENT {
-            fileOffset: self.file_offset,
-            fragmentSize: self.fragment_size,
-        }
-    }
-}
-*/
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct FontAxisRange {
-    pub axis_tag: FontAxisTag,
-    pub min_value: f32,
-    pub max_value: f32,
-}
-#[cfg(feature = "dwrite_3")]
-impl FontAxisRange {
-    fn to_c_struct(&self) -> DWRITE_FONT_AXIS_RANGE {
-        DWRITE_FONT_AXIS_RANGE {
-            axisTag: self.axis_tag as u32,
-            minValue: self.min_value,
-            maxValue: self.max_value,
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct FontAxisValue {
-    pub axis_tag: FontAxisTag,
-    pub value: f32,
-}
-#[cfg(feature = "dwrite_3")]
-impl FontAxisValue {
-    fn to_c_struct(&self) -> DWRITE_FONT_AXIS_VALUE {
-        DWRITE_FONT_AXIS_VALUE {
-            axisTag: self.axis_tag as u32,
-            value: self.value,
-        }
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct FontFeature {
@@ -1274,125 +482,6 @@ impl From<DWRITE_FONT_METRICS> for FontMetrics {
             underline_thickness: src.underlineThickness,
             strikethrough_position: src.strikethroughPosition,
             strikethrough_thickness: src.strikethroughThickness,
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub struct FontMetrics1 {
-    pub design_units_per_em: u16,
-    pub ascent: u16,
-    pub descent: u16,
-    pub line_gap: i16,
-    pub cap_height: u16,
-    pub x_height: u16,
-    pub underline_position: i16,
-    pub underline_thickness: u16,
-    pub strikethrough_position: i16,
-    pub strikethrough_thickness: u16,
-    pub glyph_box_left: i16,
-    pub glyph_box_top: i16,
-    pub glyph_box_right: i16,
-    pub glyph_box_bottom: i16,
-    pub subscript_position_x: i16,
-    pub subscript_position_y: i16,
-    pub subscript_size_x: i16,
-    pub subscript_size_y: i16,
-    pub superscript_position_x: i16,
-    pub superscript_position_y: i16,
-    pub superscript_size_x: i16,
-    pub superscript_size_y: i16,
-    pub has_typographic_metrics: bool,
-}
-#[cfg(feature = "dwrite_1")]
-impl FontMetrics1 {
-    fn to_c_struct(&self) -> dwrite_1::DWRITE_FONT_METRICS1 {
-        dwrite_1::DWRITE_FONT_METRICS1 {
-            designUnitsPerEm: self.design_units_per_em,
-            ascent: self.ascent,
-            descent: self.descent,
-            lineGap: self.line_gap,
-            capHeight: self.cap_height,
-            xHeight: self.x_height,
-            underlinePosition: self.underline_position,
-            underlineThickness: self.underline_thickness,
-            strikethroughPosition: self.strikethrough_position,
-            strikethroughThickness: self.strikethrough_thickness,
-            glyphBoxLeft: self.glyph_box_left,
-            glyphBoxTop: self.glyph_box_top,
-            glyphBoxRight: self.glyph_box_right,
-            glyphBoxBottom: self.glyph_box_bottom,
-            subscriptPositionX: self.subscript_position_x,
-            subscriptPositionY: self.subscript_position_y,
-            subscriptSizeX: self.subscript_size_x,
-            subscriptSizeY: self.subscript_size_y,
-            superscriptPositionX: self.superscript_position_x,
-            superscriptPositionY: self.superscript_position_y,
-            superscriptSizeX: self.superscript_size_x,
-            superscriptSizeY: self.superscript_size_y,
-            hasTypographicMetrics: to_BOOL(self.has_typographic_metrics),
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct FontProperty {
-    pub property_id: FontPropertyID,
-    pub property_value: String,
-    pub locale_name: String,
-}
-#[cfg(feature = "dwrite_3")]
-impl FontProperty {
-    fn to_c_struct(&self) -> (DWRITE_FONT_PROPERTY, Vec<u16>, Vec<u16>) {
-        let value = self
-            .property_value
-            .encode_utf16()
-            .chain(Some(0))
-            .collect::<Vec<_>>();
-        let locale_name = self
-            .locale_name
-            .encode_utf16()
-            .chain(Some(0))
-            .collect::<Vec<_>>();
-        (
-            DWRITE_FONT_PROPERTY {
-                propertyId: self.property_id as u32,
-                propertyValue: value.as_ptr(),
-                localeName: locale_name.as_ptr(),
-            },
-            value,
-            locale_name,
-        )
-    }
-}
-
-#[cfg(all(feature = "dwrite_3", feature = "d2d1"))]
-#[derive(Clone, Debug)]
-pub struct GlyphImageData<'a> {
-    pub image_data: &'a [u8],
-    pub unique_data_id: u32,
-    pub pixels_per_em: u32,
-    pub pixel_size: crate::d2d1::SizeU,
-    pub horizontal_left_origin: crate::d2d1::Point2L,
-    pub horizontal_right_origin: crate::d2d1::Point2L,
-    pub vertical_top_origin: crate::d2d1::Point2L,
-    pub vertical_bottom_origin: crate::d2d1::Point2L,
-}
-#[cfg(all(feature = "dwrite_3", feature = "d2d1"))]
-impl<'a> GlyphImageData<'a> {
-    fn to_c_struct(&self) -> DWRITE_GLYPH_IMAGE_DATA {
-        DWRITE_GLYPH_IMAGE_DATA {
-            imageData: self.image_data.as_ptr() as *const std::ffi::c_void,
-            imageDataSize: self.image_data.len() as u32,
-            uniqueDataId: self.unique_data_id,
-            pixelsPerEm: self.pixels_per_em,
-            pixelSize: self.pixel_size.into(),
-            horizontalLeftOrigin: self.horizontal_left_origin.into(),
-            horizontalRightOrigin: self.horizontal_right_origin.into(),
-            verticalTopOrigin: self.vertical_top_origin.into(),
-            verticalBottomOrigin: self.vertical_bottom_origin.into(),
         }
     }
 }
@@ -1585,35 +674,6 @@ impl From<DWRITE_INLINE_OBJECT_METRICS> for InlineObjectMetrics {
     }
 }
 
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub struct JustificationOpportunity {
-    pub expansion_minimum: f32,
-    pub expansion_maximum: f32,
-    pub compression_maximum: f32,
-    pub expansion_priority: u8,
-    pub compression_priority: u8,
-    pub allow_residual_expansion: bool,
-    pub allow_residual_compression: bool,
-    pub apply_to_leading_edge: bool,
-    pub apply_to_trailing_edge: bool,
-}
-#[cfg(feature = "dwrite_1")]
-impl JustificationOpportunity {
-    fn to_c_struct(&self) -> DWRITE_JUSTIFICATION_OPPORTUNITY {
-        let mut obj = DWRITE_JUSTIFICATION_OPPORTUNITY::default();
-        obj.expansionMinimum = self.expansion_minimum;
-        obj.expansionMaximum = self.expansion_maximum;
-        obj.compressionMaximum = self.compression_maximum;
-        obj.set_expansionPriority(self.expansion_priority as u32);
-        obj.set_compressionPriority(self.compression_priority as u32);
-        obj.set_allowResidualExpansion(self.allow_residual_expansion as u32);
-        obj.set_allowResidualCompression(self.allow_residual_compression as u32);
-        obj.set_applyToLeadingEdge(self.apply_to_leading_edge as u32);
-        obj.set_applyToTrailingEdge(self.apply_to_trailing_edge as u32);
-        obj
-    }
-}
 
 #[derive(Clone, Debug)]
 pub struct LineBreakpoint {
@@ -1663,55 +723,6 @@ impl From<DWRITE_LINE_METRICS> for LineMetrics {
             height: src.height,
             baseline: src.baseline,
             is_trimmed: src.isTrimmed == TRUE,
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-#[derive(Clone, Debug)]
-pub struct LineMetrics1 {
-    pub length: u32,
-    pub trailing_whitespace_length: u32,
-    pub newline_length: u32,
-    pub height: f32,
-    pub baseline: f32,
-    pub is_trimmed: bool,
-    pub leading_before: f32,
-    pub leading_after: f32,
-}
-#[cfg(feature = "dwrite_3")]
-impl LineMetrics1 {
-    fn to_c_struct(&self) -> DWRITE_LINE_METRICS1 {
-        DWRITE_LINE_METRICS1 {
-            length: self.length,
-            trailingWhitespaceLength: self.trailing_whitespace_length,
-            newlineLength: self.newline_length,
-            height: self.height,
-            baseline: self.baseline,
-            isTrimmed: to_BOOL(self.is_trimmed),
-            leadingBefore: self.leading_before,
-            leadingAfter: self.leading_after,
-        }
-    }
-}
-
-#[cfg(feature = "dwrite_3")]
-pub struct LineSpacing {
-    pub method: LineSpacingMethod,
-    pub height: f32,
-    pub baseline: f32,
-    pub leading_before: f32,
-    pub font_line_cap_usage: FontLineGapUsage,
-}
-#[cfg(feature = "dwrite_3")]
-impl LineSpacing {
-    fn to_c_struct(&self) -> DWRITE_LINE_SPACING {
-        DWRITE_LINE_SPACING {
-            method: self.method as u32,
-            height: self.height,
-            baseline: self.baseline,
-            leadingBefore: self.leading_before,
-            fontLineGapUsage: self.font_line_cap_usage as u32,
         }
     }
 }
@@ -1778,169 +789,6 @@ impl From<DWRITE_OVERHANG_METRICS> for OverhangMetrics {
     }
 }
 
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub enum Panose {
-    Text {
-        family_kind: u8,
-        serif_style: u8,
-        weight: u8,
-        proportion: u8,
-        contrast: u8,
-        stroke_variation: u8,
-        arm_style: u8,
-        letter_form: u8,
-        midline: u8,
-        x_height: u8,
-    },
-    Script {
-        family_kind: u8,
-        tool_kind: u8,
-        weight: u8,
-        spacing: u8,
-        aspect_ratio: u8,
-        contrast: u8,
-        script_topology: u8,
-        script_form: u8,
-        finials: u8,
-        x_ascent: u8,
-    },
-    Decorative {
-        family_kind: u8,
-        decorative_class: u8,
-        weight: u8,
-        aspect: u8,
-        contrast: u8,
-        serif_variant: u8,
-        fill: u8,
-        lining: u8,
-        decorative_topology: u8,
-        character_range: u8,
-    },
-    Symbol {
-        family_kind: u8,
-        symbol_kind: u8,
-        weight: u8,
-        spacing: u8,
-        aspect_ratio_and_contrast: u8,
-        aspect_ratio_94: u8,
-        aspect_ratio_119: u8,
-        aspect_ratio_157: u8,
-        aspect_ratio_163: u8,
-        aspect_ratio_211: u8,
-    },
-}
-#[cfg(feature = "dwrite_1")]
-impl Panose {
-    pub fn family_kind(&self) -> u8 {
-        match self {
-            Self::Text { family_kind, .. } => *family_kind,
-            Self::Script { family_kind, .. } => *family_kind,
-            Self::Decorative { family_kind, .. } => *family_kind,
-            Self::Symbol { family_kind, .. } => *family_kind,
-        }
-    }
-
-    fn to_c_struct(&self) -> DWRITE_PANOSE {
-        let mut obj = DWRITE_PANOSE::default();
-        match self {
-            Self::Text {
-                family_kind,
-                serif_style,
-                weight,
-                proportion,
-                contrast,
-                stroke_variation,
-                arm_style,
-                letter_form,
-                midline,
-                x_height,
-            } => unsafe {
-                obj.text_mut().familyKind = *family_kind;
-                obj.text_mut().serifStyle = *serif_style;
-                obj.text_mut().weight = *weight;
-                obj.text_mut().proportion = *proportion;
-                obj.text_mut().contrast = *contrast;
-                obj.text_mut().strokeVariation = *stroke_variation;
-                obj.text_mut().armStyle = *arm_style;
-                obj.text_mut().letterform = *letter_form;
-                obj.text_mut().midline = *midline;
-                obj.text_mut().xHeight = *x_height;
-            },
-            Self::Script {
-                family_kind,
-                tool_kind,
-                weight,
-                spacing,
-                aspect_ratio,
-                contrast,
-                script_topology,
-                script_form,
-                finials,
-                x_ascent,
-            } => unsafe {
-                obj.script_mut().familyKind = *family_kind;
-                obj.script_mut().toolKind = *tool_kind;
-                obj.script_mut().weight = *weight;
-                obj.script_mut().spacing = *spacing;
-                obj.script_mut().aspectRatio = *aspect_ratio;
-                obj.script_mut().contrast = *contrast;
-                obj.script_mut().scriptTopology = *script_topology;
-                obj.script_mut().scriptForm = *script_form;
-                obj.script_mut().finials = *finials;
-                obj.script_mut().xAscent = *x_ascent;
-            },
-            Self::Decorative {
-                family_kind,
-                decorative_class,
-                weight,
-                aspect,
-                contrast,
-                serif_variant,
-                fill,
-                lining,
-                decorative_topology,
-                character_range,
-            } => unsafe {
-                obj.decorative_mut().familyKind = *family_kind;
-                obj.decorative_mut().decorativeClass = *decorative_class;
-                obj.decorative_mut().weight = *weight;
-                obj.decorative_mut().aspect = *aspect;
-                obj.decorative_mut().contrast = *contrast;
-                obj.decorative_mut().serifVariant = *serif_variant;
-                obj.decorative_mut().fill = *fill;
-                obj.decorative_mut().lining = *lining;
-                obj.decorative_mut().decorativeTopology = *decorative_topology;
-                obj.decorative_mut().characterRange = *character_range;
-            },
-            Self::Symbol {
-                family_kind,
-                symbol_kind,
-                weight,
-                spacing,
-                aspect_ratio_and_contrast,
-                aspect_ratio_94,
-                aspect_ratio_119,
-                aspect_ratio_157,
-                aspect_ratio_163,
-                aspect_ratio_211,
-            } => unsafe {
-                obj.symbol_mut().familyKind = *family_kind;
-                obj.symbol_mut().symbolKind = *symbol_kind;
-                obj.symbol_mut().weight = *weight;
-                obj.symbol_mut().spacing = *spacing;
-                obj.symbol_mut().aspectRatioAndContrast = *aspect_ratio_and_contrast;
-                obj.symbol_mut().aspectRatio94 = *aspect_ratio_94;
-                obj.symbol_mut().aspectRatio119 = *aspect_ratio_119;
-                obj.symbol_mut().aspectRatio157 = *aspect_ratio_157;
-                obj.symbol_mut().aspectRatio163 = *aspect_ratio_163;
-                obj.symbol_mut().aspectRatio211 = *aspect_ratio_211;
-            },
-        }
-        obj
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct ScriptAnalysis {
     pub script: u16,
@@ -1952,40 +800,6 @@ impl ScriptAnalysis {
             script: self.script,
             shapes: self.shapes as u32,
         }
-    }
-}
-
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub struct ScriptProperties {
-    pub iso_script_code: u32,
-    pub iso_script_number: u32,
-    pub cluster_look_ahead: u32,
-    pub justification_character: u32,
-    pub restrict_caret_to_clusters: bool,
-    pub uses_word_dividers: bool,
-    pub is_discrete_writing: bool,
-    pub is_block_writing: bool,
-    pub is_distributed_within_cluster: bool,
-    pub is_connected_writing: bool,
-    pub is_cursive_writing: bool,
-}
-#[cfg(feature = "dwrite_1")]
-impl ScriptProperties {
-    fn to_c_struct(&self) -> DWRITE_SCRIPT_PROPERTIES {
-        let mut obj = DWRITE_SCRIPT_PROPERTIES::default();
-        obj.isoScriptCode = self.iso_script_code;
-        obj.isoScriptNumber = self.iso_script_number;
-        obj.clusterLookahead = self.cluster_look_ahead;
-        obj.justificationCharacter = self.justification_character;
-        obj.set_restrictCaretToClusters(self.restrict_caret_to_clusters as u32);
-        obj.set_usesWordDividers(self.uses_word_dividers as u32);
-        obj.set_isDiscreteWriting(self.is_discrete_writing as u32);
-        obj.set_isBlockWriting(self.is_block_writing as u32);
-        obj.set_isDistributedWithinCluster(self.is_distributed_within_cluster as u32);
-        obj.set_isConnectedWriting(self.is_connected_writing as u32);
-        obj.set_isCursiveWriting(self.is_cursive_writing as u32);
-        obj
     }
 }
 
@@ -2096,38 +910,6 @@ impl From<DWRITE_TEXT_METRICS> for TextMetrics {
     }
 }
 
-#[cfg(feature = "dwrite_2")]
-#[derive(Clone, Debug)]
-pub struct TextMetrics1 {
-    pub left: f32,
-    pub top: f32,
-    pub width: f32,
-    pub width_including_trailing_whitespace: f32,
-    pub height: f32,
-    pub layout_width: f32,
-    pub layout_height: f32,
-    pub max_bidi_reordering_depth: u32,
-    pub line_count: u32,
-    pub height_including_trailing_whitespace: f32,
-}
-#[cfg(feature = "dwrite_2")]
-impl TextMetrics1 {
-    fn to_c_struct(&self) -> DWRITE_TEXT_METRICS1 {
-        DWRITE_TEXT_METRICS1 {
-            left: self.left,
-            top: self.top,
-            width: self.width,
-            widthIncludingTrailingWhitespace: self.width_including_trailing_whitespace,
-            height: self.height,
-            layoutWidth: self.layout_width,
-            layoutHeight: self.layout_height,
-            maxBidiReorderingDepth: self.max_bidi_reordering_depth,
-            lineCount: self.line_count,
-            heightIncludingTrailingWhitespace: self.height_including_trailing_whitespace,
-        }
-    }
-}
-
 #[derive(Clone, Copy, Debug)]
 pub struct TextRange {
     pub start_position: u32,
@@ -2233,21 +1015,6 @@ impl Underline {
     }
 }
 
-#[cfg(feature = "dwrite_1")]
-#[derive(Clone, Debug)]
-pub struct UnicodeRange {
-    pub first: u32,
-    pub last: u32,
-}
-#[cfg(feature = "dwrite_1")]
-impl UnicodeRange {
-    fn to_c_struct(&self) -> dwrite_1::DWRITE_UNICODE_RANGE {
-        dwrite_1::DWRITE_UNICODE_RANGE {
-            first: self.first,
-            last: self.last,
-        }
-    }
-}
 
 macro_rules! impl_bitmap_render_target {
     ($s: ident, $interface: ident) => {

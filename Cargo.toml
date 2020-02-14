@@ -12,7 +12,17 @@ documentation = "https://docs.rs/dxplr"
 
 [package.metadata.docs.rs]
 default-target = "x86_64-pc-windows-msvc"
-features = ["dxgi1_6", "d3dcompiler"]
+features = [
+	"d3d11_4",
+	"d3d11sdklayers",
+	"d3d12",
+	"d3d12sdklayers",
+	"dxgi1_6",
+	"d3dcompiler",
+	"d3d11on12",
+	"d2d1_3",
+	"dwrite_3",
+]
 
 [features]
 d3d11 = ["dxgi", "winapi/d3d11", "winapi/d3dcommon"]
@@ -32,10 +42,10 @@ dxgi1_6 = ["dxgi1_5", "winapi/dxgi1_6"]
 dxgidebug = ["winapi/dxgidebug"]
 d3dcompiler = ["winapi/d3dcompiler", "winapi/stringapiset"]
 d3d11on12 = ["d3d11", "d3d12", "winapi/d3d11on12"]
-d2d1 = ["winapi/d2d1", "winapi/d2d1effects", "winapi/dcommon", "winapi/d2d1svg"]
+d2d1 = ["winapi/d2d1", "winapi/d2d1effects", "winapi/dcommon"]
 d2d1_1 = ["d2d1", "winapi/d2d1_1"]
 d2d1_2 = ["d2d1_1", "winapi/d2d1_2", "winapi/d2d1effects_1"]
-d2d1_3 = ["d2d1_2", "winapi/d2d1_3", "winapi/d2d1effects_2"]
+d2d1_3 = ["d2d1_2", "winapi/d2d1_3", "winapi/d2d1effects_2", "winapi/d2d1svg"]
 dwrite = ["winapi/dwrite"]
 dwrite_1 = ["dwrite", "winapi/dwrite_1"]
 dwrite_2 = ["dwrite_1", "winapi/dwrite_2"]

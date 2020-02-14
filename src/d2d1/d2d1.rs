@@ -2,23 +2,16 @@
 
 use crate::dxgi;
 use crate::result::{hresult, HResult};
-use crate::utility::*;
 use crate::Interface;
 use crate::{impl_bitflag_operators, impl_interface};
 use com_ptr::ComPtr;
 use winapi::shared::minwindef::TRUE;
 use winapi::shared::windef::{HDC, HWND};
+use winapi::um::winnt::HRESULT;
 use winapi::um::d2d1::*;
-#[cfg(feature = "d2d1_1")]
-use winapi::um::d2d1_1::*;
-#[cfg(feature = "d2d1_3")]
-use winapi::um::d2d1_3::*;
 use winapi::um::d2d1effectauthor::*;
 use winapi::um::d2d1effects::*;
-use winapi::um::d2d1svg::*;
 use winapi::um::dcommon::*;
-#[cfg(feature = "d2d1_2")]
-use winapi::um::{d2d1_2::*, d2d1effects_1::*};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Tag(pub u64);
@@ -172,21 +165,6 @@ pub enum BitmapInterpolationMode {
     Linear = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct BitmapOptions(u32);
-#[cfg(feature = "d2d1_1")]
-#[allow(non_upper_case_globals)]
-impl BitmapOptions {
-    pub const None: Self = Self(D2D1_BITMAP_OPTIONS_NONE);
-    pub const Target: Self = Self(D2D1_BITMAP_OPTIONS_TARGET);
-    pub const CannotDraw: Self = Self(D2D1_BITMAP_OPTIONS_CANNOT_DRAW);
-    pub const CPURead: Self = Self(D2D1_BITMAP_OPTIONS_CPU_READ);
-    pub const GDICompatible: Self = Self(D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE);
-}
-#[cfg(feature = "d2d1_1")]
-impl_bitflag_operators!(BitmapOptions);
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum Blend {
@@ -281,18 +259,6 @@ pub enum BrightnessProp {
     BlackPoint = D2D1_BRIGHTNESS_PROP_BLACK_POINT,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum BufferPrecision {
-    Unknown = D2D1_BUFFER_PRECISION_UNKNOWN,
-    _8BpcUnorm = D2D1_BUFFER_PRECISION_8BPC_UNORM,
-    _8BpcUnormSRGB = D2D1_BUFFER_PRECISION_8BPC_UNORM_SRGB,
-    _16BpcUnorm = D2D1_BUFFER_PRECISION_16BPC_UNORM,
-    _16BpcFloat = D2D1_BUFFER_PRECISION_16BPC_FLOAT,
-    _32BpcFloat = D2D1_BUFFER_PRECISION_32BPC_FLOAT,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum CapStyle {
@@ -327,18 +293,6 @@ pub enum ChannelSelector {
     B = D2D1_CHANNEL_SELECTOR_B,
     A = D2D1_CHANNEL_SELECTOR_A,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ChromakeyProp {
-    Color = D2D1_CHROMAKEY_PROP_COLOR,
-    Tolerance = D2D1_CHROMAKEY_PROP_TOLERANCE,
-    InvertAlpha = D2D1_CHROMAKEY_PROP_INVERT_ALPHA,
-    Feather = D2D1_CHROMAKEY_PROP_FEATHER,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -389,41 +343,6 @@ pub enum ColorMatrixProp {
     AlphaMode = D2D1_COLORMATRIX_PROP_ALPHA_MODE,
     ClampOutput = D2D1_COLORMATRIX_PROP_CLAMP_OUTPUT,
 }
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ColorBitmapGlyphSnapOption {
-    Default = D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DEFAULT,
-    Disable = D2D1_COLOR_BITMAP_GLYPH_SNAP_OPTION_DISABLE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ColorContextType {
-    ICC = D2D1_COLOR_CONTEXT_TYPE_ICC,
-    Simple = D2D1_COLOR_CONTEXT_TYPE_SIMPLE,
-    DXGI = D2D1_COLOR_CONTEXT_TYPE_DXGI,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ColorSpace {
-    Custom = D2D1_COLOR_SPACE_CUSTOM,
-    SRGB = D2D1_COLOR_SPACE_SRGB,
-    ScRGB = D2D1_COLOR_SPACE_SCRGB,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ColorInterpolationMode {
-    Straight = D2D1_COLOR_INTERPOLATION_MODE_STRAIGHT,
-    Premultiplied = D2D1_COLOR_INTERPOLATION_MODE_PREMULTIPLIED,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum CombineMode {
@@ -440,40 +359,11 @@ pub enum CompatibleRenderTargetOptions {
     GDICompatible = D2D1_COMPATIBLE_RENDER_TARGET_OPTIONS_GDI_COMPATIBLE,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum CompositeMode {
-    SourceOver = D2D1_COMPOSITE_MODE_SOURCE_OVER,
-    DestinationOver = D2D1_COMPOSITE_MODE_DESTINATION_OVER,
-    SourceIn = D2D1_COMPOSITE_MODE_SOURCE_IN,
-    DestinationIn = D2D1_COMPOSITE_MODE_DESTINATION_IN,
-    SourceOut = D2D1_COMPOSITE_MODE_SOURCE_OUT,
-    DestinationOut = D2D1_COMPOSITE_MODE_DESTINATION_OUT,
-    SourceAtop = D2D1_COMPOSITE_MODE_SOURCE_ATOP,
-    DestinationAtop = D2D1_COMPOSITE_MODE_DESTINATION_ATOP,
-    Xor = D2D1_COMPOSITE_MODE_XOR,
-    Plus = D2D1_COMPOSITE_MODE_PLUS,
-    SourceCopy = D2D1_COMPOSITE_MODE_SOURCE_COPY,
-    BoundedSourceCopy = D2D1_COMPOSITE_MODE_BOUNDED_SOURCE_COPY,
-    MaskInvert = D2D1_COMPOSITE_MODE_MASK_INVERT,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum CompositeProp {
     Mode = D2D1_COMPOSITE_PROP_MODE,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ContractProp {
-    Contrast = D2D1_CONTRAST_PROP_CONTRAST,
-    ClampInput = D2D1_CONTRAST_PROP_CLAMP_INPUT,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -535,16 +425,6 @@ pub enum DebugLevel {
     Warning = D2D1_DEBUG_LEVEL_WARNING,
     Information = D2D1_DEBUG_LEVEL_INFORMATION,
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum DeviceContextOptions {
-    None = D2D1_DEVICE_CONTEXT_OPTIONS_NONE,
-    EnableMultiThreadedOptimizations =
-        D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum DirectionalBlurOptimization {
@@ -662,42 +542,6 @@ impl DrawTextOptions {
 }
 impl_bitflag_operators!(DrawTextOptions);
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum EdgeDetectionMode {
-    Sobel = D2D1_EDGEDETECTION_MODE_SOBEL,
-    Prewitt = D2D1_EDGEDETECTION_MODE_PREWITT,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum EdgeDetectionProp {
-    Strength = D2D1_EDGEDETECTION_PROP_STRENGTH,
-    BlurRadius = D2D1_EDGEDETECTION_PROP_BLUR_RADIUS,
-    Mode = D2D1_EDGEDETECTION_PROP_MODE,
-    OverlayEdges = D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES,
-    AlphaMode = D2D1_EDGEDETECTION_PROP_ALPHA_MODE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum EmbossProp {
-    Height = D2D1_EMBOSS_PROP_HEIGHT,
-    Direction = D2D1_EMBOSS_PROP_DIRECTION,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ExposureProp {
-    ExposureValue = D2D1_EXPOSURE_PROP_EXPOSURE_VALUE,
-}
-*/
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum ExtendMode {
@@ -776,15 +620,6 @@ pub enum Gamma {
     _1_0 = D2D1_GAMMA_1_0,
 }
 
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum Gamma1 {
-    G22 = D2D1_GAMMA1_G22,
-    G10 = D2D1_GAMMA1_G10,
-    G2084 = D2D1_GAMMA1_G2084,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum GammaTransferProp {
@@ -822,17 +657,6 @@ pub enum GaussianBlurProp {
     Optimization = D2D1_GAUSSIANBLUR_PROP_OPTIMIZATION,
     BorderMode = D2D1_GAUSSIANBLUR_PROP_BORDER_MODE,
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-#[allow(non_camel_case_types)]
-pub enum GammaConversion {
-    None = 0,
-    _2_2To1_0 = 1,
-    _1_0To2_2 = 2,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum GeometryRelation {
@@ -849,45 +673,6 @@ pub enum GeometrySimplificationOption {
     CubicsAndLines = D2D1_GEOMETRY_SIMPLIFICATION_OPTION_CUBICS_AND_LINES,
     Lines = D2D1_GEOMETRY_SIMPLIFICATION_OPTION_LINES,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HDRToneMapDisplayMode {
-    SDR = D2D1_HDRTONEMAP_DISPLAY_MODE_SDR,
-    HDR = D2D1_HDRTONEMAP_DISPLAY_MODE_HDR,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HDRToneMapProp {
-    InputMaxLuminance = D2D1_HDRTONEMAP_PROP_INPUT_MAX_LUMINANCE,
-    OutputMaxLuminance = D2D1_HDRTONEMAP_PROP_OUTPUT_MAX_LUMINANCE,
-    DisplayMode = D2D1_HDRTONEMAP_PROP_DISPLAY_MODE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HighlightsAndShadowsInputGamma {
-    Linear = D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_LINEAR,
-    SRGB = D2D1_HIGHLIGHTSANDSHADOWS_INPUT_GAMMA_SRGB,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HighlightsAndShadowsProp {
-    Highlights = D2D1_HIGHLIGHTSANDSHADOWS_PROP_HIGHLIGHTS,
-    Shadows = D2D1_HIGHLIGHTSANDSHADOWS_PROP_SHADOWS,
-    Clarity = D2D1_HIGHLIGHTSANDSHADOWS_PROP_CLARITY,
-    InputGamma = D2D1_HIGHLIGHTSANDSHADOWS_PROP_INPUT_GAMMA,
-    MaskBlurRadius = D2D1_HIGHLIGHTSANDSHADOWS_PROP_MASK_BLUR_RADIUS,
-}
-*/
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum HistogramProp {
@@ -902,60 +687,6 @@ pub enum HueRotationProp {
     Angle = D2D1_HUEROTATION_PROP_ANGLE,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HueToRGBInputColorSpace {
-    HueSaturationValue = D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_VALUE,
-    HueSaturationLightness = D2D1_HUETORGB_INPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum HueToRGBProp {
-    InputColorSpace = D2D1_HUETORGB_PROP_INPUT_COLOR_SPACE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ImageSourceFromDXGIOptions {
-    None = D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_NONE,
-    LowQualityPrimaryConversion = D2D1_IMAGE_SOURCE_FROM_DXGI_OPTIONS_LOW_QUALITY_PRIMARY_CONVERSION,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ImageSourceLoadingOptions {
-    None = D2D1_IMAGE_SOURCE_LOADING_OPTIONS_NONE,
-    ReleaseSource = D2D1_IMAGE_SOURCE_LOADING_OPTIONS_RELEASE_SOURCE,
-    CacheOnDepend = D2D1_IMAGE_SOURCE_LOADING_OPTIONS_CACHE_ON_DEMAND,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum InkNibShape {
-    Round = D2D1_INK_NIB_SHAPE_ROUND,
-    Square = D2D1_INK_NIB_SHAPE_SQUARE,
-}
-*/
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum InterpolationMode {
-    NearestNeighbor = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-    Linear = D2D1_INTERPOLATION_MODE_LINEAR,
-    Cubic = D2D1_INTERPOLATION_MODE_CUBIC,
-    MultiSampleLinear = D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR,
-    Anisotropic = D2D1_INTERPOLATION_MODE_ANISOTROPIC,
-    HighQualityCubic = D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum LayerOptions {
@@ -963,14 +694,6 @@ pub enum LayerOptions {
     InitializeForClearType = D2D1_LAYER_OPTIONS_INITIALIZE_FOR_CLEARTYPE,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum LayerOptions1 {
-    None = D2D1_LAYER_OPTIONS1_NONE,
-    InitializeFromBackground = D2D1_LAYER_OPTIONS1_INITIALIZE_FROM_BACKGROUND,
-    IgnoreAlpha = D2D1_LAYER_OPTIONS1_IGNORE_ALPHA,
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -999,16 +722,6 @@ pub enum LineJoin {
     MiterOrBevel = D2D1_LINE_JOIN_MITER_OR_BEVEL,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum LookupTable3DProp {
-    LUT = D2D1_LOOKUPTABLE3D_PROP_LUT,
-    AlphaMode = D2D1_LOOKUPTABLE3D_PROP_ALPHA_MODE,
-}
-*/
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum MorphologyMode {
@@ -1024,16 +737,6 @@ pub enum MorphologyProp {
     Height = D2D1_MORPHOLOGY_PROP_HEIGHT,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum MapOptions {
-    None = D2D1_MAP_OPTIONS_NONE,
-    Read = D2D1_MAP_OPTIONS_READ,
-    Write = D2D1_MAP_OPTIONS_WRITE,
-    Discard = D2D1_MAP_OPTIONS_DISCARD,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum OpacityMetadataProp {
@@ -1047,31 +750,6 @@ pub enum OpacityMaskContent {
     Natural = D2D1_OPACITY_MASK_CONTENT_TEXT_NATURAL,
     GDICompatible = D2D1_OPACITY_MASK_CONTENT_TEXT_GDI_COMPATIBLE,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum Orientation {
-    Default = D2D1_ORIENTATION_DEFAULT,
-    FlipHorizontal = D2D1_ORIENTATION_FLIP_HORIZONTAL,
-    RotateClockwise180 = D2D1_ORIENTATION_ROTATE_CLOCKWISE180,
-    RotateClockwise180FlipHorizontal = D2D1_ORIENTATION_ROTATE_CLOCKWISE180_FLIP_HORIZONTAL,
-    RotateClockwise90FlipHorizontal = D2D1_ORIENTATION_ROTATE_CLOCKWISE90_FLIP_HORIZONTAL,
-    RotateClockwise270 = D2D1_ORIENTATION_ROTATE_CLOCKWISE270,
-    RotateClockwise270FlipHorizontal = D2D1_ORIENTATION_ROTATE_CLOCKWISE270_FLIP_HORIZONTAL,
-    RotateClockwise90 = D2D1_ORIENTATION_ROTATE_CLOCKWISE90,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PatchEdgeMode {
-    Aliased = D2D1_PATCH_EDGE_MODE_ALIASED,
-    Antialiased = D2D1_PATCH_EDGE_MODE_ANTIALIASED,
-    AliasedInflated = D2D1_PATCH_EDGE_MODE_ALIASED_INFLATED,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1133,93 +811,12 @@ pub enum PointSpecularScaleMode {
     HighQualityCubic = D2D1_POINTSPECULAR_SCALE_MODE_HIGH_QUALITY_CUBIC,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PosterizeProp {
-    RedValueCount = D2D1_POSTERIZE_PROP_RED_VALUE_COUNT,
-    GreenValueCount = D2D1_POSTERIZE_PROP_GREEN_VALUE_COUNT,
-    BlueValueCount = D2D1_POSTERIZE_PROP_BLUE_VALUE_COUNT,
-}
-*/
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum PresentOptions {
     None = D2D1_PRESENT_OPTIONS_NONE,
     RetainContents = D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS,
     Immediately = D2D1_PRESENT_OPTIONS_IMMEDIATELY,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PrimitiveBlend {
-    SourceOver = D2D1_PRIMITIVE_BLEND_SOURCE_OVER,
-    Copy = D2D1_PRIMITIVE_BLEND_COPY,
-    Min = D2D1_PRIMITIVE_BLEND_MIN,
-    Add = D2D1_PRIMITIVE_BLEND_ADD,
-    // Max = D2D1_PRIMITIVE_BLEND_MAX,
-    Max = 4,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PrintFontSubsetMode {
-    Default = D2D1_PRINT_FONT_SUBSET_MODE_DEFAULT,
-    EachPage = D2D1_PRINT_FONT_SUBSET_MODE_EACHPAGE,
-    None = D2D1_PRINT_FONT_SUBSET_MODE_NONE,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum PropertyType {
-    Unknown = D2D1_PROPERTY_TYPE_UNKNOWN,
-    String = D2D1_PROPERTY_TYPE_STRING,
-    Bool = D2D1_PROPERTY_TYPE_BOOL,
-    Uint32 = D2D1_PROPERTY_TYPE_UINT32,
-    Int32 = D2D1_PROPERTY_TYPE_INT32,
-    Float = D2D1_PROPERTY_TYPE_FLOAT,
-    Vector2 = D2D1_PROPERTY_TYPE_VECTOR2,
-    Vector3 = D2D1_PROPERTY_TYPE_VECTOR3,
-    Vector4 = D2D1_PROPERTY_TYPE_VECTOR4,
-    Blob = D2D1_PROPERTY_TYPE_BLOB,
-    IUnknown = D2D1_PROPERTY_TYPE_IUNKNOWN,
-    Enum = D2D1_PROPERTY_TYPE_ENUM,
-    Array = D2D1_PROPERTY_TYPE_ARRAY,
-    CLSID = D2D1_PROPERTY_TYPE_CLSID,
-    Matrix3x2 = D2D1_PROPERTY_TYPE_MATRIX_3X2,
-    Matrix4x3 = D2D1_PROPERTY_TYPE_MATRIX_4X3,
-    Matrix4x4 = D2D1_PROPERTY_TYPE_MATRIX_4X4,
-    Matrix5x4 = D2D1_PROPERTY_TYPE_MATRIX_5X4,
-    ColorContext = D2D1_PROPERTY_TYPE_COLOR_CONTEXT,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum Property {
-    CLSID = D2D1_PROPERTY_CLSID,
-    DisplayName = D2D1_PROPERTY_DISPLAYNAME,
-    Author = D2D1_PROPERTY_AUTHOR,
-    Category = D2D1_PROPERTY_CATEGORY,
-    Description = D2D1_PROPERTY_DESCRIPTION,
-    Inputs = D2D1_PROPERTY_INPUTS,
-    Cached = D2D1_PROPERTY_CACHED,
-    Precision = D2D1_PROPERTY_PRECISION,
-    MinInputs = D2D1_PROPERTY_MIN_INPUTS,
-    MaxInputs = D2D1_PROPERTY_MAX_INPUTS,
-}
-
-#[cfg(feature = "d2d1_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum RenderingPriority {
-    Normal = D2D1_RENDERING_PRIORITY_NORMAL,
-    Low = D2D1_RENDERING_PRIORITY_LOW,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -1238,34 +835,6 @@ pub enum RenderTargetUsage {
     GDICompatible = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ResourceType {
-    // None = D2D1_RESOURCE_TYPE_NONE,
-    // Shader = D2D1_RESOURCE_TYPE_SHADER,
-    // Buffer = D2D1_RESOURCE_TYPE_BUFFER,
-    None = 0,
-    Shader = 1,
-    Buffer = 2,
-}
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum RGBToHueOutputColorSpace {
-    HueSaturationValue = D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_VALUE,
-    HueSaturationLightness = D2D1_RGBTOHUE_OUTPUT_COLOR_SPACE_HUE_SATURATION_LIGHTNESS,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum RGBToHueProp {
-    OutputColorSpace = D2D1_RGBTOHUE_PROP_OUTPUT_COLOR_SPACE,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1294,16 +863,6 @@ pub enum ScaleProp {
     Sharpness = D2D1_SCALE_PROP_SHARPNESS,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SepiaProp {
-    Intensity = D2D1_SEPIA_PROP_INTENSITY,
-    AlphaMode = D2D1_SEPIA_PROP_ALPHA_MODE,
-}
-*/
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum ShadowOptimization {
@@ -1319,16 +878,6 @@ pub enum ShadowProp {
     Color = D2D1_SHADOW_PROP_COLOR,
     Optimization = D2D1_SHADOW_PROP_OPTIMIZATION,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum Sharpen_prop {
-    Sharpness = D2D1_SHARPEN_PROP_SHARPNESS,
-    Threashold = D2D1_SHARPEN_PROP_THRESHOLD,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1380,194 +929,6 @@ pub enum SpotSpecularScaleMode {
     Anisotropic = D2D1_SPOTSPECULAR_SCALE_MODE_ANISOTROPIC,
     HighQualityCubic = D2D1_SPOTSPECULAR_SCALE_MODE_HIGH_QUALITY_CUBIC,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SpriteOptions {
-    None = D2D1_SPRITE_OPTIONS_NONE,
-    ClampToSourceRectangle = D2D1_SPRITE_OPTIONS_CLAMP_TO_SOURCE_RECTANGLE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum StraightenProp {
-    Angle = D2D1_STRAIGHTEN_PROP_ANGLE,
-    MaintainSize = D2D1_STRAIGHTEN_PROP_MAINTAIN_SIZE,
-    ScaleMode = D2D1_STRAIGHTEN_PROP_SCALE_MODE,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum StraightenScaleMode {
-    NearestNeighbor = D2D1_STRAIGHTEN_SCALE_MODE_NEAREST_NEIGHBOR,
-    Linear = D2D1_STRAIGHTEN_SCALE_MODE_LINEAR,
-    Cubic = D2D1_STRAIGHTEN_SCALE_MODE_CUBIC,
-    MultiSampleLinear = D2D1_STRAIGHTEN_SCALE_MODE_MULTI_SAMPLE_LINEAR,
-    Anisotropic = D2D1_STRAIGHTEN_SCALE_MODE_ANISOTROPIC,
-}
-*/
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum StrokeTransformType {
-    Normal = D2D1_STROKE_TRANSFORM_TYPE_NORMAL,
-    Fiexed = D2D1_STROKE_TRANSFORM_TYPE_FIXED,
-    HairLine = D2D1_STROKE_TRANSFORM_TYPE_HAIRLINE,
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SubProperty {
-    DisplayName = D2D1_SUBPROPERTY_DISPLAYNAME,
-    IsReadOnly = D2D1_SUBPROPERTY_ISREADONLY,
-    Min = D2D1_SUBPROPERTY_MIN,
-    Max = D2D1_SUBPROPERTY_MAX,
-    Default = D2D1_SUBPROPERTY_DEFAULT,
-    Fields = D2D1_SUBPROPERTY_FIELDS,
-    Index = D2D1_SUBPROPERTY_INDEX,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGAspectAlign {
-    None = D2D1_SVG_ASPECT_ALIGN_NONE,
-    XMinYMin = D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MIN,
-    XMidYMin = D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MIN,
-    XMaxYMin = D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MIN,
-    XMinYMid = D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MID,
-    XMidYMid = D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MID,
-    XMaxYMid = D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MID,
-    XMinYMax = D2D1_SVG_ASPECT_ALIGN_X_MIN_Y_MAX,
-    XMidYMax = D2D1_SVG_ASPECT_ALIGN_X_MID_Y_MAX,
-    XMaxYMax = D2D1_SVG_ASPECT_ALIGN_X_MAX_Y_MAX,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGAspectScaling {
-    Meet = D2D1_SVG_ASPECT_SCALING_MEET,
-    Slice = D2D1_SVG_ASPECT_SCALING_SLICE,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGAttributePODType {
-    Float = D2D1_SVG_ATTRIBUTE_POD_TYPE_FLOAT,
-    Color = D2D1_SVG_ATTRIBUTE_POD_TYPE_COLOR,
-    FillMode = D2D1_SVG_ATTRIBUTE_POD_TYPE_FILL_MODE,
-    Display = D2D1_SVG_ATTRIBUTE_POD_TYPE_DISPLAY,
-    Overflow = D2D1_SVG_ATTRIBUTE_POD_TYPE_OVERFLOW,
-    LineCap = D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_CAP,
-    LineJoin = D2D1_SVG_ATTRIBUTE_POD_TYPE_LINE_JOIN,
-    Visibility = D2D1_SVG_ATTRIBUTE_POD_TYPE_VISIBILITY,
-    Matrix = D2D1_SVG_ATTRIBUTE_POD_TYPE_MATRIX,
-    UnitType = D2D1_SVG_ATTRIBUTE_POD_TYPE_UNIT_TYPE,
-    ExtendMode = D2D1_SVG_ATTRIBUTE_POD_TYPE_EXTEND_MODE,
-    PreserveAspectRatio = D2D1_SVG_ATTRIBUTE_POD_TYPE_PRESERVE_ASPECT_RATIO,
-    ViewBox = D2D1_SVG_ATTRIBUTE_POD_TYPE_VIEWBOX,
-    Length = D2D1_SVG_ATTRIBUTE_POD_TYPE_LENGTH,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGAttributeStringType {
-    SVG = D2D1_SVG_ATTRIBUTE_STRING_TYPE_SVG,
-    ID = D2D1_SVG_ATTRIBUTE_STRING_TYPE_ID,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGDisplay {
-    Inline = D2D1_SVG_DISPLAY_INLINE,
-    None = D2D1_SVG_DISPLAY_NONE,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGLengthUnits {
-    Number = D2D1_SVG_LENGTH_UNITS_NUMBER,
-    Percentage = D2D1_SVG_LENGTH_UNITS_PERCENTAGE,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGLineCap {
-    Butt = D2D1_SVG_LINE_CAP_BUTT,
-    Square = D2D1_SVG_LINE_CAP_SQUARE,
-    Round = D2D1_SVG_LINE_CAP_ROUND,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGLineJoin {
-    Bevel = D2D1_SVG_LINE_JOIN_BEVEL,
-    Miter = D2D1_SVG_LINE_JOIN_MITER,
-    Round = D2D1_SVG_LINE_JOIN_ROUND,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGOverflow {
-    Visible = D2D1_SVG_OVERFLOW_VISIBLE,
-    Hidden = D2D1_SVG_OVERFLOW_HIDDEN,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGPaintType {
-    None = D2D1_SVG_PAINT_TYPE_NONE,
-    Color = D2D1_SVG_PAINT_TYPE_COLOR,
-    CurrentColor = D2D1_SVG_PAINT_TYPE_CURRENT_COLOR,
-    URI = D2D1_SVG_PAINT_TYPE_URI,
-    URINone = D2D1_SVG_PAINT_TYPE_URI_NONE,
-    URIColor = D2D1_SVG_PAINT_TYPE_URI_COLOR,
-    URICurrentColor = D2D1_SVG_PAINT_TYPE_URI_CURRENT_COLOR,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGPathCommand {
-    ClosePath = D2D1_SVG_PATH_COMMAND_CLOSE_PATH,
-    MoveAbsolute = D2D1_SVG_PATH_COMMAND_MOVE_ABSOLUTE,
-    MoveRelative = D2D1_SVG_PATH_COMMAND_MOVE_RELATIVE,
-    LineAbsolute = D2D1_SVG_PATH_COMMAND_LINE_ABSOLUTE,
-    LineRelative = D2D1_SVG_PATH_COMMAND_LINE_RELATIVE,
-    CubicAbsolute = D2D1_SVG_PATH_COMMAND_CUBIC_ABSOLUTE,
-    CubicRelative = D2D1_SVG_PATH_COMMAND_CUBIC_RELATIVE,
-    QuadradicAbsolute = D2D1_SVG_PATH_COMMAND_QUADRADIC_ABSOLUTE,
-    QuadradicRelative = D2D1_SVG_PATH_COMMAND_QUADRADIC_RELATIVE,
-    ArcAbsolute = D2D1_SVG_PATH_COMMAND_ARC_ABSOLUTE,
-    ArcRelative = D2D1_SVG_PATH_COMMAND_ARC_RELATIVE,
-    HorizontalAbsolute = D2D1_SVG_PATH_COMMAND_HORIZONTAL_ABSOLUTE,
-    HorizontalRelative = D2D1_SVG_PATH_COMMAND_HORIZONTAL_RELATIVE,
-    VerticalAbsolute = D2D1_SVG_PATH_COMMAND_VERTICAL_ABSOLUTE,
-    VerticalRelative = D2D1_SVG_PATH_COMMAND_VERTICAL_RELATIVE,
-    CubicSmoothAbsolute = D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_ABSOLUTE,
-    CubicSmoothRelative = D2D1_SVG_PATH_COMMAND_CUBIC_SMOOTH_RELATIVE,
-    QuadradicSmoothAbsolute = D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_ABSOLUTE,
-    QuadradicSmoothRelative = D2D1_SVG_PATH_COMMAND_QUADRADIC_SMOOTH_RELATIVE,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGUnitType {
-    UserSpaceOnUse = D2D1_SVG_UNIT_TYPE_USER_SPACE_ON_USE,
-    ObjectBoundingBox = D2D1_SVG_UNIT_TYPE_OBJECT_BOUNDING_BOX,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum SVGVisibility {
-    Visible = D2D1_SVG_VISIBILITY_VISIBLE,
-    Hidden = D2D1_SVG_VISIBILITY_HIDDEN,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum SweepDirection {
@@ -1589,15 +950,6 @@ pub enum TableTransferProp {
     ClampOutput = D2D1_TABLETRANSFER_PROP_CLAMP_OUTPUT,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum TemperatureAndTintProp {
-    Temperature = D2D1_TEMPERATUREANDTINT_PROP_TEMPERATURE,
-    Tint = D2D1_TEMPERATUREANDTINT_PROP_TINT,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1608,29 +960,11 @@ pub enum TextAntialiasMode {
     Aliased = D2D1_TEXT_ANTIALIAS_MODE_ALIASED,
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum ThreadingMode {
-    SingleThreaded = D2D1_THREADING_MODE_SINGLE_THREADED,
-    MultiThreaded = D2D1_THREADING_MODE_MULTI_THREADED,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum TileProp {
     Rect = D2D1_TILE_PROP_RECT,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum TransformedImageSourceOptions {
-    None = D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_NONE,
-    DisableDPIScale = D2D1_TRANSFORMED_IMAGE_SOURCE_OPTIONS_DISABLE_DPI_SCALE,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1650,15 +984,6 @@ pub enum TurbulenceProp {
     Noise = D2D1_TURBULENCE_PROP_NOISE,
     Stitchable = D2D1_TURBULENCE_PROP_STITCHABLE,
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum UnitMode {
-    DIPs = D2D1_UNIT_MODE_DIPS,
-    Pixels = D2D1_UNIT_MODE_PIXELS,
-}
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum VertexOptions {
@@ -1675,24 +1000,6 @@ pub enum VertexUsage {
     Dynamic = D2D1_VERTEX_USAGE_DYNAMIC,
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum VignetteProp {
-    Color = D2D1_VIGNETTE_PROP_COLOR,
-    TransitionSize = D2D1_VIGNETTE_PROP_TRANSITION_SIZE,
-    Strength = D2D1_VIGNETTE_PROP_STRENGTH,
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum WhiteLevelAdjustmentProp {
-    InputWhiteLevel = D2D1_WHITELEVELADJUSTMENT_PROP_INPUT_WHITE_LEVEL,
-    OutputWhiteLevel = D2D1_WHITELEVELADJUSTMENT_PROP_OUTPUT_WHITE_LEVEL,
-}
-*/
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -1701,37 +1008,6 @@ pub enum WindowState {
     Occluded = D2D1_WINDOW_STATE_OCCLUDED,
 }
 
-#[cfg(feature = "d2d1_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum YCbCrChromaSubsampling {
-    Auto = D2D1_YCBCR_CHROMA_SUBSAMPLING_AUTO,
-    _420 = D2D1_YCBCR_CHROMA_SUBSAMPLING_420,
-    _422 = D2D1_YCBCR_CHROMA_SUBSAMPLING_422,
-    _444 = D2D1_YCBCR_CHROMA_SUBSAMPLING_444,
-    _440 = D2D1_YCBCR_CHROMA_SUBSAMPLING_440,
-}
-
-#[cfg(feature = "d2d1_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum YCbCrInterpolationMode {
-    NearestNeighbor = D2D1_YCBCR_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
-    Linear = D2D1_YCBCR_INTERPOLATION_MODE_LINEAR,
-    Cubic = D2D1_YCBCR_INTERPOLATION_MODE_CUBIC,
-    MultiSampleLinear = D2D1_YCBCR_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR,
-    Anisotropic = D2D1_YCBCR_INTERPOLATION_MODE_ANISOTROPIC,
-    HighQualityCubic = D2D1_YCBCR_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC,
-}
-
-#[cfg(feature = "d2d1_2")]
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-#[repr(u32)]
-pub enum YCbCrProp {
-    ChromaSubsampling = D2D1_YCBCR_PROP_CHROMA_SUBSAMPLING,
-    TransformMatrix = D2D1_YCBCR_PROP_TRANSFORM_MATRIX,
-    InterpolationMode = D2D1_YCBCR_PROP_INTERPOLATION_MODE,
-}
 
 pub type ColorF = crate::dxgi::RGBA;
 
@@ -2202,6 +1478,13 @@ pub struct BezierSegment {
     pub point3: Point2F,
 }
 impl BezierSegment {
+    pub fn new(point1: impl Into<Point2F>, point2: impl Into<Point2F>, point3: impl Into<Point2F>) -> Self {
+        BezierSegment {
+            point1: point1.into(),
+            point2: point2.into(),
+            point3: point3.into(),
+        }
+    }
     fn to_c_struct(&self) -> D2D1_BEZIER_SEGMENT {
         D2D1_BEZIER_SEGMENT {
             point1: self.point1.into(),
@@ -2227,24 +1510,6 @@ impl BitmapBrushProperties {
     }
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct BitmapBrushProperties1 {
-    pub extend_mode_x: ExtendMode,
-    pub extend_mode_y: ExtendMode,
-    pub interpolation_mode: BitmapInterpolationMode,
-}
-#[cfg(feature = "d2d1_1")]
-impl BitmapBrushProperties1 {
-    fn to_c_struct(&self) -> D2D1_BITMAP_BRUSH_PROPERTIES1 {
-        D2D1_BITMAP_BRUSH_PROPERTIES1 {
-            extendModeX: self.extend_mode_x as u32,
-            extendModeY: self.extend_mode_y as u32,
-            interpolationMode: self.interpolation_mode as u32,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct BitmapProperties {
     pub pixel_format: PixelFormat,
@@ -2260,32 +1525,6 @@ impl BitmapProperties {
         }
     }
 }
-
-/*
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct BitmapProperties1 {
-    pub pixel_format: PixelFormat,
-    pub dpi_x: f32,
-    pub dpi_y: f32,
-    pub bitmap_options: BitmapOptions,
-    pub color_context: Option<ColorContext>,
-}
-#[cfg(feature = "d2d1_1")]
-impl BitmapProperties1 {
-    fn to_c_struct(&self) -> D2D1_BITMAP_PROPERTIES1 {
-        D2D1_BITMAP_PROPERTIES1 {
-            pixelFormat: self.pixel_format.to_c_struct(),
-            dpiX: self.dpi_x,
-            dpiY: self.dpi_y,
-            bitmapOptions: self.bitmap_options.0,
-            colorContext: self
-                .color_context
-                .map_or(std::ptr::null_mut(), |p| p.as_ptr()),
-        }
-    }
-}
-*/
 
 #[derive(Clone, Debug)]
 pub struct BlendDescription {
@@ -2339,25 +1578,6 @@ impl BrushProperties {
         }
     }
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct CreationProperties {
-    pub threading_mode: ThreadingMode,
-    pub debug_level: DebugLevel,
-    pub options: Option<DeviceContextOptions>,
-}
-#[cfg(feature = "d2d1_1")]
-impl CreationProperties {
-    fn to_c_struct(&self) -> D2D1_CREATION_PROPERTIES {
-        D2D1_CREATION_PROPERTIES {
-            threadingMode: self.threading_mode as u32,
-            debugLevel: self.debug_level as u32,
-            options: self.options.map_or(0, |v| v as u32),
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct CustomVertexBufferProperties<'a, 'b> {
     pub shader_buffer_with_input_signature: &'a [u8],
@@ -2422,52 +1642,6 @@ impl From<D2D1_DRAWING_STATE_DESCRIPTION> for DrawingStateDescription {
     }
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct DrawingStateDescription1 {
-    pub antialias_mode: AntialiasMode,
-    pub text_antialias_mode: TextAntialiasMode,
-    pub tag1: Tag,
-    pub tag2: Tag,
-    pub transform: Matrix3x2F,
-    pub primitive_blend: PrimitiveBlend,
-    pub unit_mode: UnitMode,
-}
-#[cfg(feature = "d2d1_1")]
-impl DrawingStateDescription1 {
-    fn to_c_struct(&self) -> D2D1_DRAWING_STATE_DESCRIPTION1 {
-        D2D1_DRAWING_STATE_DESCRIPTION1 {
-            antialiasMode: self.antialias_mode as u32,
-            textAntialiasMode: self.text_antialias_mode as u32,
-            tag1: self.tag1.0,
-            tag2: self.tag2.0,
-            transform: self.transform.into(),
-            primitiveBlend: self.primitive_blend as u32,
-            unitMode: self.unit_mode as u32,
-        }
-    }
-}
-
-/*
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct EffectInputDescription {
-    pub effect: Effect,
-    pub input_index: u32,
-    pub input_rectangle: RectF,
-}
-#[cfg(feature = "d2d1_1")]
-impl EffectInputDescription {
-    fn to_c_struct(&self) -> D2D1_EFFECT_INPUT_DESCRIPTION {
-        D2D1_EFFECT_INPUT_DESCRIPTION {
-            effect: self.effect.as_ptr(),
-            inputIndex: self.input_index,
-            inputRectangle: self.input_rectangle.into(),
-        }
-    }
-}
-*/
-
 #[derive(Clone, Debug)]
 pub struct Ellipse {
     pub point: Point2F,
@@ -2514,37 +1688,6 @@ pub struct FeatureDataDoubles {
 pub struct FeatureDataD3D10XHardwareOptions {
     pub compute_shaders_plus_raw_and_structured_buffers_via_shader_4_x: bool,
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct GradientMeshPatch {
-    pub point00: Point2F,
-    pub point01: Point2F,
-    pub point02: Point2F,
-    pub point03: Point2F,
-    pub point10: Point2F,
-    pub point11: Point2F,
-    pub point12: Point2F,
-    pub point13: Point2F,
-    pub point20: Point2F,
-    pub point21: Point2F,
-    pub point22: Point2F,
-    pub point23: Point2F,
-    pub point30: Point2F,
-    pub point31: Point2F,
-    pub point32: Point2F,
-    pub point33: Point2F,
-    pub color00: ColorF,
-    pub color03: ColorF,
-    pub color30: ColorF,
-    pub color33: ColorF,
-    pub top_edge_mode: PatchEdgeMode,
-    pub left_edge_mode: PatchEdgeMode,
-    pub bottom_edge_mode: PatchEdgeMode,
-    pub right_edge_mode: PatchEdgeMode,
-}
-*/
 
 #[derive(Clone, Debug)]
 pub struct GradientStop {
@@ -2600,70 +1743,6 @@ impl HwndRenderTargetProperties {
         }
     }
 }
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct InkStyleProperties {
-    pub nib_shape: InkNIBShape,
-    pub nib_transform: Matrix3x2F,
-}
-impl InkStyleProperties {
-    fn to_c_struct(&self) -> D2D1_INK_STYLE_PROPERTIES {
-        D2D1_INK_STYLE_PROPERTIES {
-            nibShape: self.nib_shape.to_c_struct(),
-            nibTrasform: self.nib_transform.into(),
-        }
-    }
-}
-*/
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct ImageBrushProperties {
-    pub source_rectangle: RectF,
-    pub extend_mode_x: ExtendMode,
-    pub extend_mode_y: ExtendMode,
-    pub interpolation_mode: InterpolationMode,
-}
-#[cfg(feature = "d2d1_1")]
-impl ImageBrushProperties {
-    fn to_c_struct(&self) -> D2D1_IMAGE_BRUSH_PROPERTIES {
-        D2D1_IMAGE_BRUSH_PROPERTIES {
-            sourceRectangle: self.source_rectangle.into(),
-            extendModeX: self.extend_mode_x as u32,
-            extendModeY: self.extend_mode_y as u32,
-            interpolationMode: self.interpolation_mode as u32,
-        }
-    }
-}
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct InkBezierSegment {
-    pub point1: InkPoint,
-    pub point2: InkPoint,
-    pub point3: InkPoint,
-}
-impl InkBezierSegment {
-    fn to_c_struct(&self) -> D2D1_INK_BEZIER_SEGMENT {
-        D2D1_INK_BEZIER_SEGMENT {
-            point1: self.point1.into(),
-            point2: self.point2.into(),
-            point3: self.point3.into(),
-        }
-    }
-}
-
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct InkPoint {
-    pub x: f32,
-    pub y: f32,
-    pub radius: f32,
-}
-*/
 
 #[derive(Clone, Debug)]
 pub struct InputDescription {
@@ -2730,35 +1809,6 @@ impl LayerParameters {
     }
 }
 
-/*
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct LayerParameters1 {
-    pub content_bounds: RectF,
-    pub geometric_mask: Geometry,
-    pub mask_antialias_mode: AntialiasMode,
-    pub mask_transform: Matrix3x2F,
-    pub opacity: f32,
-    pub opacity_brush: Brush,
-    pub layer_options: Option<LayerOptions1>,
-}
-#[cfg(feature = "d2d1_1")]
-impl LayerParameters1 {
-    fn to_c_struct(&self) -> D2D1_LAYER_PARAMETERS1 {
-        D2D1_LAYER_PARAMETERS1 {
-            contentBounds: self.content_bounds.into(),
-            geometricMask: self.geometric_mask.as_ptr(),
-            maskAntialiasMode: self.mask_antialias_mode as u32,
-            maskTransform: self.mask_transform.into(),
-            opacity: self.opacity,
-            opacityBrush: self.opacity_brush.as_ptr(),
-            layerOptions: self
-                .layer_options
-                .map_or(LayerOptions1::None as u32, |v| v as u32),
-        }
-    }
-}
-*/
 
 #[derive(Clone, Debug)]
 pub struct LinearGradientBrushProperties {
@@ -2773,23 +1823,6 @@ impl LinearGradientBrushProperties {
         }
     }
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct MappedRect {
-    pub pitch: u32,
-    pub bits: *mut u8,
-}
-#[cfg(feature = "d2d1_1")]
-impl From<D2D1_MAPPED_RECT> for MappedRect {
-    fn from(src: D2D1_MAPPED_RECT) -> MappedRect {
-        MappedRect {
-            pitch: src.pitch,
-            bits: src.bits as *mut u8,
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct PixelFormat {
     pub format: dxgi::Format,
@@ -2821,46 +1854,6 @@ impl From<D2D1_PIXEL_FORMAT> for PixelFormat {
                 format: std::mem::transmute(src.format),
                 alpha_mode: std::mem::transmute(src.alphaMode),
             }
-        }
-    }
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct PointDescription {
-    pub point: Point2F,
-    pub unit_tangent_vector: Point2F,
-    pub end_segment: u32,
-    pub end_figure: u32,
-    pub length_to_end_segment: f32,
-}
-#[cfg(feature = "d2d1_1")]
-impl PointDescription {
-    fn to_c_struct(&self) -> D2D1_POINT_DESCRIPTION {
-        D2D1_POINT_DESCRIPTION {
-            point: self.point.into(),
-            unitTangentVector: self.unit_tangent_vector.into(),
-            endSegment: self.end_segment,
-            endFigure: self.end_figure,
-            lengthToEndSegment: self.length_to_end_segment,
-        }
-    }
-}
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct PrintControlProperties {
-    pub font_subset: PrintFontSubsetMode,
-    pub raster_dpi: f32,
-    pub color_space: ColorSpace,
-}
-#[cfg(feature = "d2d1_1")]
-impl PrintControlProperties {
-    fn to_c_struct(&self) -> D2D1_PRINT_CONTROL_PROPERTIES {
-        D2D1_PRINT_CONTROL_PROPERTIES {
-            fontSubset: self.font_subset as u32,
-            rasterDPI: self.raster_dpi,
-            colorSpace: self.color_space as u32,
         }
     }
 }
@@ -2905,41 +1898,6 @@ impl RadialGradientBrushProperties {
         }
     }
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct ResourceTextureProperties<'a> {
-    pub extents: &'a [u32],
-    pub buffer_precision: BufferPrecision,
-    pub channel_depth: ChannelDepth,
-    pub filter: Filter,
-    pub extend_modes: &'a [ExtendMode],
-}
-#[cfg(feature = "d2d1_1")]
-impl<'a> ResourceTextureProperties<'a> {
-    fn to_c_struct(&self) -> (D2D1_RESOURCE_TEXTURE_PROPERTIES, Vec<u32>) {
-        assert!(self.extents.len() >= 1 && self.extents.len() <= 3);
-        assert!(self.extend_modes.len() >= 1 && self.extend_modes.len() <= 3);
-
-        let extend_modes = self
-            .extend_modes
-            .iter()
-            .map(|&modes| modes as u32)
-            .collect::<Vec<_>>();
-        (
-            D2D1_RESOURCE_TEXTURE_PROPERTIES {
-                extents: self.extents.as_ptr(),
-                dimensions: self.extents.len() as u32,
-                bufferPrecision: self.buffer_precision as u32,
-                channelDepth: self.channel_depth as u32,
-                filter: self.filter as u32,
-                extendModes: extend_modes.as_ptr(),
-            },
-            extend_modes,
-        )
-    }
-}
-
 /*
 #[derive(Clone, Debug)]
 pub struct ResourceUsage {
@@ -3015,23 +1973,6 @@ impl Default for RenderTargetProperties {
         }
     }
 }
-
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct RenderingControls {
-    pub buffer_precision: BufferPrecision,
-    pub tile_size: SizeU,
-}
-#[cfg(feature = "d2d1_1")]
-impl RenderingControls {
-    fn to_c_struct(&self) -> D2D1_RENDERING_CONTROLS {
-        D2D1_RENDERING_CONTROLS {
-            bufferPrecision: self.buffer_precision as u32,
-            tileSize: self.tile_size.into(),
-        }
-    }
-}
-
 #[derive(Clone, Debug)]
 pub struct RoundedRect {
     pub rect: RectF,
@@ -3057,29 +1998,7 @@ impl From<D2D1_ROUNDED_RECT> for RoundedRect {
     }
 }
 
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct SimpleColorProfile {
-    pub red_primary: Point2F,
-    pub green_primary: Point2F,
-    pub blue_primary: Point2F,
-    pub white_point_xz: Point2F,
-    pub gamma: Gamma1,
-}
-#[cfg(feature = "d2d1_3")]
-impl SimpleColorProfile {
-    fn to_c_struct(&self) -> D2D1_SIMPLE_COLOR_PROFILE {
-        D2D1_SIMPLE_COLOR_PROFILE {
-            redPrimary: self.red_primary.into(),
-            greenPrimary: self.green_primary.into(),
-            bluePrimary: self.blue_primary.into(),
-            whitePointXZ: self.white_point_xz.into(),
-            gamma: self.gamma as u32,
-        }
-    }
-}
-*/
+
 
 #[derive(Clone, Debug)]
 pub struct StrokeStyleProperties {
@@ -3105,105 +2024,6 @@ impl StrokeStyleProperties {
     }
 }
 
-#[cfg(feature = "d2d1_1")]
-#[derive(Clone, Debug)]
-pub struct StrokeStyleProperties1 {
-    pub start_cap: CapStyle,
-    pub end_cap: CapStyle,
-    pub dash_cap: CapStyle,
-    pub line_join: LineJoin,
-    pub miter_limit: f32,
-    pub dash_style: DashStyle,
-    pub dash_offset: f32,
-    pub transform_type: StrokeTransformType,
-}
-#[cfg(feature = "d2d1_1")]
-impl StrokeStyleProperties1 {
-    fn to_c_struct(&self) -> D2D1_STROKE_STYLE_PROPERTIES1 {
-        D2D1_STROKE_STYLE_PROPERTIES1 {
-            startCap: self.start_cap as u32,
-            endCap: self.end_cap as u32,
-            dashCap: self.dash_cap as u32,
-            lineJoin: self.line_join as u32,
-            miterLimit: self.miter_limit,
-            dashStyle: self.dash_style as u32,
-            dashOffset: self.dash_offset,
-            transformType: self.transform_type as u32,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct SVGLength {
-    pub value: f32,
-    pub units: SVGLengthUnits,
-}
-impl SVGLength {
-    fn to_c_struct(&self) -> D2D1_SVG_LENGTH {
-        D2D1_SVG_LENGTH {
-            value: self.value,
-            units: self.units as u32,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct SVGPreserveAspectRatio {
-    pub defer: bool,
-    pub align: SVGAspectAlign,
-    pub meet_or_slice: SVGAspectScaling,
-}
-impl SVGPreserveAspectRatio {
-    fn to_c_struct(&self) -> D2D1_SVG_PRESERVE_ASPECT_RATIO {
-        D2D1_SVG_PRESERVE_ASPECT_RATIO {
-            defer: to_BOOL(self.defer),
-            align: self.align as u32,
-            meetOrSlice: self.meet_or_slice as u32,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct SVGViewBox {
-    pub x: f32,
-    pub y: f32,
-    pub width: f32,
-    pub height: f32,
-}
-impl SVGViewBox {
-    fn to_c_struct(&self) -> D2D1_SVG_VIEWBOX {
-        D2D1_SVG_VIEWBOX {
-            x: self.x,
-            y: self.y,
-            width: self.width,
-            height: self.height,
-        }
-    }
-}
-
-/*
-#[cfg(feature = "d2d1_3")]
-#[derive(Clone, Debug)]
-pub struct TransformedImageSourceProperties {
-    pub orientation: Orientation,
-    pub scale_x: f32,
-    pub scale_y: f32,
-    pub interpolation_mode: InterpolationMode,
-    pub options: Option<TransformedImageSourceOptions>,
-}
-#[cfg(feature = "d2d1_3")]
-impl TransformedImageSourceProperties {
-    fn to_c_struct(&self) -> D2D1_TRANSFORMED_IMAGE_SOURCE_PROPERTIES {
-        D2D1_TRANSFORMED_IMAGE_SOURCE_PROPERTIES {
-            orientation: self.orientation as u32,
-            scaleX: self.scale_x,
-            scaleY: self.scale_y,
-            interpolationMode: self.interpolation_mode as u32,
-            options: self.options.map_or(TransformedImageSourceOptions::None as u32, |v| v as u32),
-        }
-    }
-}
-*/
 
 #[derive(Clone, Debug)]
 pub struct Triangle {
@@ -4312,12 +3132,15 @@ macro_rules! impl_render_target {
                     );
                 }
             }
-            fn end_draw(&self) -> Result<(Tag, Tag), HResult> {
+            fn end_draw(&self) -> Result<(), HResultWithTags> {
                 unsafe {
                     let mut tag1 = 0;
                     let mut tag2 = 0;
                     let ret = self.0.EndDraw(&mut tag1, &mut tag2);
-                    hresult((Tag(tag1), Tag(tag2)), ret)
+                    if ret < 0 {
+                        return Err(HResultWithTags::new(ret, tag1, tag2));
+                    }
+                    Ok(())
                 }
             }
             fn fill_ellipse(&self, ellipse: &Ellipse, brush: &impl IBrush) {
@@ -4372,12 +3195,15 @@ macro_rules! impl_render_target {
                     );
                 }
             }
-            fn flush(&self) -> Result<(Tag, Tag), HResult> {
+            fn flush(&self) -> Result<(), HResultWithTags> {
                 unsafe {
                     let mut tag1 = 0;
                     let mut tag2 = 0;
                     let ret = self.0.Flush(&mut tag1, &mut tag2);
-                    hresult((Tag(tag1), Tag(tag2)), ret)
+                    if ret < 0 {
+                        return Err(HResultWithTags::new(ret, tag1, tag2));
+                    }
+                    Ok(())
                 }
             }
             fn get_antialias_mode(&self) -> AntialiasMode {
@@ -5016,6 +3842,20 @@ pub trait IRectangleGeometry: IGeometry {
 pub struct RectangleGeometry(ComPtr<ID2D1RectangleGeometry>);
 impl_rectangle_geometry!(RectangleGeometry, ID2D1RectangleGeometry);
 
+#[derive(Clone, Debug)]
+pub struct HResultWithTags {
+    pub hresult: HResult,
+    pub tags: (Tag, Tag),
+}
+impl HResultWithTags {
+    fn new(hresult: HRESULT, tag1: u64, tag2: u64) -> Self {
+        Self {
+            hresult: hresult.into(),
+            tags: (Tag(tag1), Tag(tag2)),
+        }
+    }
+}
+
 pub trait IRenderTarget: IResource {
     fn begin_draw(&self);
     fn clear(&self, color: impl Into<ColorF>);
@@ -5136,7 +3976,7 @@ pub trait IRenderTarget: IResource {
         fill_brush: &impl IBrush,
         options: Option<DrawTextOptions>,
     );
-    fn end_draw(&self) -> Result<(Tag, Tag), HResult>;
+    fn end_draw(&self) -> Result<(), HResultWithTags>;
     fn fill_ellipse(&self, ellipse: &Ellipse, brush: &impl IBrush);
     fn fill_geometry(&self, geometry: &impl IGeometry, brush: &impl IBrush, opacity: Option<&Brush>);
     fn fill_mesh(&self, mesh: &impl IMesh, brush: &impl IBrush);
@@ -5150,7 +3990,7 @@ pub trait IRenderTarget: IResource {
     );
     fn fill_rectangle(&self, rect: impl Into<RectF>, brush: &impl IBrush);
     fn fill_rounded_rectangle(&self, rounded: &RoundedRect, brush: &impl IBrush);
-    fn flush(&self) -> Result<(Tag, Tag), HResult>;
+    fn flush(&self) -> Result<(), HResultWithTags>;
     fn get_antialias_mode(&self) -> AntialiasMode;
     fn get_dpi(&self) -> Vector2F;
     fn get_maximum_bitmap_size(&self) -> u32;
