@@ -339,4 +339,15 @@ impl LineSpacing {
         }
     }
 }
+
+#[cfg(feature = "dwrite_3")]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[repr(u32)]
+pub enum FontSourceType {
+    Unknown = DWRITE_FONT_SOURCE_TYPE_UNKNOWN,
+    PerMachine = DWRITE_FONT_SOURCE_TYPE_PER_MACHINE,
+    PerUser = DWRITE_FONT_SOURCE_TYPE_PER_USER,
+    APPXPackage = DWRITE_FONT_SOURCE_TYPE_APPX_PACKAGE,
+    RemoteFontProvider = DWRITE_FONT_SOURCE_TYPE_REMOTE_FONT_PROVIDER
+}
 */
