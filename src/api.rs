@@ -249,14 +249,16 @@ unsafe impl Sync for EventHandle {}
 /// A trait for converting a value to a 'HWND' and a `c_void` pointer.
 pub trait WindowHandle {
     fn as_hwnd(&self) -> HWND;
-    fn as_ptr(&self) -> *const std::ffi::c_void;
+    fn as_ptr(&self) -> *const std::ffi::c_void {
+        self.as_hwnd() as _
+    }
+    fn as_mut(&self) -> *mut std::ffi::c_void {
+        self.as_hwnd() as _
+    }
 }
 impl WindowHandle for HWND {
     fn as_hwnd(&self) -> HWND {
         self.clone()
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
-        self.clone() as *const _
     }
 }
 impl WindowHandle for *const std::ffi::c_void {
@@ -274,12 +276,20 @@ impl WindowHandle for *mut std::ffi::c_void {
     fn as_ptr(&self) -> *const std::ffi::c_void {
         self.clone()
     }
+    fn as_mut(&self) -> *mut std::ffi::c_void {
+        self.clone()
+    }
 }
 
 /// A trait for converting a value to a 'HDC' and a `c_void` pointer.
 pub trait DeviceContextHandle {
     fn as_hdc(&self) -> HDC;
-    fn as_ptr(&self) -> *const std::ffi::c_void;
+    fn as_ptr(&self) -> *const std::ffi::c_void {
+        self.as_hdc() as _
+    }
+    fn as_mut(&self) -> *mut std::ffi::c_void {
+        self.as_hdc() as _
+    }
 }
 impl DeviceContextHandle for HDC {
     fn as_hdc(&self) -> HDC {
