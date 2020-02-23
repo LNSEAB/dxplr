@@ -163,6 +163,18 @@ impl<T> Rect<T> {
             bottom,
         }
     }
+
+}
+impl<T: std::ops::Add<Output = T> + Copy> Rect<T> {
+    /// Creates a `Rect` from the `Point` as left-top.
+    pub fn from_point_size(point: Point<T>, size: Size<T>) -> Self {
+        Self {
+            left: point.x,
+            top: point.y,
+            right: point.x + size.width,
+            bottom: point.y + size.height,
+        }
+    }
 }
 impl<T> From<(T, T, T, T)> for Rect<T> {
     fn from(src: (T, T, T, T)) -> Rect<T> {
@@ -248,70 +260,42 @@ unsafe impl Sync for EventHandle {}
 
 /// A trait for converting a value to a 'HWND' and a `c_void` pointer.
 pub trait WindowHandle {
-    fn as_hwnd(&self) -> HWND;
-    fn as_ptr(&self) -> *const std::ffi::c_void {
-        self.as_hwnd() as _
-    }
-    fn as_mut(&self) -> *mut std::ffi::c_void {
-        self.as_hwnd() as _
+    fn as_ptr(&self) -> *mut std::ffi::c_void;
+    fn as_hwnd(&self) -> HWND {
+        self.as_ptr() as _
     }
 }
 impl WindowHandle for HWND {
-    fn as_hwnd(&self) -> HWND {
-        self.clone()
+    fn as_ptr(&self) -> *mut std::ffi::c_void {
+        self.clone() as _
     }
-}
-impl WindowHandle for *const std::ffi::c_void {
     fn as_hwnd(&self) -> HWND {
-        self.clone() as HWND
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
         self.clone()
     }
 }
 impl WindowHandle for *mut std::ffi::c_void {
-    fn as_hwnd(&self) -> HWND {
-        self.clone() as HWND
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
-        self.clone()
-    }
-    fn as_mut(&self) -> *mut std::ffi::c_void {
+    fn as_ptr(&self) -> *mut std::ffi::c_void {
         self.clone()
     }
 }
 
 /// A trait for converting a value to a 'HDC' and a `c_void` pointer.
 pub trait DeviceContextHandle {
-    fn as_hdc(&self) -> HDC;
-    fn as_ptr(&self) -> *const std::ffi::c_void {
-        self.as_hdc() as _
-    }
-    fn as_mut(&self) -> *mut std::ffi::c_void {
-        self.as_hdc() as _
+    fn as_ptr(&self) -> *mut std::ffi::c_void;
+    fn as_hdc(&self) -> HDC {
+        self.as_ptr() as _
     }
 }
 impl DeviceContextHandle for HDC {
+    fn as_ptr(&self) -> *mut std::ffi::c_void {
+        self.clone() as _
+    }
     fn as_hdc(&self) -> HDC {
-        self.clone()
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
-        self.clone() as *const _
-    }
-}
-impl DeviceContextHandle for *const std::ffi::c_void {
-    fn as_hdc(&self) -> HDC {
-        self.clone() as HDC
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
         self.clone()
     }
 }
 impl DeviceContextHandle for *mut std::ffi::c_void {
-    fn as_hdc(&self) -> HDC {
-        self.clone() as HDC
-    }
-    fn as_ptr(&self) -> *const std::ffi::c_void {
+    fn as_ptr(&self) -> *mut std::ffi::c_void {
         self.clone()
     }
 }
