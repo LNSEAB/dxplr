@@ -5,7 +5,7 @@ use crate::result::*;
 use crate::utility::*;
 use crate::Interface;
 use crate::Unknown;
-use crate::{impl_bitflag_operators, impl_interface};
+use crate::{impl_bitflag_operators, impl_interface, impl_interface_simple};
 use com_ptr::ComPtr;
 use std::path::{Path, PathBuf};
 use winapi::shared::minwindef::TRUE;
@@ -2296,7 +2296,8 @@ fn as_text_format(p: &impl Interface) -> &IDWriteTextFormat {
 
 macro_rules! impl_text_format {
     ($s: ident, $interface: ident) => {
-        impl_interface!($s, $interface);
+        impl_interface_simple!($s, $interface);
+
         impl ITextFormat for $s {
             fn get_flow_direction(&self) -> FlowDirection {
                 unsafe { std::mem::transmute(self.0.GetFlowDirection()) }
