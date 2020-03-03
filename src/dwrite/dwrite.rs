@@ -2302,12 +2302,16 @@ macro_rules! impl_text_format {
             fn get_flow_direction(&self) -> FlowDirection {
                 unsafe { std::mem::transmute(self.0.GetFlowDirection()) }
             }
-            fn get_font_collection(&self) -> Result<FontCollection, HResult> {
-                Ok(FontCollection(ComPtr::new(|| unsafe {
+            fn get_font_collection(&self) -> Result<Option<FontCollection>, HResult> {
+                unsafe {
                     let mut p = std::ptr::null_mut();
                     let ret = as_text_format(self).GetFontCollection(&mut p);
-                    hresult(p, ret)
-                })?))
+                    let p = hresult(p, ret)?;
+                    if p == std::ptr::null_mut() {
+                        return Ok(None);
+                    }
+                    Ok(Some(FontCollection(ComPtr::from_raw(p))))
+                }
             }
             fn get_font_family_name(&self) -> Result<String, HResult> {
                 let len = <Self as ITextFormat>::get_font_family_name_length(self) + 1;
@@ -3641,7 +3645,7 @@ pub struct GetTrimmingResult {
 
 pub trait ITextFormat: Interface {
     fn get_flow_direction(&self) -> FlowDirection;
-    fn get_font_collection(&self) -> Result<FontCollection, HResult>;
+    fn get_font_collection(&self) -> Result<Option<FontCollection>, HResult>;
     fn get_font_family_name(&self) -> Result<String, HResult>;
     fn get_font_family_name_length(&self) -> u32;
     fn get_font_size(&self) -> f32;
