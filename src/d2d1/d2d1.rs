@@ -163,6 +163,14 @@ pub enum BitmapSourceProp {
 pub enum BitmapInterpolationMode {
     NearestNeighbor = D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR,
     Linear = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+    #[cfg(feature = "d2d1_1")]
+    Cubic = D2D1_INTERPOLATION_MODE_CUBIC,
+    #[cfg(feature = "d2d1_1")]
+    MultiSampleLinear = D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR,
+    #[cfg(feature = "d2d1_1")]
+    Anisotropic = D2D1_INTERPOLATION_MODE_ANISOTROPIC,
+    #[cfg(feature = "d2d1_1")]
+    HighQualityCubic = D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
