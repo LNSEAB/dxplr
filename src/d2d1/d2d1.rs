@@ -13,6 +13,9 @@ use winapi::um::d2d1effectauthor::*;
 use winapi::um::d2d1effects::*;
 use winapi::um::dcommon::*;
 
+#[cfg(feature = "d2d1_1")]
+use winapi::um::d2d1_1::*;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Tag(pub u64);
 
