@@ -3584,21 +3584,21 @@ impl VideoColor {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct VideoContentProtectionCaps {
-    caps: u32,
-    key_exchange_type_count: u32,
-    block_alignment_size: u32,
-    protected_memory_size: u64,
+    pub caps: u32,
+    pub key_exchange_type_count: u32,
+    pub block_alignment_size: u32,
+    pub protected_memory_size: u64,
 }
 
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct Viewport {
-    top_left_x: f32,
-    top_left_y: f32,
-    width: f32,
-    height: f32,
-    min_depth: f32,
-    max_depth: f32,
+    pub top_left_x: f32,
+    pub top_left_y: f32,
+    pub width: f32,
+    pub height: f32,
+    pub min_depth: f32,
+    pub max_depth: f32,
 }
 impl Viewport {
     pub fn new() -> Self {
