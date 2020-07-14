@@ -53,7 +53,7 @@ dwrite_3 = ["dwrite_2", "winapi/dwrite_3"]
 
 [dependencies]
 com_ptr = "0.1.3"
-winapi = { version = "0.3.8", features = [
+winapi = { version = "0.3.9", features = [
 	"impl-default",
 	"winbase",
 	"winuser",
@@ -61,11 +61,11 @@ winapi = { version = "0.3.8", features = [
 	"handleapi",
 	"synchapi",
 ] }
-thiserror = "1.0.10"
+thiserror = "1.0.20"
 
 [dev-dependencies]
-winit = "0.21.0"
-image = "0.23.0"
+winit = "0.22.2"
+image = "0.23.7"
 
 [[example]]
 name = "d3d11_triangle"

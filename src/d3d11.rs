@@ -36,10 +36,9 @@ pub enum AuthenticatedChannelType {
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum AuthenticatedProcessIdentifierType {
-    // Typo in winapi-rs
-    Unknown = DD3D11_PROCESSIDTYPE_UNKNOWN,
-    DWM = DD3D11_PROCESSIDTYPE_DWM,
-    Handle = DD3D11_PROCESSIDTYPE_HANDLE,
+    Unknown = D3D11_PROCESSIDTYPE_UNKNOWN,
+    DWM = D3D11_PROCESSIDTYPE_DWM,
+    Handle = D3D11_PROCESSIDTYPE_HANDLE,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
