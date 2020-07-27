@@ -7610,12 +7610,12 @@ where
     fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>;
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress;
     fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult>;
-    unsafe fn map<'a>(
+    fn map<'a>(
         &self,
         subresource: u32,
         read_range: Option<Range>,
     ) -> Result<&'a mut [u8], HResult>;
-    unsafe fn unmap(&self, subresource: u32, written_range: Option<Range>);
+    fn unmap(&self, subresource: u32, written_range: Option<Range>);
 }
 #[derive(Clone, Debug)]
 pub struct Resource(ComPtr<ID3D12Resource>);
@@ -7633,7 +7633,7 @@ impl IResource for Resource {
         let res = unsafe { self.0.GetHeapProperties(&mut properties, &mut flags) };
         hresult((properties.into(), HeapFlags(flags)), res)
     }
-    unsafe fn map<'a>(
+    fn map<'a>(
         &self,
         subresource: u32,
         read_range: Option<Range>,
@@ -7653,7 +7653,7 @@ impl IResource for Resource {
         );
         hresult(std::slice::from_raw_parts_mut(p as *mut u8, size), res)
     }
-    unsafe fn unmap(&self, subresource: u32, write_range: Option<Range>) {
+    fn unmap(&self, subresource: u32, write_range: Option<Range>) {
         self.0.Unmap(
             subresource,
             write_range.as_ref().map_or(std::ptr::null(), |r| {
