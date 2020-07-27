@@ -7690,28 +7690,32 @@ impl IResource for Resource {
         subresource: u32,
         read_range: Option<Range>,
     ) -> Result<&'a mut [u8], HResult> {
-        let desc = self.get_desc();
-        let mut p = std::ptr::null_mut();
-        let res = self.0.Map(
-            subresource,
-            read_range.as_ref().map_or(std::ptr::null(), |r| {
-                r as *const Range as *const D3D12_RANGE
-            }),
-            &mut p,
-        );
-        let size = read_range.map_or(
-            desc.width as usize * desc.height as usize * desc.depth_or_array_size as usize,
-            |r| r.end - r.begin,
-        );
-        hresult(std::slice::from_raw_parts_mut(p as *mut u8, size), res)
+        unsafe {
+            let desc = self.get_desc();
+            let mut p = std::ptr::null_mut();
+            let res = self.0.Map(
+                subresource,
+                read_range.as_ref().map_or(std::ptr::null(), |r| {
+                    r as *const Range as *const D3D12_RANGE
+                }),
+                &mut p,
+            );
+            let size = read_range.map_or(
+                desc.width as usize * desc.height as usize * desc.depth_or_array_size as usize,
+                |r| r.end - r.begin,
+            );
+            hresult(std::slice::from_raw_parts_mut(p as *mut u8, size), res)
+        }
     }
     fn unmap(&self, subresource: u32, write_range: Option<Range>) {
-        self.0.Unmap(
-            subresource,
-            write_range.as_ref().map_or(std::ptr::null(), |r| {
-                r as *const Range as *const D3D12_RANGE
-            }),
-        );
+        unsafe {
+            self.0.Unmap(
+                subresource,
+                write_range.as_ref().map_or(std::ptr::null(), |r| {
+                    r as *const Range as *const D3D12_RANGE
+                }),
+            );
+        }
     }
 }
 
