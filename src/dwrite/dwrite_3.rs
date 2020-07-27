@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use winapi::um::dwrite_3::*;
 use crate::utility::*;
+use winapi::um::dwrite_3::*;
 
 /*
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

@@ -1,3 +1,4 @@
+use super::{Format, RGBA};
 use crate::api::WindowHandle;
 use crate::api::*;
 use crate::result::{hresult, HResult};
@@ -18,11 +19,11 @@ use winapi::shared::dxgi1_4::*;
 use winapi::shared::dxgi1_5::*;
 #[cfg(feature = "dxgi1_6")]
 use winapi::shared::dxgi1_6::*;
+use winapi::shared::dxgitype::*;
 use winapi::shared::guiddef::GUID;
 use winapi::shared::minwindef::*;
 use winapi::shared::windef::*;
 use winapi::shared::winerror::*;
-use winapi::shared::dxgitype::*;
 #[cfg(feature = "dxgidebug")]
 use winapi::um::dxgidebug::*;
 #[cfg(feature = "dxgi1_2")]
@@ -31,7 +32,6 @@ use winapi::um::unknwnbase::IUnknown;
 use winapi::um::winnt::HANDLE;
 #[cfg(feature = "dxgi1_6")]
 use winapi::um::winnt::HRESULT;
-use super::{RGBA, Format};
 
 #[derive(Clone, Copy, Debug)]
 pub struct DebugID(Guid);
@@ -1392,7 +1392,6 @@ impl From<(f32, f32, f32)> for RGB {
         }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct SampleDesc {

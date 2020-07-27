@@ -100,7 +100,11 @@ impl From<Point<i32>> for POINT {
 }
 impl AsRef<POINT> for Point<i32> {
     fn as_ref(&self) -> &POINT {
-        unsafe { (self as *const Point<i32> as *const POINT).as_ref().unwrap() }
+        unsafe {
+            (self as *const Point<i32> as *const POINT)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -163,7 +167,6 @@ impl<T> Rect<T> {
             bottom,
         }
     }
-
 }
 impl<T: std::ops::Add<Output = T> + Copy> Rect<T> {
     /// Creates a `Rect` from the `Point` as left-top.

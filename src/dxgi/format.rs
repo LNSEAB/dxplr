@@ -127,4 +127,3 @@ impl Default for Format {
         Format::Unknown
     }
 }
-

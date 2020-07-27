@@ -39,7 +39,6 @@ pub enum FlowDirection {
     RightToLeft = DWRITE_FLOW_DIRECTION_RIGHT_TO_LEFT,
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum FontFaceType {
@@ -160,8 +159,6 @@ impl FontFileType {
     pub const TrueTypeCollection: Self = Self::OpenTypeCollection;
 }
 
-
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct FontSimulations(u32);
 #[allow(non_upper_case_globals)]
@@ -171,8 +168,6 @@ impl FontSimulations {
     pub const Oblique: FontSimulations = FontSimulations(DWRITE_FONT_SIMULATIONS_OBLIQUE);
 }
 impl_bitflag_operators!(FontSimulations);
-
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -356,7 +351,6 @@ pub enum TrimmingGranularity {
     Character = DWRITE_TRIMMING_GRANULARITY_CHARACTER,
     Word = DWRITE_TRIMMING_GRANULARITY_WORD,
 }
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
@@ -662,7 +656,6 @@ impl From<DWRITE_INLINE_OBJECT_METRICS> for InlineObjectMetrics {
         }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct LineBreakpoint {
@@ -1003,7 +996,6 @@ impl Underline {
         )
     }
 }
-
 
 macro_rules! impl_bitmap_render_target {
     ($s: ident, $interface: ident) => {
@@ -2010,7 +2002,10 @@ macro_rules! impl_glyph_run_analysis {
                     )
                 }
             }
-            fn get_alpha_texture_bounds(&self, texture_type: TextureType) -> Result<Rect<i32>, HResult> {
+            fn get_alpha_texture_bounds(
+                &self,
+                texture_type: TextureType,
+            ) -> Result<Rect<i32>, HResult> {
                 unsafe {
                     let mut rc = Default::default();
                     let ret = self.0.GetAlphaTextureBounds(texture_type as u32, &mut rc);
@@ -2035,7 +2030,8 @@ macro_rules! impl_inline_object {
                 is_right_to_left: bool,
                 effect: Option<Unknown>,
             ) -> Result<(), HResult> {
-                let context = context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
+                let context =
+                    context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
                 let effect = effect.map_or(std::ptr::null_mut(), |e| e.as_ptr());
                 unsafe {
                     let ret = self.0.Draw(
@@ -2210,7 +2206,8 @@ macro_rules! impl_pixel_snapping {
                 &self,
                 context: Option<*mut std::ffi::c_void>,
             ) -> Result<Matrix, HResult> {
-                let context = context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
+                let context =
+                    context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
                 unsafe {
                     let mut m = Default::default();
                     let ret = self.0.GetCurrentTransform(context, &mut m);
@@ -2221,7 +2218,8 @@ macro_rules! impl_pixel_snapping {
                 &self,
                 context: Option<*mut std::ffi::c_void>,
             ) -> Result<f32, HResult> {
-                let context = context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
+                let context =
+                    context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
                 unsafe {
                     let mut ppd = 0.0;
                     let ret = self.0.GetPixelsPerDip(context, &mut ppd);
@@ -2475,7 +2473,8 @@ macro_rules! impl_text_layout {
                 origin_x: f32,
                 origin_y: f32,
             ) -> Result<(), HResult> {
-                let context = context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
+                let context =
+                    context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void);
                 unsafe {
                     let ret = self
                         .0
@@ -3025,7 +3024,8 @@ macro_rules! impl_text_renderer {
                     hresult(
                         (),
                         self.0.DrawGlyphRun(
-                            context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
+                            context
+                                .map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
                             baseline_origin_x,
                             baseline_origin_y,
                             measuring_mode as u32,
@@ -3052,7 +3052,8 @@ macro_rules! impl_text_renderer {
                     hresult(
                         (),
                         self.0.DrawInlineObject(
-                            context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
+                            context
+                                .map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
                             baseline_origin_x,
                             baseline_origin_y,
                             inline_object.as_ptr() as *mut _,
@@ -3078,7 +3079,8 @@ macro_rules! impl_text_renderer {
                     hresult(
                         (),
                         self.0.DrawStrikethrough(
-                            context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
+                            context
+                                .map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
                             baseline_origin_x,
                             baseline_origin_y,
                             &strikethrough,
@@ -3102,7 +3104,8 @@ macro_rules! impl_text_renderer {
                     hresult(
                         (),
                         self.0.DrawUnderline(
-                            context.map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
+                            context
+                                .map_or(std::ptr::null_mut(), |c| c as *mut winapi::ctypes::c_void),
                             baseline_origin_x,
                             baseline_origin_y,
                             &underline,

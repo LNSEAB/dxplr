@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
+use crate::utility::to_BOOL;
 use winapi::um::dwrite_1;
 use winapi::um::dwrite_1::*;
-use crate::utility::to_BOOL;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]

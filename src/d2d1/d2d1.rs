@@ -7,11 +7,11 @@ use crate::{impl_bitflag_operators, impl_interface};
 use com_ptr::ComPtr;
 use winapi::shared::minwindef::TRUE;
 use winapi::shared::windef::{HDC, HWND};
-use winapi::um::winnt::HRESULT;
 use winapi::um::d2d1::*;
 use winapi::um::d2d1effectauthor::*;
 use winapi::um::d2d1effects::*;
 use winapi::um::dcommon::*;
+use winapi::um::winnt::HRESULT;
 
 #[cfg(feature = "d2d1_1")]
 use winapi::um::d2d1_1::*;
@@ -705,7 +705,6 @@ pub enum LayerOptions {
     InitializeForClearType = D2D1_LAYER_OPTIONS_INITIALIZE_FOR_CLEARTYPE,
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum LinearTransferProp {
@@ -846,7 +845,6 @@ pub enum RenderTargetUsage {
     GDICompatible = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum SaturationProp {
@@ -961,7 +959,6 @@ pub enum TableTransferProp {
     ClampOutput = D2D1_TABLETRANSFER_PROP_CLAMP_OUTPUT,
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum TextAntialiasMode {
@@ -1011,14 +1008,12 @@ pub enum VertexUsage {
     Dynamic = D2D1_VERTEX_USAGE_DYNAMIC,
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 #[repr(u32)]
 pub enum WindowState {
     None = D2D1_WINDOW_STATE_NONE,
     Occluded = D2D1_WINDOW_STATE_OCCLUDED,
 }
-
 
 pub type ColorF = crate::dxgi::RGBA;
 
@@ -1230,7 +1225,11 @@ impl From<D2D_POINT_2F> for Point2F {
 }
 impl AsRef<D2D_POINT_2F> for Point2F {
     fn as_ref(&self) -> &D2D_POINT_2F {
-        unsafe { (self as *const Point2F as *const D2D_POINT_2F).as_ref().unwrap() }
+        unsafe {
+            (self as *const Point2F as *const D2D_POINT_2F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1250,7 +1249,11 @@ impl From<D2D_POINT_2U> for Point2U {
 }
 impl AsRef<D2D_POINT_2U> for Point2U {
     fn as_ref(&self) -> &D2D_POINT_2U {
-        unsafe { (self as *const Point2U as *const D2D_POINT_2U).as_ref().unwrap() }
+        unsafe {
+            (self as *const Point2U as *const D2D_POINT_2U)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1278,7 +1281,11 @@ impl From<D2D_RECT_F> for RectF {
 }
 impl AsRef<D2D_RECT_F> for RectF {
     fn as_ref(&self) -> &D2D_RECT_F {
-        unsafe { (self as *const RectF as *const D2D_RECT_F).as_ref().unwrap() }
+        unsafe {
+            (self as *const RectF as *const D2D_RECT_F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1308,7 +1315,11 @@ impl From<D2D_RECT_U> for RectU {
 }
 impl AsRef<D2D_RECT_U> for RectU {
     fn as_ref(&self) -> &D2D_RECT_U {
-        unsafe { (self as *const RectU as *const D2D_RECT_U).as_ref().unwrap() }
+        unsafe {
+            (self as *const RectU as *const D2D_RECT_U)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1332,7 +1343,11 @@ impl From<D2D_SIZE_F> for SizeF {
 }
 impl AsRef<D2D_SIZE_F> for SizeF {
     fn as_ref(&self) -> &D2D_SIZE_F {
-        unsafe { (self as *const SizeF as *const D2D_SIZE_F).as_ref().unwrap() }
+        unsafe {
+            (self as *const SizeF as *const D2D_SIZE_F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1356,7 +1371,11 @@ impl From<D2D_SIZE_U> for SizeU {
 }
 impl AsRef<D2D_SIZE_U> for SizeU {
     fn as_ref(&self) -> &D2D_SIZE_U {
-        unsafe { (self as *const SizeU as *const D2D_SIZE_U).as_ref().unwrap() }
+        unsafe {
+            (self as *const SizeU as *const D2D_SIZE_U)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1383,7 +1402,11 @@ impl From<D2D_VECTOR_2F> for Vector2F {
 }
 impl AsRef<D2D_VECTOR_2F> for Vector2F {
     fn as_ref(&self) -> &D2D_VECTOR_2F {
-        unsafe { (self as *const Vector2F as *const D2D_VECTOR_2F).as_ref().unwrap() }
+        unsafe {
+            (self as *const Vector2F as *const D2D_VECTOR_2F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1419,7 +1442,11 @@ impl From<D2D_VECTOR_3F> for Vector3F {
 }
 impl AsRef<D2D_VECTOR_3F> for Vector3F {
     fn as_ref(&self) -> &D2D_VECTOR_3F {
-        unsafe { (self as *const Vector3F as *const D2D_VECTOR_3F).as_ref().unwrap() }
+        unsafe {
+            (self as *const Vector3F as *const D2D_VECTOR_3F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1458,7 +1485,11 @@ impl From<D2D_VECTOR_4F> for Vector4F {
 }
 impl AsRef<D2D_VECTOR_4F> for Vector4F {
     fn as_ref(&self) -> &D2D_VECTOR_4F {
-        unsafe { (self as *const Vector4F as *const D2D_VECTOR_4F).as_ref().unwrap() }
+        unsafe {
+            (self as *const Vector4F as *const D2D_VECTOR_4F)
+                .as_ref()
+                .unwrap()
+        }
     }
 }
 
@@ -1489,7 +1520,11 @@ pub struct BezierSegment {
     pub point3: Point2F,
 }
 impl BezierSegment {
-    pub fn new(point1: impl Into<Point2F>, point2: impl Into<Point2F>, point3: impl Into<Point2F>) -> Self {
+    pub fn new(
+        point1: impl Into<Point2F>,
+        point2: impl Into<Point2F>,
+        point3: impl Into<Point2F>,
+    ) -> Self {
         BezierSegment {
             point1: point1.into(),
             point2: point2.into(),
@@ -1820,7 +1855,6 @@ impl LayerParameters {
     }
 }
 
-
 #[derive(Clone, Debug)]
 pub struct LinearGradientBrushProperties {
     pub start_point: Point2F,
@@ -2009,8 +2043,6 @@ impl From<D2D1_ROUNDED_RECT> for RoundedRect {
     }
 }
 
-
-
 #[derive(Clone, Debug)]
 pub struct StrokeStyleProperties {
     pub start_cap: CapStyle,
@@ -2034,7 +2066,6 @@ impl StrokeStyleProperties {
         }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Triangle {
@@ -2142,9 +2173,7 @@ macro_rules! impl_bitmap {
                 }
             }
             fn get_pixel_format(&self) -> PixelFormat {
-                unsafe {
-                    std::mem::transmute(self.0.GetPixelFormat())
-                }
+                unsafe { std::mem::transmute(self.0.GetPixelFormat()) }
             }
             fn get_pixel_size(&self) -> SizeU {
                 unsafe { self.0.GetPixelSize().into() }
@@ -2286,11 +2315,15 @@ macro_rules! impl_drawing_state_block {
                 }
             }
             fn set_description(&self, desc: &DrawingStateDescription) {
-                unsafe { self.0.SetDescription(&desc.to_c_struct()); }
+                unsafe {
+                    self.0.SetDescription(&desc.to_c_struct());
+                }
             }
             #[cfg(feature = "dwrite")]
             fn set_text_rendering_params(&self, params: &impl crate::dwrite::IRenderingParams) {
-                unsafe { self.0.SetTextRenderingParams(params.as_ptr() as *mut _); }
+                unsafe {
+                    self.0.SetTextRenderingParams(params.as_ptr() as *mut _);
+                }
             }
         }
     };
@@ -2336,7 +2369,7 @@ macro_rules! impl_factory {
                     let ret = self.0.CreateDrawingStateBlock(
                         &desc.to_c_struct(),
                         params.map_or(std::ptr::null_mut(), |p| p.as_ptr() as *mut _),
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
@@ -2352,7 +2385,7 @@ macro_rules! impl_factory {
                     let ret = self.0.CreateDxgiSurfaceRenderTarget(
                         surface.as_ptr() as *mut _,
                         &props.to_c_struct(),
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
@@ -2372,12 +2405,18 @@ macro_rules! impl_factory {
                 fill_mode: FillMode,
                 geometries: &[&impl IGeometry],
             ) -> Result<GeometryGroup, HResult> {
-                let mut geometries = geometries.iter().map(|p| p.as_ptr() as *mut _).collect::<Vec<_>>();
+                let mut geometries = geometries
+                    .iter()
+                    .map(|p| p.as_ptr() as *mut _)
+                    .collect::<Vec<_>>();
                 Ok(GeometryGroup(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
-                    let ret = self
-                        .0
-                        .CreateGeometryGroup(fill_mode as u32, geometries.as_mut_ptr(), geometries.len() as u32, &mut p);
+                    let ret = self.0.CreateGeometryGroup(
+                        fill_mode as u32,
+                        geometries.as_mut_ptr(),
+                        geometries.len() as u32,
+                        &mut p,
+                    );
                     hresult(p, ret)
                 })?))
             }
@@ -2388,9 +2427,11 @@ macro_rules! impl_factory {
             ) -> Result<HwndRenderTarget, HResult> {
                 Ok(HwndRenderTarget(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
-                    let ret = self
-                        .0
-                        .CreateHwndRenderTarget(&props.to_c_struct(), &hwnd_props.to_c_struct(), &mut p);
+                    let ret = self.0.CreateHwndRenderTarget(
+                        &props.to_c_struct(),
+                        &hwnd_props.to_c_struct(),
+                        &mut p,
+                    );
                     hresult(p, ret)
                 })?))
             }
@@ -2417,7 +2458,9 @@ macro_rules! impl_factory {
             ) -> Result<RoundedRectangleGeometry, HResult> {
                 Ok(RoundedRectangleGeometry(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
-                    let ret = self.0.CreateRoundedRectangleGeometry(&rc.to_c_struct(), &mut p);
+                    let ret = self
+                        .0
+                        .CreateRoundedRectangleGeometry(&rc.to_c_struct(), &mut p);
                     hresult(p, ret)
                 })?))
             }
@@ -2447,8 +2490,10 @@ macro_rules! impl_factory {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateTransformedGeometry(
                         src.as_ptr() as *mut _,
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        &mut p
+                        transform
+                            .as_ref()
+                            .map_or(std::ptr::null(), |m| m as *const _),
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
@@ -2602,48 +2647,86 @@ macro_rules! impl_geometry {
                 unsafe {
                     let mut rc = Default::default();
                     let ret = self.0.GetBounds(
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        &mut rc
+                        transform
+                            .as_ref()
+                            .map_or(std::ptr::null(), |m| m as *const _),
+                        &mut rc,
                     );
                     hresult(rc.into(), ret)
                 }
             }
-            fn get_widened_bounds(&self, width: f32, stroke_style: &impl IStrokeStyle, transform: Option<&Matrix3x2F>, tolerance: f32) -> Result<RectF, HResult> {
+            fn get_widened_bounds(
+                &self,
+                width: f32,
+                stroke_style: &impl IStrokeStyle,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+            ) -> Result<RectF, HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
                     let mut rc = Default::default();
                     let ret = self.0.GetWidenedBounds(
                         width,
                         stroke_style.as_ptr() as *mut _,
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
+                        transform
+                            .as_ref()
+                            .map_or(std::ptr::null(), |m| m as *const _),
                         tolerance,
-                        &mut rc
+                        &mut rc,
                     );
                     hresult(rc.into(), ret)
                 }
             }
-            fn outline(&self, transform: Option<&Matrix3x2F>, tolerance: f32, sink: &impl ISimplifiedGeometrySink) -> Result<(), HResult> {
+            fn outline(
+                &self,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+                sink: &impl ISimplifiedGeometrySink,
+            ) -> Result<(), HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
-                    hresult((), self.0.Outline(
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        tolerance,
-                        sink.as_ptr() as *mut _
-                    ))
+                    hresult(
+                        (),
+                        self.0.Outline(
+                            transform
+                                .as_ref()
+                                .map_or(std::ptr::null(), |m| m as *const _),
+                            tolerance,
+                            sink.as_ptr() as *mut _,
+                        ),
+                    )
                 }
             }
-            fn simplify(&self, option: GeometrySimplificationOption, transform: Option<&Matrix3x2F>, tolerance: f32, sink: &impl ISimplifiedGeometrySink) -> Result<(), HResult> {
+            fn simplify(
+                &self,
+                option: GeometrySimplificationOption,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+                sink: &impl ISimplifiedGeometrySink,
+            ) -> Result<(), HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
-                    hresult((), self.0.Simplify(
-                        option as u32,
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        tolerance,
-                        sink.as_ptr() as *mut _
-                    ))
+                    hresult(
+                        (),
+                        self.0.Simplify(
+                            option as u32,
+                            transform
+                                .as_ref()
+                                .map_or(std::ptr::null(), |m| m as *const _),
+                            tolerance,
+                            sink.as_ptr() as *mut _,
+                        ),
+                    )
                 }
             }
-            fn stroke_contains_point(&self, point: impl Into<Point2F>, width: f32, stroke_style: &impl IStrokeStyle, transform: Option<&Matrix3x2F>, tolerance: f32) -> Result<bool, HResult> {
+            fn stroke_contains_point(
+                &self,
+                point: impl Into<Point2F>,
+                width: f32,
+                stroke_style: &impl IStrokeStyle,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+            ) -> Result<bool, HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
                     let mut contains = 0;
@@ -2651,33 +2734,57 @@ macro_rules! impl_geometry {
                         point.into().into(),
                         width,
                         stroke_style.as_ptr() as *mut _,
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
+                        transform
+                            .as_ref()
+                            .map_or(std::ptr::null(), |m| m as *const _),
                         tolerance,
                         &mut contains,
                     );
                     hresult(contains == TRUE, ret)
                 }
             }
-            fn tessellate(&self, transform: Option<&Matrix3x2F>, tolerance: f32, sink: &impl ITessellationSink) -> Result<(), HResult> {
+            fn tessellate(
+                &self,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+                sink: &impl ITessellationSink,
+            ) -> Result<(), HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
-                    hresult((), self.0.Tessellate(
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        tolerance,
-                        sink.as_ptr() as *mut _
-                    ))
+                    hresult(
+                        (),
+                        self.0.Tessellate(
+                            transform
+                                .as_ref()
+                                .map_or(std::ptr::null(), |m| m as *const _),
+                            tolerance,
+                            sink.as_ptr() as *mut _,
+                        ),
+                    )
                 }
             }
-            fn widen(&self, width: f32, stroke_style: &impl IStrokeStyle, transform: Option<&Matrix3x2F>, tolerance: f32, sink: &impl ISimplifiedGeometrySink) -> Result<(), HResult> {
+            fn widen(
+                &self,
+                width: f32,
+                stroke_style: &impl IStrokeStyle,
+                transform: Option<&Matrix3x2F>,
+                tolerance: f32,
+                sink: &impl ISimplifiedGeometrySink,
+            ) -> Result<(), HResult> {
                 let transform = transform.map(|m| m.clone().into());
                 unsafe {
-                    hresult((), self.0.Widen(
-                        width,
-                        stroke_style.as_ptr() as *mut _,
-                        transform.as_ref().map_or(std::ptr::null(), |m| m as *const _),
-                        tolerance,
-                        sink.as_ptr() as *mut _
-                    ))
+                    hresult(
+                        (),
+                        self.0.Widen(
+                            width,
+                            stroke_style.as_ptr() as *mut _,
+                            transform
+                                .as_ref()
+                                .map_or(std::ptr::null(), |m| m as *const _),
+                            tolerance,
+                            sink.as_ptr() as *mut _,
+                        ),
+                    )
                 }
             }
         }
@@ -2696,7 +2803,9 @@ macro_rules! impl_geometry_group {
                 unsafe {
                     let mut v = vec![std::ptr::null_mut(); len as usize];
                     self.0.GetSourceGeometries(v.as_mut_ptr(), len);
-                    v.into_iter().map(|p| Geometry(ComPtr::from_raw(p))).collect::<Vec<_>>()
+                    v.into_iter()
+                        .map(|p| Geometry(ComPtr::from_raw(p)))
+                        .collect::<Vec<_>>()
                 }
             }
             fn get_source_geometry_count(&self) -> u32 {
@@ -2723,9 +2832,13 @@ macro_rules! impl_geometry_sink {
                 unsafe { self.0.AddQuadraticBezier(&bezier.to_c_struct()) }
             }
             fn add_quadratic_beziers(&self, beziers: &[&QuadraticBezierSegment]) {
-                let beziers = beziers.iter().map(|seg| seg.to_c_struct()).collect::<Vec<_>>();
+                let beziers = beziers
+                    .iter()
+                    .map(|seg| seg.to_c_struct())
+                    .collect::<Vec<_>>();
                 unsafe {
-                    self.0.AddQuadraticBeziers(beziers.as_ptr(), beziers.len() as u32);
+                    self.0
+                        .AddQuadraticBeziers(beziers.as_ptr(), beziers.len() as u32);
                 }
             }
         }
@@ -2743,7 +2856,7 @@ macro_rules! impl_gradient_stop_collection {
                 unsafe { std::mem::transmute(self.0.GetExtendMode()) }
             }
             fn get_gradient_stop_count(&self) -> u32 {
-                unsafe{ self.0.GetGradientStopCount() }
+                unsafe { self.0.GetGradientStopCount() }
             }
             fn get_gradient_stops(&self) -> Vec<GradientStop> {
                 let len = self.get_gradient_stop_count();
@@ -2810,10 +2923,14 @@ macro_rules! impl_linear_gradient_brush {
                 unsafe { self.0.GetStartPoint().into() }
             }
             fn set_end_point(&self, point: impl Into<Point2F>) {
-                unsafe { self.0.SetEndPoint(point.into().into()); }
+                unsafe {
+                    self.0.SetEndPoint(point.into().into());
+                }
             }
             fn set_start_point(&self, point: impl Into<Point2F>) {
-                unsafe { self.0.SetStartPoint(point.into().into()); }
+                unsafe {
+                    self.0.SetStartPoint(point.into().into());
+                }
             }
         }
     };
@@ -2890,16 +3007,22 @@ macro_rules! impl_radial_gradient_brush {
                 unsafe { self.0.GetRadiusY() }
             }
             fn set_center(&self, center: impl Into<Point2F>) {
-                unsafe { self.0.SetCenter(center.into().into()); }
+                unsafe {
+                    self.0.SetCenter(center.into().into());
+                }
             }
             fn set_gradient_origin_offset(&self, offset: impl Into<Point2F>) {
                 unsafe { self.0.SetGradientOriginOffset(offset.into().into()) }
             }
             fn set_radius_x(&self, x: f32) {
-                unsafe { self.0.SetRadiusX(x); }
+                unsafe {
+                    self.0.SetRadiusX(x);
+                }
             }
             fn set_radius_y(&self, y: f32) {
-                unsafe { self.0.SetRadiusY(y); }
+                unsafe {
+                    self.0.SetRadiusY(y);
+                }
             }
         }
     };
@@ -2925,13 +3048,23 @@ macro_rules! impl_render_target {
         impl_resource!($s, $interface);
         impl IRenderTarget for $s {
             fn begin_draw(&self) {
-                unsafe { self.0.BeginDraw(); }
+                unsafe {
+                    self.0.BeginDraw();
+                }
             }
             fn clear(&self, color: impl Into<ColorF>) {
                 let color = color.into();
-                unsafe { self.0.Clear(&color.into()); }
+                unsafe {
+                    self.0.Clear(&color.into());
+                }
             }
-            unsafe fn create_bitmap(&self, size: impl Into<SizeU>, src_data: Option<&[u8]>, pitch: u32, props: &BitmapProperties) -> Result<Bitmap, HResult> {
+            unsafe fn create_bitmap(
+                &self,
+                size: impl Into<SizeU>,
+                src_data: Option<&[u8]>,
+                pitch: u32,
+                props: &BitmapProperties,
+            ) -> Result<Bitmap, HResult> {
                 Ok(Bitmap(ComPtr::new(|| {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateBitmap(
@@ -2939,12 +3072,17 @@ macro_rules! impl_render_target {
                         src_data.map_or(std::ptr::null(), |d| d.as_ptr() as *const _),
                         pitch,
                         &props.to_c_struct(),
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
             }
-            fn create_bitmap_brush(&self, bitmap: &impl IBitmap, props: Option<&BitmapBrushProperties>, brush_props: Option<&BrushProperties>) -> Result<BitmapBrush, HResult> {
+            fn create_bitmap_brush(
+                &self,
+                bitmap: &impl IBitmap,
+                props: Option<&BitmapBrushProperties>,
+                brush_props: Option<&BrushProperties>,
+            ) -> Result<BitmapBrush, HResult> {
                 let props = props.map(|p| p.to_c_struct());
                 let brush_props = brush_props.map(|p| p.to_c_struct());
                 Ok(BitmapBrush(ComPtr::new(|| unsafe {
@@ -2952,13 +3090,21 @@ macro_rules! impl_render_target {
                     let ret = self.0.CreateBitmapBrush(
                         bitmap.as_ptr() as *mut _,
                         props.as_ref().map_or(std::ptr::null(), |p| p as *const _),
-                        brush_props.as_ref().map_or(std::ptr::null(), |p| p as *const _),
-                        &mut p
+                        brush_props
+                            .as_ref()
+                            .map_or(std::ptr::null(), |p| p as *const _),
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
             }
-            fn create_compatible_render_target(&self, size: Option<SizeF>, pixel_size: Option<SizeU>, format: Option<&PixelFormat>, options: CompatibleRenderTargetOptions) -> Result<BitmapRenderTarget, HResult> {
+            fn create_compatible_render_target(
+                &self,
+                size: Option<SizeF>,
+                pixel_size: Option<SizeU>,
+                format: Option<&PixelFormat>,
+                options: CompatibleRenderTargetOptions,
+            ) -> Result<BitmapRenderTarget, HResult> {
                 let size = size.map(|s| D2D_SIZE_F::from(s));
                 let pixel_size = pixel_size.map(|s| D2D_SIZE_U::from(s));
                 let format = format.map(|f| f.to_c_struct());
@@ -2966,15 +3112,22 @@ macro_rules! impl_render_target {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateCompatibleRenderTarget(
                         size.as_ref().map_or(std::ptr::null(), |s| s as *const _),
-                        pixel_size.as_ref().map_or(std::ptr::null(), |s| s as *const _),
+                        pixel_size
+                            .as_ref()
+                            .map_or(std::ptr::null(), |s| s as *const _),
                         format.as_ref().map_or(std::ptr::null(), |f| f as *const _),
                         options as u32,
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
             }
-            fn create_gradient_stop_collection(&self, stops: &[GradientStop], gamma: Gamma, mode: ExtendMode) -> Result<GradientStopCollection, HResult> {
+            fn create_gradient_stop_collection(
+                &self,
+                stops: &[GradientStop],
+                gamma: Gamma,
+                mode: ExtendMode,
+            ) -> Result<GradientStopCollection, HResult> {
                 let stops = stops.iter().map(|s| s.to_c_struct()).collect::<Vec<_>>();
                 Ok(GradientStopCollection(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
@@ -2983,7 +3136,7 @@ macro_rules! impl_render_target {
                         stops.len() as u32,
                         gamma as u32,
                         mode as u32,
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
@@ -2992,19 +3145,29 @@ macro_rules! impl_render_target {
                 let size = size.map(|s| s.into());
                 Ok(Layer(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
-                    let ret = self.0.CreateLayer(size.as_ref().map_or(std::ptr::null(), |s| s as *const _), &mut p);
+                    let ret = self.0.CreateLayer(
+                        size.as_ref().map_or(std::ptr::null(), |s| s as *const _),
+                        &mut p,
+                    );
                     hresult(p, ret)
                 })?))
             }
-            fn create_linear_gradient_brush(&self, props: &LinearGradientBrushProperties, brush_props: Option<&BrushProperties>, gradient: &impl IGradientStopCollection) -> Result<LinearGradientBrush, HResult> {
+            fn create_linear_gradient_brush(
+                &self,
+                props: &LinearGradientBrushProperties,
+                brush_props: Option<&BrushProperties>,
+                gradient: &impl IGradientStopCollection,
+            ) -> Result<LinearGradientBrush, HResult> {
                 let brush_props = brush_props.map(|p| p.to_c_struct());
                 Ok(LinearGradientBrush(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateLinearGradientBrush(
                         &props.to_c_struct(),
-                        brush_props.as_ref().map_or(std::ptr::null(), |p| p as *const _),
+                        brush_props
+                            .as_ref()
+                            .map_or(std::ptr::null(), |p| p as *const _),
                         gradient.as_ptr() as *mut _,
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
@@ -3016,110 +3179,183 @@ macro_rules! impl_render_target {
                     hresult(p, ret)
                 })?))
             }
-            fn create_radial_gradient_brush(&self, props: &RadialGradientBrushProperties, brush_props: Option<&BrushProperties>, gradient: &impl IGradientStopCollection) -> Result<RadialGradientBrush, HResult> {
+            fn create_radial_gradient_brush(
+                &self,
+                props: &RadialGradientBrushProperties,
+                brush_props: Option<&BrushProperties>,
+                gradient: &impl IGradientStopCollection,
+            ) -> Result<RadialGradientBrush, HResult> {
                 let brush_props = brush_props.map(|p| p.to_c_struct());
                 Ok(RadialGradientBrush(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateRadialGradientBrush(
                         &props.to_c_struct(),
-                        brush_props.as_ref().map_or(std::ptr::null(), |p| p as *const _),
+                        brush_props
+                            .as_ref()
+                            .map_or(std::ptr::null(), |p| p as *const _),
                         gradient.as_ptr() as *mut _,
-                        &mut p
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
             }
-            fn create_solid_color_brush(&self, color: impl Into<ColorF>, brush_props: Option<&BrushProperties>) -> Result<SolidColorBrush, HResult> {
+            fn create_solid_color_brush(
+                &self,
+                color: impl Into<ColorF>,
+                brush_props: Option<&BrushProperties>,
+            ) -> Result<SolidColorBrush, HResult> {
                 let brush_props = brush_props.map(|p| p.to_c_struct());
                 Ok(SolidColorBrush(ComPtr::new(|| unsafe {
                     let mut p = std::ptr::null_mut();
                     let ret = self.0.CreateSolidColorBrush(
                         &color.into().into(),
-                        brush_props.as_ref().map_or(std::ptr::null(), |p| p as *const _),
-                        &mut p
+                        brush_props
+                            .as_ref()
+                            .map_or(std::ptr::null(), |p| p as *const _),
+                        &mut p,
                     );
                     hresult(p, ret)
                 })?))
             }
-            fn draw_bitmap(&self, bitmap: &impl IBitmap, dest_rect: Option<&RectF>, opacity: Option<f32>, interpolation: Option<BitmapInterpolationMode>, src_rect: Option<&RectF>) {
+            fn draw_bitmap(
+                &self,
+                bitmap: &impl IBitmap,
+                dest_rect: Option<&RectF>,
+                opacity: Option<f32>,
+                interpolation: Option<BitmapInterpolationMode>,
+                src_rect: Option<&RectF>,
+            ) {
                 let dest_rect = dest_rect.map(|rc| rc.clone().into());
                 let src_rect = src_rect.map(|rc| rc.clone().into());
                 unsafe {
                     self.0.DrawBitmap(
                         bitmap.as_ptr() as *mut _,
-                        dest_rect.as_ref().map_or(std::ptr::null(), |rc| rc as *const _),
+                        dest_rect
+                            .as_ref()
+                            .map_or(std::ptr::null(), |rc| rc as *const _),
                         opacity.unwrap_or(1.0),
                         interpolation.map_or(0, |i| i as u32),
-                        src_rect.as_ref().map_or(std::ptr::null(), |rc| rc as *const _),
+                        src_rect
+                            .as_ref()
+                            .map_or(std::ptr::null(), |rc| rc as *const _),
                     );
                 }
             }
-            fn draw_ellipse(&self, ellipse: &Ellipse, brush: &impl IBrush, width: Option<f32>, stroke_style: Option<&StrokeStyle>) {
+            fn draw_ellipse(
+                &self,
+                ellipse: &Ellipse,
+                brush: &impl IBrush,
+                width: Option<f32>,
+                stroke_style: Option<&StrokeStyle>,
+            ) {
                 unsafe {
                     self.0.DrawEllipse(
                         &ellipse.to_c_struct(),
                         brush.as_ptr() as *mut _,
                         width.unwrap_or(1.0),
-                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
-            fn draw_geometry(&self, geometry: &impl IGeometry, brush: &impl IBrush, width: Option<f32>, stroke_style: Option<&StrokeStyle>) {
+            fn draw_geometry(
+                &self,
+                geometry: &impl IGeometry,
+                brush: &impl IBrush,
+                width: Option<f32>,
+                stroke_style: Option<&StrokeStyle>,
+            ) {
                 unsafe {
                     self.0.DrawGeometry(
                         geometry.as_ptr() as *mut _,
                         brush.as_ptr() as *mut _,
                         width.unwrap_or(1.0),
-                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
-            #[cfg(feature ="dwrite")]
-            fn draw_glyph_run(&self, baseline_origin: impl Into<Point2F>, glyph_run: &crate::dwrite::GlyphRun, brush: &impl IBrush, mode: crate::dwrite::MeasuringMode) {
+            #[cfg(feature = "dwrite")]
+            fn draw_glyph_run(
+                &self,
+                baseline_origin: impl Into<Point2F>,
+                glyph_run: &crate::dwrite::GlyphRun,
+                brush: &impl IBrush,
+                mode: crate::dwrite::MeasuringMode,
+            ) {
                 let (glyph_run, _) = glyph_run.to_c_struct();
                 unsafe {
                     self.0.DrawGlyphRun(
                         baseline_origin.into().into(),
                         &glyph_run,
                         brush.as_ptr() as *mut _,
-                        mode as u32
+                        mode as u32,
                     );
                 }
             }
-            fn draw_line(&self, point0: impl Into<Point2F>, point1: impl Into<Point2F>, brush: &impl IBrush, width: Option<f32>, stroke_style: Option<&StrokeStyle>) {
+            fn draw_line(
+                &self,
+                point0: impl Into<Point2F>,
+                point1: impl Into<Point2F>,
+                brush: &impl IBrush,
+                width: Option<f32>,
+                stroke_style: Option<&StrokeStyle>,
+            ) {
                 unsafe {
                     self.0.DrawLine(
                         point0.into().into(),
                         point1.into().into(),
                         brush.as_ptr() as *mut _,
                         width.unwrap_or(1.0),
-                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
-            fn draw_rectangle(&self, rect: impl Into<RectF>, brush: &impl IBrush, width: Option<f32>, stroke_style: Option<&StrokeStyle>) {
+            fn draw_rectangle(
+                &self,
+                rect: impl Into<RectF>,
+                brush: &impl IBrush,
+                width: Option<f32>,
+                stroke_style: Option<&StrokeStyle>,
+            ) {
                 unsafe {
                     self.0.DrawRectangle(
                         rect.into().as_ref(),
                         brush.as_ptr() as *mut _,
                         width.unwrap_or(1.0),
-                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
-            fn draw_rounded_rectangle(&self, round: &RoundedRect, brush: &impl IBrush, width: Option<f32>, stroke_style: Option<&StrokeStyle>) {
+            fn draw_rounded_rectangle(
+                &self,
+                round: &RoundedRect,
+                brush: &impl IBrush,
+                width: Option<f32>,
+                stroke_style: Option<&StrokeStyle>,
+            ) {
                 unsafe {
                     self.0.DrawRoundedRectangle(
                         &round.to_c_struct(),
                         brush.as_ptr() as *mut _,
                         width.unwrap_or(1.0),
-                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        stroke_style.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
             #[cfg(feature = "dwrite")]
-            fn draw_text(&self, string: impl AsRef<str>, format: &impl crate::dwrite::ITextFormat, rect: impl Into<RectF>, fill_brush: &impl IBrush, options: Option<DrawTextOptions>, measure_mode: Option<crate::dwrite::MeasuringMode>) {
-                let string = string.as_ref().encode_utf16().chain(Some(0)).collect::<Vec<_>>();
+            fn draw_text(
+                &self,
+                string: impl AsRef<str>,
+                format: &impl crate::dwrite::ITextFormat,
+                rect: impl Into<RectF>,
+                fill_brush: &impl IBrush,
+                options: Option<DrawTextOptions>,
+                measure_mode: Option<crate::dwrite::MeasuringMode>,
+            ) {
+                let string = string
+                    .as_ref()
+                    .encode_utf16()
+                    .chain(Some(0))
+                    .collect::<Vec<_>>();
                 unsafe {
                     self.0.DrawText(
                         string.as_ptr(),
@@ -3128,18 +3364,25 @@ macro_rules! impl_render_target {
                         rect.into().as_ref(),
                         fill_brush.as_ptr() as *mut _,
                         options.map_or(DrawTextOptions::None.0, |o| o.0),
-                        measure_mode.map_or(crate::dwrite::MeasuringMode::Natural as u32, |m| m as u32)
+                        measure_mode
+                            .map_or(crate::dwrite::MeasuringMode::Natural as u32, |m| m as u32),
                     );
                 }
             }
             #[cfg(feature = "dwrite")]
-            fn draw_text_layout(&self, origin: impl Into<Point2F>, layout: &impl crate::dwrite::ITextLayout, fill_brush: &impl IBrush, options: Option<DrawTextOptions>) {
+            fn draw_text_layout(
+                &self,
+                origin: impl Into<Point2F>,
+                layout: &impl crate::dwrite::ITextLayout,
+                fill_brush: &impl IBrush,
+                options: Option<DrawTextOptions>,
+            ) {
                 unsafe {
                     self.0.DrawTextLayout(
                         origin.into().into(),
                         layout.as_ptr() as *mut _,
                         fill_brush.as_ptr() as *mut _,
-                        options.map_or(DrawTextOptions::None.0, |o| o.0)
+                        options.map_or(DrawTextOptions::None.0, |o| o.0),
                     );
                 }
             }
@@ -3156,54 +3399,58 @@ macro_rules! impl_render_target {
             }
             fn fill_ellipse(&self, ellipse: &Ellipse, brush: &impl IBrush) {
                 unsafe {
-                    self.0.FillEllipse(
-                        &ellipse.to_c_struct(),
-                        brush.as_ptr() as *mut _
-                    );
+                    self.0
+                        .FillEllipse(&ellipse.to_c_struct(), brush.as_ptr() as *mut _);
                 }
             }
-            fn fill_geometry(&self, geometry: &impl IGeometry, brush: &impl IBrush, opacity: Option<&Brush>) {
+            fn fill_geometry(
+                &self,
+                geometry: &impl IGeometry,
+                brush: &impl IBrush,
+                opacity: Option<&Brush>,
+            ) {
                 unsafe {
                     self.0.FillGeometry(
                         geometry.as_ptr() as *mut _,
                         brush.as_ptr() as *mut _,
-                        opacity.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        opacity.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
             fn fill_mesh(&self, mesh: &impl IMesh, brush: &impl IBrush) {
                 unsafe {
-                    self.0.FillMesh(
-                        mesh.as_ptr() as *mut _,
-                        brush.as_ptr() as *mut _
-                    );
+                    self.0
+                        .FillMesh(mesh.as_ptr() as *mut _, brush.as_ptr() as *mut _);
                 }
             }
-            fn fill_opacity_mask(&self, mask: &impl IBitmap, brush: &impl IBrush, content: OpacityMaskContent, dest_rect: Option<&RectF>, src_rect: Option<&RectF>) {
+            fn fill_opacity_mask(
+                &self,
+                mask: &impl IBitmap,
+                brush: &impl IBrush,
+                content: OpacityMaskContent,
+                dest_rect: Option<&RectF>,
+                src_rect: Option<&RectF>,
+            ) {
                 unsafe {
                     self.0.FillOpacityMask(
                         mask.as_ptr() as *mut _,
                         brush.as_ptr() as *mut _,
                         content as u32,
                         dest_rect.map_or(std::ptr::null(), |rc| rc.as_ref()),
-                        src_rect.map_or(std::ptr::null(), |rc| rc.as_ref())
+                        src_rect.map_or(std::ptr::null(), |rc| rc.as_ref()),
                     );
                 }
             }
             fn fill_rectangle(&self, rect: impl Into<RectF>, brush: &impl IBrush) {
                 unsafe {
-                    self.0.FillRectangle(
-                        rect.into().as_ref(),
-                        brush.as_ptr() as *mut _
-                    );
+                    self.0
+                        .FillRectangle(rect.into().as_ref(), brush.as_ptr() as *mut _);
                 }
             }
             fn fill_rounded_rectangle(&self, rounded: &RoundedRect, brush: &impl IBrush) {
                 unsafe {
-                    self.0.FillRoundedRectangle(
-                        &rounded.to_c_struct(),
-                        brush.as_ptr() as *mut _
-                    );
+                    self.0
+                        .FillRoundedRectangle(&rounded.to_c_struct(), brush.as_ptr() as *mut _);
                 }
             }
             fn flush(&self) -> Result<(), HResultWithTags> {
@@ -3274,55 +3521,71 @@ macro_rules! impl_render_target {
                 unsafe { self.0.IsSupported(&props.to_c_struct()) == TRUE }
             }
             fn pop_axis_aligned_clip(&self) {
-                unsafe { self.0.PopAxisAlignedClip(); }
+                unsafe {
+                    self.0.PopAxisAlignedClip();
+                }
             }
             fn pop_layer(&self) {
-                unsafe { self.0.PopLayer(); }
+                unsafe {
+                    self.0.PopLayer();
+                }
             }
             fn push_axis_aligned_clip(&self, rect: impl Into<RectF>, mode: AntialiasMode) {
                 unsafe {
-                    self.0.PushAxisAlignedClip(
-                        rect.into().as_ref(),
-                        mode as u32
-                    );
+                    self.0
+                        .PushAxisAlignedClip(rect.into().as_ref(), mode as u32);
                 }
             }
             fn push_layer(&self, params: &LayerParameters, layer: Option<&Layer>) {
                 unsafe {
                     self.0.PushLayer(
                         &params.to_c_struct(),
-                        layer.map_or(std::ptr::null_mut(), |p| p.0.as_ptr())
+                        layer.map_or(std::ptr::null_mut(), |p| p.0.as_ptr()),
                     );
                 }
             }
             fn restore_drawing_state(&self, block: &impl IDrawingStateBlock) {
-                unsafe { self.0.RestoreDrawingState(block.as_ptr() as *mut _); }
+                unsafe {
+                    self.0.RestoreDrawingState(block.as_ptr() as *mut _);
+                }
             }
             fn save_drawing_state(&self, block: &impl IDrawingStateBlock) {
-                unsafe { self.0.SaveDrawingState(block.as_ptr() as *mut _); }
+                unsafe {
+                    self.0.SaveDrawingState(block.as_ptr() as *mut _);
+                }
             }
             fn set_antialias_mode(&self, mode: AntialiasMode) {
-                unsafe { self.0.SetAntialiasMode(mode as u32); }
+                unsafe {
+                    self.0.SetAntialiasMode(mode as u32);
+                }
             }
             fn set_dpi(&self, x: f32, y: f32) {
-                unsafe { self.0.SetDpi(x, y); }
+                unsafe {
+                    self.0.SetDpi(x, y);
+                }
             }
             fn set_tags(&self, tag1: Tag, tag2: Tag) {
-                unsafe { self.0.SetTags(tag1.0, tag2.0); }
+                unsafe {
+                    self.0.SetTags(tag1.0, tag2.0);
+                }
             }
             fn set_text_antialias_mode(&self, mode: TextAntialiasMode) {
-                unsafe { self.0.SetTextAntialiasMode(mode as u32); }
+                unsafe {
+                    self.0.SetTextAntialiasMode(mode as u32);
+                }
             }
             #[cfg(feature = "dwrite")]
             fn set_text_rendering_params(&self, params: Option<&crate::dwrite::RenderingParams>) {
                 unsafe {
                     self.0.SetTextRenderingParams(
-                        params.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _)
+                        params.map_or(std::ptr::null_mut(), |p| p.0.as_ptr() as *mut _),
                     );
                 }
             }
             fn set_transform(&self, m: &Matrix3x2F) {
-                unsafe { self.0.SetTransform(&m.clone().into()); }
+                unsafe {
+                    self.0.SetTransform(&m.clone().into());
+                }
             }
         }
     };
@@ -3376,23 +3639,26 @@ macro_rules! impl_simplified_geometry_sink {
             }
             fn begin_figure(&self, point: impl Into<Point2F>, figure: FigureBegin) {
                 unsafe {
-                    self.0.BeginFigure(
-                        point.into().into(),
-                        figure as u32
-                    );
+                    self.0.BeginFigure(point.into().into(), figure as u32);
                 }
             }
             fn close(&self) -> Result<(), HResult> {
                 unsafe { hresult((), self.0.Close()) }
             }
             fn end_figure(&self, figure: FigureEnd) {
-                unsafe { self.0.EndFigure(figure as u32); }
+                unsafe {
+                    self.0.EndFigure(figure as u32);
+                }
             }
             fn set_fill_mode(&self, mode: FillMode) {
-                unsafe { self.0.SetFillMode(mode as u32); }
+                unsafe {
+                    self.0.SetFillMode(mode as u32);
+                }
             }
             fn set_segment_flags(&self, flags: PathSegment) {
-                unsafe { self.0.SetSegmentFlags(flags as u32); }
+                unsafe {
+                    self.0.SetSegmentFlags(flags as u32);
+                }
             }
         }
     };
@@ -3406,7 +3672,9 @@ macro_rules! impl_solid_color_brush {
                 unsafe { self.0.GetColor().into() }
             }
             fn set_color(&self, color: impl Into<ColorF>) {
-                unsafe { self.0.SetColor(&color.into().into()); }
+                unsafe {
+                    self.0.SetColor(&color.into().into());
+                }
             }
         }
     };
@@ -3457,8 +3725,14 @@ macro_rules! impl_tesselation_sink {
         impl_interface!($s, $interface);
         impl ITessellationSink for $s {
             fn add_triangles(&self, triangles: &[Triangle]) {
-                let triangles = triangles.iter().map(|t| t.to_c_struct()).collect::<Vec<_>>();
-                unsafe { self.0.AddTriangles(triangles.as_ptr(), triangles.len() as u32); }
+                let triangles = triangles
+                    .iter()
+                    .map(|t| t.to_c_struct())
+                    .collect::<Vec<_>>();
+                unsafe {
+                    self.0
+                        .AddTriangles(triangles.as_ptr(), triangles.len() as u32);
+                }
             }
             fn close(&self) -> Result<(), HResult> {
                 unsafe { hresult((), self.0.Close()) }
@@ -3641,11 +3915,19 @@ pub trait IFactory: Interface {
 pub struct Factory(ComPtr<ID2D1Factory>);
 impl_factory!(Factory, ID2D1Factory);
 
-pub fn create_factory<T: IFactory>(factory_type: FactoryType, options: Option<&FactoryOptions>) -> Result<T, HResult> {
+pub fn create_factory<T: IFactory>(
+    factory_type: FactoryType,
+    options: Option<&FactoryOptions>,
+) -> Result<T, HResult> {
     let options = options.map(|o| o.to_c_struct());
     Ok(T::new(ComPtr::new(|| unsafe {
         let mut p = std::ptr::null_mut();
-        let ret = D2D1CreateFactory(factory_type as u32, &T::uuidof().into(), options.as_ref().map_or(std::ptr::null(), |o| o as *const _), &mut p);
+        let ret = D2D1CreateFactory(
+            factory_type as u32,
+            &T::uuidof().into(),
+            options.as_ref().map_or(std::ptr::null(), |o| o as *const _),
+            &mut p,
+        );
         hresult(p as *mut T::APIType, ret)
     })?))
 }
@@ -3989,7 +4271,12 @@ pub trait IRenderTarget: IResource {
     );
     fn end_draw(&self) -> Result<(), HResultWithTags>;
     fn fill_ellipse(&self, ellipse: &Ellipse, brush: &impl IBrush);
-    fn fill_geometry(&self, geometry: &impl IGeometry, brush: &impl IBrush, opacity: Option<&Brush>);
+    fn fill_geometry(
+        &self,
+        geometry: &impl IGeometry,
+        brush: &impl IBrush,
+        opacity: Option<&Brush>,
+    );
     fn fill_mesh(&self, mesh: &impl IMesh, brush: &impl IBrush);
     fn fill_opacity_mask(
         &self,

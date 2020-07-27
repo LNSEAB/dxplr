@@ -1,8 +1,8 @@
 use crate::d3d::{Blob, IBlob};
 use com_ptr::ComPtr;
+use thiserror::Error;
 use winapi::um::d3dcommon::ID3DBlob;
 use winapi::um::winnt::HRESULT;
-use thiserror::Error;
 
 #[derive(Clone, PartialEq, Eq, Debug, Error)]
 pub enum HResult {

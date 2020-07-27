@@ -1464,6 +1464,18 @@ pub struct BlendDesc {
     pub render_target: Vec<RenderTargetBlendDesc>,
 }
 impl BlendDesc {
+    pub fn alpha_to_coverage_enable(mut self, alpha_to_coverage_enable: bool) -> Self {
+        self.alpha_to_coverage_enable = alpha_to_coverage_enable;
+        self
+    }
+    pub fn independent_blend_enable(mut self, independent_blend_enable: bool) -> Self {
+        self.independent_blend_enable = independent_blend_enable;
+        self
+    }
+    pub fn render_target(mut self, render_target: Vec<RenderTargetBlendDesc>) -> Self {
+        self.render_target = render_target;
+        self
+    }
     fn to_c_struct(&self) -> D3D12_BLEND_DESC {
         assert!(self.render_target.len() <= 8);
         let mut render_target: [D3D12_RENDER_TARGET_BLEND_DESC; 8] = Default::default();
@@ -3683,6 +3695,49 @@ impl Default for RenderTargetBlendDesc {
     }
 }
 impl RenderTargetBlendDesc {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn blend_enable(mut self, blend_enable: bool) -> Self {
+        self.blend_enable = blend_enable;
+        self
+    }
+    pub fn logic_op_enable(mut self, logic_op_enable: bool) -> Self {
+        self.logic_op_enable = logic_op_enable;
+        self
+    }
+    pub fn src_blend(mut self, src_blend: Blend) -> Self {
+        self.src_blend = src_blend;
+        self
+    }
+    pub fn dest_blend(mut self, dest_blend: Blend) -> Self {
+        self.dest_blend = dest_blend;
+        self
+    }
+    pub fn blend_op(mut self, blend_op: BlendOp) -> Self {
+        self.blend_op = blend_op;
+        self
+    }
+    pub fn src_blend_alpha(mut self, src_blend_alpha: Blend) -> Self {
+        self.src_blend_alpha = src_blend_alpha;
+        self
+    }
+    pub fn dest_blend_alpha(mut self, dest_blend_alpha: Blend) -> Self {
+        self.dest_blend_alpha = dest_blend_alpha;
+        self
+    }
+    pub fn blend_op_alpha(mut self, blend_op_alpha: BlendOp) -> Self {
+        self.blend_op_alpha = blend_op_alpha;
+        self
+    }
+    pub fn logic_op(mut self, logic_op: LogicOp) -> Self {
+        self.logic_op = logic_op;
+        self
+    }
+    pub fn render_target_write_mask(mut self, render_target_write_mask: ColorWriteEnable) -> Self {
+        self.render_target_write_mask = render_target_write_mask;
+        self
+    }
     fn to_c_struct(&self) -> D3D12_RENDER_TARGET_BLEND_DESC {
         D3D12_RENDER_TARGET_BLEND_DESC {
             BlendEnable: to_BOOL(self.blend_enable),
@@ -7610,11 +7665,8 @@ where
     fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>;
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress;
     fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult>;
-    fn map<'a>(
-        &self,
-        subresource: u32,
-        read_range: Option<Range>,
-    ) -> Result<&'a mut [u8], HResult>;
+    fn map<'a>(&self, subresource: u32, read_range: Option<Range>)
+        -> Result<&'a mut [u8], HResult>;
     fn unmap(&self, subresource: u32, written_range: Option<Range>);
 }
 #[derive(Clone, Debug)]

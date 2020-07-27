@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
-use crate::impl_bitflag_operators;
 use super::d2d1::*;
+use crate::impl_bitflag_operators;
 use winapi::um::d2d1_1::*;
 use winapi::um::d2d1effectauthor::*;
 
