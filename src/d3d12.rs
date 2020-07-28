@@ -1464,6 +1464,9 @@ pub struct BlendDesc {
     pub render_target: Vec<RenderTargetBlendDesc>,
 }
 impl BlendDesc {
+    pub fn new() -> Self {
+        Default::default()
+    }
     pub fn alpha_to_coverage_enable(mut self, alpha_to_coverage_enable: bool) -> Self {
         self.alpha_to_coverage_enable = alpha_to_coverage_enable;
         self
@@ -1870,6 +1873,20 @@ pub struct DepthStencilValue {
     pub stencil: u8,
 }
 impl DepthStencilValue {
+    pub fn new() -> Self {
+        Self {
+            depth: 1.0,
+            stencil: 0,
+        }
+    }
+    pub fn depth(mut self, depth: f32) -> Self {
+        self.depth = depth;
+        self
+    }
+    pub fn stencil(mut self, stencil: u8) -> Self {
+        self.stencil = stencil;
+        self
+    }
     fn to_c_struct(&self) -> D3D12_DEPTH_STENCIL_VALUE {
         D3D12_DEPTH_STENCIL_VALUE {
             Depth: self.depth,
