@@ -3969,7 +3969,13 @@ impl<'a, T: IResource> ResourceBarrier<'a, T> {
 }
 
 #[derive(Clone, Debug)]
-pub struct ResourceDesc<D, W, H, F, L> {
+pub struct ResourceDesc<
+    D = ResourceDimension,
+    W = u64,
+    H = u32,
+    F = dxgi::Format,
+    L = TextureLayout,
+> {
     pub dimension: D,
     pub alignment: u64,
     pub width: W,
@@ -4943,7 +4949,12 @@ impl<'a> SODeclarationEntry<'a> {
 // pub struct StateSubobject;
 
 #[derive(Clone, Debug)]
-pub struct StaticSamplerDesc<F, Sr, Rs, Sv> {
+pub struct StaticSamplerDesc<
+    F = Filter,
+    Sr = u32,
+    Rs = u32,
+    Sv = ShaderVisibility,
+> {
     pub filter: F,
     pub address_u: TextureAddressMode,
     pub address_v: TextureAddressMode,
@@ -5857,7 +5868,7 @@ pub trait IDevice: IObject {
         &self,
         heap_properties: &HeapProperties<HeapType>,
         heap_flags: Option<HeapFlags>,
-        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc,
         initial_resource_state: ResourceStates,
         optimized_clear_value: Option<&ClearValue>,
     ) -> Result<T, HResult>;
@@ -5894,7 +5905,7 @@ pub trait IDevice: IObject {
         &self,
         heap: &Heap,
         heap_offset: u64,
-        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -5907,7 +5918,7 @@ pub trait IDevice: IObject {
     );
     fn create_reserved_resource<T: IResource>(
         &self,
-        desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        desc: &ResourceDesc,
         initial_state: ResourceStates,
         optimized_clear_value: Option<ClearValue>,
     ) -> Result<T, HResult>;
@@ -5941,7 +5952,7 @@ pub trait IDevice: IObject {
     fn get_adapter_luid(&self) -> Luid;
     fn get_copyable_footprints(
         &self,
-        resource: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+        resource: &ResourceDesc,
         first_subresource: u32,
         num_subresources: u32,
         base_offset: u64,
@@ -5960,7 +5971,7 @@ pub trait IDevice: IObject {
     fn get_resource_allocation_info(
         &self,
         visible_mask: u32,
-        descs: &[&ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
+        descs: &[&ResourceDesc],
     ) -> ResourceAllocationInfo;
     fn get_resource_tiling(
         &self,
@@ -6124,7 +6135,7 @@ macro_rules! impl_device {
                 &self,
                 heap_properties: &HeapProperties<HeapType>,
                 heap_flags: Option<HeapFlags>,
-                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc,
                 initial_resource_state: ResourceStates,
                 optimized_clear_value: Option<&ClearValue>,
             ) -> Result<T, HResult> {
@@ -6255,7 +6266,7 @@ macro_rules! impl_device {
                 &self,
                 heap: &Heap,
                 heap_offset: u64,
-                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -6312,7 +6323,7 @@ macro_rules! impl_device {
             }
             fn create_reserved_resource<T: IResource>(
                 &self,
-                desc: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                desc: &ResourceDesc,
                 initial_state: ResourceStates,
                 optimized_clear_value: Option<ClearValue>,
             ) -> Result<T, HResult> {
@@ -6448,7 +6459,7 @@ macro_rules! impl_device {
             }
             fn get_copyable_footprints(
                 &self,
-                resource: &ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>,
+                resource: &ResourceDesc,
                 first_subresource: u32,
                 num_subresources: u32,
                 base_offset: u64,
@@ -6525,7 +6536,7 @@ macro_rules! impl_device {
             fn get_resource_allocation_info(
                 &self,
                 visible_mask: u32,
-                descs: &[&ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>],
+                descs: &[&ResourceDesc],
             ) -> ResourceAllocationInfo {
                 unsafe {
                     let c_descs = descs.iter().map(|d| d.to_c_struct()).collect::<Vec<_>>();
@@ -7679,7 +7690,7 @@ pub trait IResource: IPageable
 where
     Self: Sized,
 {
-    fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout>;
+    fn get_desc(&self) -> ResourceDesc;
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress;
     fn get_heap_properties(&self) -> Result<(HeapProperties<HeapType>, HeapFlags), HResult>;
     fn map<'a>(&self, subresource: u32, read_range: Option<Range>)
@@ -7690,7 +7701,7 @@ where
 pub struct Resource(ComPtr<ID3D12Resource>);
 impl_pageable!(Resource, ID3D12Resource);
 impl IResource for Resource {
-    fn get_desc(&self) -> ResourceDesc<ResourceDimension, u64, u32, dxgi::Format, TextureLayout> {
+    fn get_desc(&self) -> ResourceDesc {
         unsafe { self.0.GetDesc().into() }
     }
     fn get_gpu_virtual_address(&self) -> GPUVirtualAddress {
