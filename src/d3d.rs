@@ -182,15 +182,22 @@ impl From<D3D_SHADER_MODEL> for ShaderModel {
 /// Defines a shader macro.
 #[derive(Clone, Debug)]
 pub struct ShaderMacro<'a, 'b> {
-    name: &'a str,
-    definition: &'b str,
+    pub name: &'a str,
+    pub definition: &'b str,
 }
 impl<'a, 'b> ShaderMacro<'a, 'b> {
+    pub fn new(name: &'a impl AsRef<str>, definition: &'b impl AsRef<str>) -> Self {
+        Self {
+            name: name.as_ref(),
+            definition: definition.as_ref(),
+        }
+    }
+
     // This function is used in d3dcompiler.rs.
     #[allow(dead_code)]
     pub(crate) fn to_c_struct(&self) -> (D3D_SHADER_MACRO, (std::ffi::CString, std::ffi::CString)) {
         let name = std::ffi::CString::new(self.name).unwrap();
-        let definition = std::ffi::CString::new(self.name).unwrap();
+        let definition = std::ffi::CString::new(self.definition).unwrap();
         (
             D3D_SHADER_MACRO {
                 Name: name.as_ptr(),

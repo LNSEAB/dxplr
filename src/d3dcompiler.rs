@@ -7,7 +7,7 @@ use com_ptr::ComPtr;
 use winapi::ctypes::c_void;
 use winapi::shared::minwindef::LPCVOID;
 use winapi::shared::winerror::*;
-use winapi::um::d3dcommon::{ID3DInclude, ID3DIncludeVtbl, D3D_INCLUDE_LOCAL, D3D_INCLUDE_SYSTEM};
+use winapi::um::d3dcommon::{ID3DInclude, ID3DIncludeVtbl, D3D_INCLUDE_LOCAL, D3D_INCLUDE_SYSTEM, D3D_SHADER_MACRO};
 use winapi::um::d3dcompiler::*;
 use winapi::um::stringapiset::MultiByteToWideChar;
 use winapi::um::winnls::CP_OEMCP;
@@ -149,8 +149,14 @@ pub fn compile(
     flags2: Option<CompileEffectFlags>,
 ) -> Result<Blob, ErrorMessage> {
     let c_src_name = src_name.map(|name| std::ffi::CString::new(name).unwrap());
-    let c_macros: Option<(Vec<_>, Vec<_>)> =
+    let mut c_macros: Option<(Vec<_>, Vec<_>)> =
         macros.map(|ms| ms.iter().map(|m| m.to_c_struct()).unzip());
+    if let Some((ms, _tmp)) = c_macros.as_mut() {
+        ms.push(D3D_SHADER_MACRO {
+            Name: std::ptr::null_mut(),
+            Definition: std::ptr::null_mut(),
+        });
+    }
     let mut include_obj = include.map(|i| IncludeObject::new(i));
     let c_entry_point = std::ffi::CString::new(entry_point).unwrap();
     let c_target = std::ffi::CString::new(target).unwrap();
