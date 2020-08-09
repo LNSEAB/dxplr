@@ -65,7 +65,7 @@ impl Triangle {
                 None,
             )
             .unwrap();
-        cmd_list.close();
+        cmd_list.close().unwrap();
         let dxgi_factory = dxgi::create_dxgi_factory1::<dxgi::Factory2>().unwrap();
         let wnd_size = wnd.inner_size();
         let swap_chain = dxgi_factory
@@ -264,7 +264,7 @@ impl Triangle {
                 state_before: d3d12::ResourceStates::RenderTarget,
                 state_after: d3d12::ResourceStates::Present,
             }]);
-        self.cmd_list.close();
+        self.cmd_list.close().unwrap();
         self.cmd_queue
             .execute_command_lists(&[self.cmd_list.as_command_list()]);
         if let Err(e) = self.swap_chain.present(0, None) {

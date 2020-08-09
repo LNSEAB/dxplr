@@ -281,6 +281,11 @@ impl WindowHandle for *mut std::ffi::c_void {
         self.clone()
     }
 }
+impl WindowHandle for *const std::ffi::c_void {
+    fn as_ptr(&self) -> *mut std::ffi::c_void {
+        self.clone() as *mut std::ffi::c_void
+    }
+}
 
 /// A trait for converting a value to a 'HDC' and a `c_void` pointer.
 pub trait DeviceContextHandle {

@@ -30,7 +30,7 @@ fn main() {
             None,
         )
         .unwrap();
-    cmd_list.close();
+    cmd_list.close().unwrap();
     let fence = device.create_fence::<d3d12::Fence>(0, None).unwrap();
     let event = dxplr::EventHandle::new();
 
@@ -172,7 +172,7 @@ fn main() {
         state_before: d3d12::ResourceStates::CopyDest,
         state_after: d3d12::ResourceStates::UnorderedAccess,
     }]);
-    cmd_list.close();
+    cmd_list.close().unwrap();
     cmd_queue.execute_command_lists(&[cmd_list.as_command_list()]);
     cmd_queue.signal(&fence, 1).unwrap();
     if fence.get_completed_value() < 1 {
@@ -197,7 +197,7 @@ fn main() {
         state_after: d3d12::ResourceStates::CopySource,
     }]);
     cmd_list.copy_resource(&readback_buffer, &buffer);
-    cmd_list.close();
+    cmd_list.close().unwrap();
     cmd_queue.execute_command_lists(&[cmd_list.as_command_list()]);
     cmd_queue.signal(&fence, 2).unwrap();
     if fence.get_completed_value() < 2 {

@@ -65,7 +65,7 @@ thiserror = "1.0.20"
 
 [dev-dependencies]
 winit = "0.22.2"
-image = "0.23.7"
+image = "0.23.8"
 
 [[example]]
 name = "d3d11_triangle"

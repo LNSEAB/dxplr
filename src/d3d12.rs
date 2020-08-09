@@ -6807,7 +6807,7 @@ pub trait IGraphicsCommandList: ICommandList {
         values: [u32; 4],
         rects: &[Rect<i32>],
     );
-    fn close(&self) -> HResult;
+    fn close(&self) -> Result<(), HResult>;
     fn copy_buffer_region(
         &self,
         dst_buffer: &Resource,
@@ -7076,8 +7076,11 @@ macro_rules! impl_graphics_command_list {
                     )
                 }
             }
-            fn close(&self) -> HResult {
-                unsafe { self.0.Close().into() }
+            fn close(&self) -> Result<(), HResult> {
+                unsafe {
+                    let ret = self.0.Close();
+                    hresult((), ret)
+                }
             }
             fn copy_buffer_region(
                 &self,
